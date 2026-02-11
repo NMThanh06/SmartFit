@@ -1,0 +1,43 @@
+:root {
+    --text-main: #fff;
+    --text-sub: #E0E0E0;
+    --text-muted: #A0A0A0;
+
+    --glass-bg: rgba(20, 20, 20, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.1);
+
+    --success: #00E676;
+    --loading: #FFEA00;
+}
+
+* {
+    box-sizing: inherit;
+    padding: 0;
+    margin: 0;
+}
+
+html {
+    font-size: 62.5%;
+    line-height: 1.6rem;
+    font-family: 'Be Vietnam Pro', sans-serif;
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Be Vietnam Pro', sans-serif;
+    font-size: 1.6rem;
+    line-height: 1.6rem;
+}
+
+html, body {
+    height: 100%;
+    padding: 0;
+    margin: 0;
+    overflow: hidden; 
+}
+
+/* Button */
+.button {
+    min-width: 200px;
+}
