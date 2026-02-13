@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/style_lg.css">  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+<form action="../includes/login.php" method="post" id="loginForm">  <div class="imgcontainer">
+     <a href="javascript:history.back()" class="back-icon">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+  </div>
+
+  <div class="container">
+    <label for="email"><b>Tên đăng nhập</b></label>
+    <input type="email" placeholder="Nhập email" name="email" required>
+    
+
+    <label for="psw"><b>Mật khẩu</b></label>
+    <input type="password" placeholder="Enter Password" name="psw" required>
+
+    <button type="submit">Đăng nhập</button>
+    <!-- <label>
+      <input type="checkbox" checked="checked" name="remember"> Nghi nhớ
+    </label> -->
+  </div>
+
+  <div class="container" style="background-color:#f1f1f1">
+    <button type="button" class="signupbt" onclick="window.location.href='signup.html'">Đăng ký</button>
+    <span class="psw">Quên <a href="forgotpassword.html">mật khẩu?</a></span>
+  </div>
+</form>
+</body>
+</html>

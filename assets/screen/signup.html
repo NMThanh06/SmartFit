@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="../css/style_signup.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+</head>
+<body>
+  <form action="../includes/signup-form.php" method="post" style="border:1px solid #ccc">
+  <div class="container">
+    <a href="javascript:history.back()" class="back-icon">
+        <i class="fas fa-arrow-left"></i>
+    </a>
+    <h1>Đăng ký</h1>
+    <p>Vui lòng điền thông tin để tạo tài khoản.</p>
+    <hr>
+
+    <label for="name"><b>Tên người dùng</b></label>
+    <input type="text" placeholder="Nhập tên người dùng" name="name" id="name" required>
+
+    <label for="email"><b>Email</b></label>
+    <input type="text" placeholder="Nhập Email" name="email" id="email" required>
+
+    <label for="psw"><b>Mật khẩu</b></label>
+    <input type="password" placeholder="Nhập mật khẩu" name="psw" id="psw" required>
+
+    <label for="psw-repeat"><b>Xác nhận mật khẩu</b></label>
+    <input type="password" placeholder="Xác nhận mật khẩu" name="psw-repeat" id="psw-repeat" required>
+
+    <div class="clearfix">
+      <button type="submit" class="signupbtn">Đăng ký!</button>
+    </div>
+  </div>
+</form>
+</body>
+</html>

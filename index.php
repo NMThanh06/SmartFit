@@ -1,0 +1,151 @@
+<?php
+session_start();
+$logged_in = isset($_SESSION['user_id']);
+$user_name = $logged_in ? $_SESSION['user_name'] : '';
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartFit</title>
+
+    <!-- Font Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
+
+    <!-- My Library -->
+    <link rel="stylesheet" href="./assets/css/grid.css">
+    <link rel="stylesheet" href="./assets/css/base.css">
+    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/responsive.css">
+
+</head>
+
+<body>
+    
+    <video src="./assets/video/cloudy.mp4" autoplay muted loop class="web__background"></video>
+
+    <div class="web__background--overlay"></div>
+
+    <main class="web__container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <a href="" class="navbar__logo">SmartFit</a>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="https://github.com/NMThanh06/SmartFit" class="navbar__github">
+                    <i class="fa-brands fa-square-github"></i>
+                </a>
+
+                <?php if (isset($_SESSION['user_name'])): ?>
+                    <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                    <button class="logout-btn" onclick="if(confirm('Đăng xuất?')) window.location.href='/SmartFit/assets/includes/logout.php'">Đăng xuất</button>
+                <?php else: ?>
+                    <button class="logout-btn" onclick="window.location.href='assets/screen/login.html'">Đăng nhập</button>
+                <?php endif; ?>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section class="hero" id="hero">
+            <div class="hero__info">
+                <div class="info__greeting">Chào buổi sáng, hôm nay bạn thế nào?</div>
+                <div class="info__weather">
+                    <div class="info__weather__icon">
+                        <i class="fa-solid fa-cloud"></i>
+                    </div>
+
+                    <div class="info__weather__text">
+                        Trời mây, 36 độ C
+                    </div>
+                </div>
+                <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
+            </div>
+
+            <form class="config-form" action="">
+
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Bạn mặc cho dịp gì ?</h3>
+                    
+                    <div class="config-form__options"> 
+                        <input class="config-form__input" type="radio" id="study" name="occasion" value="study">
+                        <label class="config-form__label" for="study">Đi học</label>
+
+                        <input class="config-form__input" type="radio" id="goout" name="occasion" value="goout">
+                        <label class="config-form__label" for="goout">Đi chơi</label>
+
+                        <input class="config-form__input" type="radio" id="date" name="occasion" value="date">
+                        <label class="config-form__label" for="date">Hẹn hò</label>
+
+                        <input class="config-form__input" type="radio" id="sport" name="occasion" value="sport">
+                        <label class="config-form__label" for="sport">Thể thao</label>
+                    </div>
+                </div>
+
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Bạn là ?</h3>
+                    
+                    <div class="config-form__options"> 
+                        <input class="config-form__input" type="radio" id="male" name="gender" value="male">
+                        <label class="config-form__label" for="male">Nam</label>
+
+                        <input class="config-form__input" type="radio" id="female" name="gender" value="female">
+                        <label class="config-form__label" for="female">Nữ</label>
+                    </div>
+                </div>
+
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Phong cách bạn hướng tới ?</h3>
+                    
+                    <div class="config-form__options"> 
+                        <input class="config-form__input" type="radio" id="basic" name="style" value="basic">
+                        <label class="config-form__label" for="basic">Basic</label>
+
+                        <input class="config-form__input" type="radio" id="street" name="style" value="street">
+                        <label class="config-form__label" for="street">Streetwear</label>
+
+                        <input class="config-form__input" type="radio" id="vintage" name="style" value="vintage">
+                        <label class="config-form__label" for="vintage">Vintage</label>
+                    </div>
+                </div>
+            </form>
+
+            <button type="submit" class="confirm__button button">
+                Phối đồ ngay
+                <i class="fa-solid fa-star"></i>
+            </button>
+
+        </section>
+
+        <!-- Result Section -->
+        <section class="result" id="result">
+
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer__author">Designed and Developed by Cuong & Thanh.</div>
+
+            <div class="footer__contact">
+                <div>
+                    <i class="fa-solid fa-envelope"></i>
+                    trungcuong.2006tn@gmail.com
+                </div>
+
+                <div>
+                    <i class="fa-solid fa-envelope"></i>
+                    nguyenminhthanh043216@gmail.com
+                </div>
+            </div>
+        </footer>
+    </main>
+
+
+</body>
+</html>
