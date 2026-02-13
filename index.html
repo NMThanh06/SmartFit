@@ -22,6 +22,9 @@
     <link rel="stylesheet" href="./assets/css/style.css">
     <link rel="stylesheet" href="./assets/css/responsive.css">
 
+    <!-- Javascript -->
+     <script src="script.js" defer></script>
+
 </head>
 
 <body>
@@ -43,15 +46,12 @@
         <!-- Hero Section -->
         <section class="hero" id="hero">
             <div class="hero__info">
-                <div class="info__greeting">Chào buổi sáng, hôm nay bạn thế nào?</div>
+                <div class="info__greeting"></div> <!--Câu chào-->
                 <div class="info__weather">
-                    <div class="info__weather__icon">
-                        <i class="fa-solid fa-cloud"></i>
-                    </div>
+                    <div class="info__weather__icon"></div> <!-- Icon thời tiết-->
 
-                    <div class="info__weather__text">
-                        Trời mây, 36 độ C
-                    </div>
+                    <div class="info__weather__text"></div> <!-- Thời tiết hiện tại-->
+                    <div class="info__weather__temp"></div> <!-- Nhiệt độ -->
                 </div>
                 <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
             </div>
@@ -166,14 +166,16 @@
             <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
 
             <div class="footer__contact">
-                <div>
+                <div class="footer__contact__mail" onclick="app.copyToClipboard(this)"> 
                     <i class="fa-solid fa-envelope"></i>
-                    trungcuong.2006tn@gmail.com
+                    <span>trungcuong.2006tn@gmail.com</span>
+                    <div class="copy-tooltip">Copied!</div>
                 </div>
 
-                <div>
+                <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
                     <i class="fa-solid fa-envelope"></i>
-                    nguyenminhthanh043216@gmail.com
+                    <span>nguyenminhthanh043216@gmail.com</span>
+                    <div class="copy-tooltip">Copied!</div>
                 </div>
             </div>
         </footer>

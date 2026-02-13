@@ -74,14 +74,6 @@
     margin: 25px 0 10px 0;
 }
 
-.info__weather__icon {
-
-}
-
-.info__weather__text {
-
-}
-
 .info__desc {
     color: var(--text-sub);
     font-size: 2rem;
@@ -275,12 +267,66 @@
     background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.2), transparent);
 }
 
-.footer__author {
-
-}
-
 .footer__contact {
     display: flex;
     flex-direction: column;
     gap: 10px;
+}
+
+.footer__contact__mail {
+    position: relative;
+
+    font-size: 1.6rem;
+
+    transition: all 0.3s ease;
+}
+
+.footer__contact__mail:hover {
+    color: #fff;
+    cursor: pointer;
+    transform: translateY(-1px);
+}
+
+.copy-tooltip {
+    position: absolute;
+    top: -10px;
+    right: calc(86% - 1px);
+
+    background-color: #fff;
+
+    color: #000;
+    font-size: 1.2rem;
+    font-weight: 600;
+
+    padding: 5px 12px;
+
+    border-radius: 4px;
+    opacity: 0;
+
+    visibility: hidden;
+
+    transition: all 0.3s ease;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+.copy-tooltip.show {
+    opacity: 1;
+    visibility: visible;
+    top: -40px;
+}
+
+.copy-tooltip::after {
+    content: "";
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #fff;
 }
