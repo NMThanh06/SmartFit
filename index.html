@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="./assets/css/responsive.css">
 
     <!-- Javascript -->
-     <script src="script.js" defer></script>
+    <script src="script.js" defer></script>
 
 </head>
 
@@ -38,9 +38,10 @@
         <nav class="navbar">
             <a href="" class="navbar__logo">SmartFit</a>
 
-            <a href="https://github.com/NMThanh06/SmartFit" class="navbar__github">
-                <i class="fa-brands fa-square-github"></i>
-            </a>
+            <div id="loginBtn" class="navbar__auth">
+                <i class="fa-solid fa-circle-user"></i>
+                Đăng nhập
+            </div>
         </nav>
 
         <!-- Hero Section -->
@@ -100,54 +101,54 @@
                     </div>
                 </div>
 
-                
-            <div class="config-form__group">
-                <h3 class="config-form__heading">Tông màu chủ đạo ?</h3>
-                <div class="config-form__options">
 
-                    <input class="config-form__input" type="radio" id="color-dark" name="color" value="dark">
-                    <label class="config-form__label config-form__label--color" for="color-dark"
-                        style="background-color: #000000;"></label>
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Tông màu chủ đạo ?</h3>
+                    <div class="config-form__options">
 
-                    <input class="config-form__input" type="radio" id="color-light" name="color" value="light">
-                    <label class="config-form__label config-form__label--color" for="color-light"
-                        style="background-color: #f0f0f0;"></label>
+                        <input class="config-form__input" type="radio" id="color-dark" name="color" value="dark">
+                        <label class="config-form__label config-form__label--color" for="color-dark"
+                            style="background-color: #000000;"></label>
 
-                    <input class="config-form__input" type="radio" id="color-pop" name="color" value="colorful">
-                    <label class="config-form__label config-form__label--color" for="color-pop"
-                        style="background: linear-gradient(#C21807, #DAA520);"></label>
+                        <input class="config-form__input" type="radio" id="color-light" name="color" value="light">
+                        <label class="config-form__label config-form__label--color" for="color-light"
+                            style="background-color: #f0f0f0;"></label>
 
-                    <input class="config-form__input" type="radio" id="color-pastel" name="color" value="pastel">
-                    <label class="config-form__label config-form__label--color" for="color-pastel"
-                        style="background: linear-gradient(#2C3E50, #3E5E5E);"></label>
+                        <input class="config-form__input" type="radio" id="color-pop" name="color" value="colorful">
+                        <label class="config-form__label config-form__label--color" for="color-pop"
+                            style="background: linear-gradient(#C21807, #DAA520);"></label>
 
-                    <input class="config-form__input" type="radio" id="color-neutral" name="color" value="pastel">
-                    <label class="config-form__label config-form__label--color" for="color-neutral"
-                        style="background: linear-gradient(#fff, #000);"></label>
+                        <input class="config-form__input" type="radio" id="color-pastel" name="color" value="pastel">
+                        <label class="config-form__label config-form__label--color" for="color-pastel"
+                            style="background: linear-gradient(#2C3E50, #3E5E5E);"></label>
 
+                        <input class="config-form__input" type="radio" id="color-neutral" name="color" value="pastel">
+                        <label class="config-form__label config-form__label--color" for="color-neutral"
+                            style="background: linear-gradient(#fff, #000);"></label>
+
+                    </div>
                 </div>
-            </div>
 
-            <div class="config-form__group">
-                <h3 class="config-form__heading">Độ rộng (Fit) ?</h3>
-                <div class="config-form__options">
-                    <input class="config-form__input" type="radio" id="fit-oversize" name="fit" value="oversized">
-                    <label class="config-form__label" for="fit-oversize">Oversized</label>
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Độ rộng (Fit) ?</h3>
+                    <div class="config-form__options">
+                        <input class="config-form__input" type="radio" id="fit-oversize" name="fit" value="oversized">
+                        <label class="config-form__label" for="fit-oversize">Oversized</label>
 
-                    <input class="config-form__input" type="radio" id="fit-regular" name="fit" value="regular">
-                    <label class="config-form__label" for="fit-regular">Vừa vặn</label>
+                        <input class="config-form__input" type="radio" id="fit-regular" name="fit" value="regular">
+                        <label class="config-form__label" for="fit-regular">Vừa vặn</label>
 
-                    <input class="config-form__input" type="radio" id="fit-slim" name="fit" value="slim">
-                    <label class="config-form__label" for="fit-slim">Ôm sát</label>
+                        <input class="config-form__input" type="radio" id="fit-slim" name="fit" value="slim">
+                        <label class="config-form__label" for="fit-slim">Ôm sát</label>
+                    </div>
                 </div>
-            </div>
 
-            <div class="config-form__group">
-                <h3 class="config-form__heading">Ghi chú cho AI (Tùy chọn)</h3>
-                <textarea class="config-form__textarea" name="note"
-                    placeholder="VD: Tôi có đôi Jordan đỏ, tôi không thích mặc váy..."></textarea>
-            </div>
-                
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Ghi chú cho AI (Tùy chọn)</h3>
+                    <textarea class="config-form__textarea" name="note"
+                        placeholder="VD: Tôi có đôi Jordan đỏ, tôi không thích mặc váy..."></textarea>
+                </div>
+
             </form>
 
             <button type="submit" class="confirm__button button">
@@ -166,22 +167,77 @@
             <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
 
             <div class="footer__contact">
-                <div class="footer__contact__mail" onclick="app.copyToClipboard(this)"> 
-                    <i class="fa-solid fa-envelope"></i>
-                    <span>trungcuong.2006tn@gmail.com</span>
-                    <div class="copy-tooltip">Copied!</div>
-                </div>
+                <a href="https://github.com/NMThanh06/SmartFit" class="footer__contact__github">
+                    <i class="fa-brands fa-square-github"></i>
+                </a>
 
-                <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                    <i class="fa-solid fa-envelope"></i>
-                    <span>nguyenminhthanh043216@gmail.com</span>
-                    <div class="copy-tooltip">Copied!</div>
+                <div class="footer__contact__team">
+                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>trungcuong.2006tn@gmail.com</span>
+                        <div class="copy-tooltip">Copied!</div>
+                    </div>
+
+                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span>nguyenminhthanh043216@gmail.com</span>
+                        <div class="copy-tooltip">Copied!</div>
+                    </div>
                 </div>
             </div>
         </footer>
     </main>
 
+    <!-- Auth Form -->
+    <section id="authOverlay" class="auth-overlay">
+        <div class="auth-card">
+            <i id="closeAuth" class="fa-solid fa-xmark auth-card__close"></i>
 
+            <div id="loginForm">
+                <div class="auth-card__title">Đăng nhập</div>
+                <form action="" class="auth-card__form">
+                    <div class="auth-card__group">
+                        <h4 class="auth-card__heading">Tên đăng nhập :</h4>
+                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input">
+                    </div>
+
+                    <div class="auth-card__group">
+                        <h4 class="auth-card__heading">Mật khẩu :</h4>
+                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input">
+                    </div>
+                </form>
+                <button type="submit" class="auth-card__button button">Đăng nhập</button>
+                <p class="auth-card__switch">Bạn chưa có tài khoản? <a href="#" id="toRegister">Đăng ký ngay</a></p>
+            </div>
+
+            <div id="registerForm" style="display: none;">
+                <div class="auth-card__title">Đăng ký</div>
+                <form action="" class="auth-card__form">
+                    <div class="auth-card__group">
+                        <h4 class="auth-card__heading">Tên đăng nhập :</h4>
+                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input">
+                    </div>
+
+                    <div class="auth-card__group">
+                        <h4 class="auth-card__heading">Gmail: </h4>
+                        <input type="password" placeholder="Nhập gmail của bạn." class="auth-card__input">
+                    </div>
+
+                    <div class="auth-card__group">
+                        <h4 class="auth-card__heading">Mật khẩu :</h4>
+                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input">
+                    </div>
+
+                    <div class="auth-card__group">
+                        <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
+                        <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input">
+                    </div>
+                </form>
+                <button type="submit" class="auth-card__button button">Đăng ký</button>
+                <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>
+            </div>
+        </div>
+    </section>
 </body>
 
 </html>

@@ -18,6 +18,9 @@ const app = {
     // --- 2. CÁC HÀM XỬ LÝ ---
     start: function () {
         console.log("🚀 Ứng dụng bắt đầu chạy...");
+
+        this.initAuthEvents();
+
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
                 this.getWeatherByPosition.bind(this),
@@ -158,17 +161,61 @@ const app = {
         const tooltip = element.querySelector('.copy-tooltip');
 
         navigator.clipboard.writeText(emailText)
-        .then(() => {
-            tooltip.classList.add("show");
+            .then(() => {
+                tooltip.classList.add("show");
 
-            setTimeout(() => {
-                tooltip.classList.remove("show");
-            }, 2000);
-        })
-        .catch(err => {
-            console.error('Lỗi khi copy: ', err);
-            alert("Không thể copy email này!");
-        });
+                setTimeout(() => {
+                    tooltip.classList.remove("show");
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Lỗi khi copy: ', err);
+                alert("Không thể copy email này!");
+            });
+    },
+
+    //Auth
+    initAuthEvents: function () {
+        const loginBtn = document.getElementById('loginBtn');
+        const authOverlay = document.getElementById('authOverlay');
+        const closeBtn = document.getElementById('closeAuth');
+
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const toRegister = document.getElementById('toRegister');
+        const toLogin = document.getElementById('toLogin');
+
+        if (loginBtn) {
+            loginBtn.onclick = () => {
+                authOverlay.style.display = 'flex';
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            };
+        }
+
+        if (closeBtn) {
+            closeBtn.onclick = () => authOverlay.style.display = 'none';
+        }
+
+        if (toRegister) {
+            toRegister.onclick = (e) => {
+                e.preventDefault();
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+            };
+        }
+
+        if (toLogin) {
+            toLogin.onclick = (e) => {
+                e.preventDefault();
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+            };
+        }
+
+        authOverlay.onclick = (e) => {
+            if (e.target === authOverlay) authOverlay.style.display = 'none';
+        };
     }
 };
 
