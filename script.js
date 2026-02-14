@@ -20,6 +20,7 @@ const app = {
         console.log("🚀 Ứng dụng bắt đầu chạy...");
 
         this.initAuthEvents();
+        this.startClock();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -30,6 +31,36 @@ const app = {
             alert("Trình duyệt không hỗ trợ định vị.");
             this.handleLocationError({ message: "Not supported" });
         }
+    },
+
+    startClock: function() {
+        const greetingElement = document.querySelector('.info__greeting');
+        
+        const updateTime = () => {
+            if (!greetingElement) return;
+
+            const now = new Date();
+            const hour = now.getHours();
+            const minutes = now.getMinutes();
+            const minuteString = minutes < 10 ? `0${minutes}` : minutes;
+
+            let session = "";
+            if (hour >= 5 && hour < 12) session = "day";
+            else if (hour >= 12 && hour < 17) session = "afternoon";
+            else session = "night";
+
+            let greetingMsg = `<span style="margin-right: 15px; font-weight: bold;">${hour}:${minuteString} -</span>`;
+
+            if (session === "day") greetingMsg += "Chào buổi sáng 🌅, hôm nay bạn thấy thế nào ?";
+            else if (session === "afternoon") greetingMsg += "Chào buổi trưa ☀️, hôm nay bạn thấy thế nào ?";
+            else greetingMsg += "Chào buổi tối 🌙, hôm nay bạn thấy thế nào ?";
+
+            greetingElement.innerHTML = greetingMsg;
+        };
+
+        updateTime();
+
+        setInterval(updateTime, 1000);
     },
 
     getWeatherByPosition: function (position) {
@@ -73,36 +104,14 @@ const app = {
         const condition = data.weather[0].main;
         const locationName = data.name;
 
-        // --- 1. XỬ LÝ THỜI GIAN ---
-        const localTime = new Date((data.dt + data.timezone) * 1000);
-        const hour = localTime.getUTCHours();
-        const minutes = localTime.getUTCMinutes();
-        const minuteString = minutes < 10 ? `0${minutes}` : minutes;
-
-        // Xác định buổi
-        let session = "";
-        if (hour >= 5 && hour < 12) session = "day";
-        else if (hour >= 12 && hour < 17) session = "afternoon";
-        else session = "night";
-
-        // --- 2. CẬP NHẬT GIAO DIỆN ---
-        // A. Thay đổi số Độ
+        // --- CẬP NHẬT GIAO DIỆN ---
+        // 1. Thay đổi số Độ
         const tempElement = document.querySelector('.info__weather__temp');
         if (tempElement) {
             tempElement.innerHTML = `${temp}<span>°C</span>`;
         }
 
-        // B. Thay đổi câu chào
-        const greetingElement = document.querySelector('.info__greeting');
-        let greetingMsg = `<span style="margin-right: 15px; font-weight: bold;">${hour}:${minuteString} -</span>`;
-
-        if (session === "day") greetingMsg += "Chào buổi sáng 🌅, hôm nay bạn thấy thế nào ?";
-        else if (session === "afternoon") greetingMsg += "Chào buổi trưa ☀️, hôm nay bạn thấy thế nào ?";
-        else greetingMsg += "Chào buổi tối 🌙, hôm nay bạn thấy thế nào ?";
-
-        if (greetingElement) greetingElement.innerHTML = greetingMsg;
-
-        // C. Thay đổi icon thời tiết
+        // 2. Thay đổi icon thời tiết
         const weatherIconElement = document.querySelector('.info__weather__icon');
         if (weatherIconElement) {
             let weatherIconMsg = `☁️`;
@@ -115,7 +124,7 @@ const app = {
             weatherIconElement.innerHTML = weatherIconMsg;
         }
 
-        // D. Thay đổi thời tiết
+        // 3. Thay đổi thời tiết
         const weatherTextElement = document.querySelector('.info__weather__text');
         if (weatherTextElement) {
             let weatherTextMsg = `Trời mây&nbsp`;
@@ -128,7 +137,7 @@ const app = {
             weatherTextElement.innerHTML = weatherTextMsg;
         }
 
-        // E. Thay đổi câu mô tả (Desc)
+        // 4. Thay đổi câu mô tả (Desc)
         const descElement = document.querySelector('.info__desc');
         if (descElement) {
             let descMsg = `<b>${locationName}</b>`;
@@ -142,7 +151,7 @@ const app = {
             descElement.innerHTML = descMsg;
         }
 
-        // F. Thay đổi Video nền
+        // 5. Thay đổi Video nền
         const videoElement = document.querySelector('.web__background');
         if (videoElement) {
             const videoSrc = this.config.videos[condition] || this.config.videos.Default;
