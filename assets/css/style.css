@@ -310,3 +310,21 @@
     border-right: 5px solid transparent;
     border-top: 5px solid #fff;
 }
+/*login*/
+.user-dropdown {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 20px;
+    transition: background 0.3s;
+}
+
+.user-name:hover {
+    background: rgba(0,0,0,0.05);
+}

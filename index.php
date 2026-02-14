@@ -1,6 +1,13 @@
+<?php
+session_start();
+$success = $_SESSION['success'] ?? '';
+$error = $_SESSION['error'] ?? '';
+unset($_SESSION['success'], $_SESSION['error']);
+?>
+<?php include 'includes/toast.php'; ?>
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -37,10 +44,22 @@
         <!-- Navigation -->
         <nav class="navbar">
             <a href="" class="navbar__logo">SmartFit</a>
+            
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <a href="https://github.com/NMThanh06/SmartFit" class="navbar__github">
+                    <i class="fa-brands fa-square-github"></i>
+                </a>
 
-            <div id="loginBtn" class="navbar__auth">
-                <i class="fa-solid fa-circle-user"></i>
-                Đăng nhập
+                <?php if (isset($_SESSION['user_name'])): ?>
+                    <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
+                    <button class="navbar__auth" onclick="if(confirm('Đăng xuất?')) window.location.href='includes/logout.php'">Đăng xuất</button>
+                <?php else: ?>
+                    <div id="loginBtn" class="navbar__auth">
+                        <i class="fa-solid fa-circle-user"></i>
+                        Đăng nhập
+                    </div>
+                    <!-- <button class="logout-btn" onclick="window.location.href='assets/screen/login.html'">Đăng nhập</button> -->
+                <?php endif; ?>
             </div>
         </nav>
 
@@ -195,49 +214,66 @@
 
             <div id="loginForm">
                 <div class="auth-card__title">Đăng nhập</div>
-                <form action="" class="auth-card__form">
+                <form action="includes/login.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tên đăng nhập :</h4>
-                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input">
+                        <h4 class="auth-card__heading">Tài khoản :</h4>
+                        <input type="text" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
                     </div>
-
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input">
+                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
                     </div>
+                    <button type="submit" class="auth-card__button button">Đăng nhập</button>
                 </form>
-                <button type="submit" class="auth-card__button button">Đăng nhập</button>
                 <p class="auth-card__switch">Bạn chưa có tài khoản? <a href="#" id="toRegister">Đăng ký ngay</a></p>
             </div>
 
             <div id="registerForm" style="display: none;">
                 <div class="auth-card__title">Đăng ký</div>
-                <form action="" class="auth-card__form">
+                <form action="includes/signup-form.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Tên đăng nhập :</h4>
-                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input">
+                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input" name="name" required>
                     </div>
-
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Gmail: </h4>
-                        <input type="password" placeholder="Nhập gmail của bạn." class="auth-card__input">
+                        <input type="email" placeholder="Nhập gmail của bạn." class="auth-card__input" name="email" required>
                     </div>
-
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input">
+                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
                     </div>
-
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input">
+                        <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input" name="psw-repeat" required>
                     </div>
+                    <button type="submit" class="auth-card__button button">Đăng ký</button>
                 </form>
-                <button type="submit" class="auth-card__button button">Đăng ký</button>
                 <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>
             </div>
         </div>
     </section>
+    <script>
+        // Hàm hiển thị toast
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
+            toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + message;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        window.onload = function() {
+            <?php if ($success): ?>
+                showToast('<?php echo addslashes($success); ?>', 'success');
+            <?php elseif ($error): ?>
+                showToast('<?php echo addslashes($error); ?>', 'error');
+            <?php endif; ?>
+        };
+    </script>
 </body>
 
 </html>
