@@ -8,6 +8,7 @@ unset($_SESSION['success'], $_SESSION['error']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -44,23 +45,43 @@ unset($_SESSION['success'], $_SESSION['error']);
         <!-- Navigation -->
         <nav class="navbar">
             <a href="" class="navbar__logo">SmartFit</a>
-            
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="https://github.com/NMThanh06/SmartFit" class="navbar__github">
-                    <i class="fa-brands fa-square-github"></i>
-                </a>
 
+            <div class="navbar__auth">
                 <?php if (isset($_SESSION['user_name'])): ?>
-                    <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <button class="navbar__auth" onclick="if(confirm('Đăng xuất?')) window.location.href='includes/logout.php'">Đăng xuất</button>
+                    <div id="userInfoToggle" class="user-info">
+                        <div class="user-info__trigger">
+                            <span class="user-info__name"> Xin chào, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b></span>
+                            <i class="fa-solid fa-caret-down user-info__arrow"></i>
+                        </div>
+
+                        <div id="userDropdown" class="user-dropdown">
+                            <a href="./includes/" class="user-dropdown__item">
+                                <i class="fa-solid fa-id-card"></i>
+                                <span>Thông tin cá nhân</span>
+                            </a>
+
+                            <a href="./includes/" class="user-dropdown__item">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>Lịch sử phối đồ</span>
+                            </a>
+
+                            <div class="user-dropdown__divider"></div>
+
+                            <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Đăng xuất</span>
+                            </a>
+                        </div>
+                    </div>
+
                 <?php else: ?>
-                    <div id="loginBtn" class="navbar__auth">
+                    <div id="loginBtn">
                         <i class="fa-solid fa-circle-user"></i>
                         Đăng nhập
                     </div>
-                    <!-- <button class="logout-btn" onclick="window.location.href='assets/screen/login.html'">Đăng nhập</button> -->
                 <?php endif; ?>
             </div>
+
         </nav>
 
         <!-- Hero Section -->

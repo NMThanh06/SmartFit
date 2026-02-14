@@ -20,6 +20,7 @@ const app = {
         console.log("🚀 Ứng dụng bắt đầu chạy...");
 
         this.initAuthEvents();
+        this.initUserMenu();
         this.startClock();
 
         if (navigator.geolocation) {
@@ -225,7 +226,30 @@ const app = {
         authOverlay.onclick = (e) => {
             if (e.target === authOverlay) authOverlay.style.display = 'none';
         };
-    }
+    },
+
+    // Submenu User
+    initUserMenu: function() {
+        const userInfo = document.getElementById('userInfoToggle');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userInfo && userDropdown) {
+            // 1. Sự kiện click vào tên user
+            userInfo.onclick = (e) => {
+                e.stopPropagation(); // Ngăn chặn sự kiện nổi bọt (để không bị tính là click ra ngoài)
+                userDropdown.classList.toggle('show'); // Bật/Tắt class show
+                userInfo.classList.toggle('active');   // Để xoay mũi tên
+            };
+
+            // 2. Sự kiện click ra ngoài thì đóng menu
+            document.addEventListener('click', (e) => {
+                if (!userInfo.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                    userInfo.classList.remove('active');
+                }
+            });
+        }
+    },
 };
 
 app.start();

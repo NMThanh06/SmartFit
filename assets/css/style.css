@@ -45,6 +45,116 @@
     cursor: pointer;
 }
 
+/* User */
+.user-info {
+    position: relative;
+    cursor: pointer;
+    user-select: none;
+}
+
+.user-info__trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    color: var(--text-main);
+    font-size: 1.8rem;
+
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 8px 12px;
+
+    transition: all 0.3s ease;
+}
+
+.user-info__name b {
+    color: #FF6584;
+}
+
+.user-info__arrow {
+    font-size: 1.4rem;
+    transition: transform 0.3s;
+}
+
+.user-info__trigger:hover {
+    transform: translateY(-2px);
+}
+
+.user-info.active .user-info__arrow {
+    transform: rotate(180deg);
+}
+
+/* Menu con (Dropdown) */
+.user-dropdown {
+    position: absolute;
+    top: 130%;
+    right: 0;
+    width: 220px;
+    
+    background: rgba(30, 30, 30, 0.95);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    
+    z-index: 100;
+    overflow: hidden;
+}
+
+.user-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.user-dropdown__item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    
+    color: var(--text-main);
+    text-decoration: none;
+    font-size: 1.5rem;
+    transition: all 0.2s;
+}
+
+.user-dropdown__item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    padding-left: 25px;
+}
+
+.user-dropdown__divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 5px 0;
+}
+
+.user-dropdown__item--logout {
+    color: #ff4d4d;
+}
+
+.user-dropdown__item i {
+    width: 20px;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.user-dropdown__item--logout:hover {
+    background: rgba(255, 77, 77, 0.1);
+}
+
+.user-dropdown__item--logout i {
+    color: #ff4d4d;
+}
+
+
 /* Hero Section */
 .hero {
     text-align: center;
@@ -310,21 +420,4 @@
     border-right: 5px solid transparent;
     border-top: 5px solid #fff;
 }
-/*login*/
-.user-dropdown {
-    position: relative;
-    display: inline-block;
-    cursor: pointer;
-}
 
-.user-name {
-    font-weight: 500;
-    color: #333;
-    padding: 8px 12px;
-    border-radius: 20px;
-    transition: background 0.3s;
-}
-
-.user-name:hover {
-    background: rgba(0,0,0,0.05);
-}
