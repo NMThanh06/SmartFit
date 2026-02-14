@@ -37,6 +37,16 @@
     text-decoration: none;
     font-size: 2.6rem;
     font-weight: 700;
+
+    background-color: rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+    padding: 12px 12px;
+
+    transition: all 0.3s ease;
+}
+
+.navbar__logo:hover {
+    transform: translateY(-2px);
 }
 
 .navbar__auth {
@@ -355,6 +365,12 @@
     color: var(--text-main);
     text-decoration: none;
     font-size: 3rem;
+
+    transition: all 0.3s ease;;
+}
+
+.footer__contact__github:hover {
+    transform: scale(1.2);
 }
 
 .footer__contact__team {

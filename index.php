@@ -237,8 +237,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <div class="auth-card__title">Đăng nhập</div>
                 <form action="includes/login.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tài khoản :</h4>
-                        <input type="text" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
+                        <h4 class="auth-card__heading">Email :</h4>
+                        <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
                     </div>
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Mật khẩu :</h4>
@@ -253,12 +253,12 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <div class="auth-card__title">Đăng ký</div>
                 <form action="includes/signup-form.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tên đăng nhập :</h4>
-                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input" name="name" required>
+                        <h4 class="auth-card__heading">Tên :</h4>
+                        <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
                     </div>
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Gmail: </h4>
-                        <input type="email" placeholder="Nhập gmail của bạn." class="auth-card__input" name="email" required>
+                        <h4 class="auth-card__heading">Email :</h4>
+                        <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
                     </div>
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Mật khẩu :</h4>
