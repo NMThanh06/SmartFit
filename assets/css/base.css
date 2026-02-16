@@ -28,6 +28,14 @@ body {
     font-family: 'Be Vietnam Pro', sans-serif;
     font-size: 1.6rem;
     line-height: 1.6rem;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100vh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 html, body {

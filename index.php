@@ -97,7 +97,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
             </div>
 
-            <form class="config-form" action="">
+            <form id="configForm" class="config-form" action="">
 
                 <div class="config-form__group">
                     <h3 class="config-form__heading">Bạn mặc cho dịp gì ?</h3>
@@ -188,18 +188,68 @@ unset($_SESSION['success'], $_SESSION['error']);
                     <textarea class="config-form__textarea" name="note"
                         placeholder="VD: Tôi có đôi Jordan đỏ, tôi không thích mặc váy..."></textarea>
                 </div>
-
             </form>
 
-            <button type="submit" class="confirm__button button">
+            <button type="submit" class="confirm__button button" form="configForm">
                 Phối đồ ngay ⭐
             </button>
-
         </section>
 
         <!-- Result Section -->
         <section class="result" id="result">
+            <div class="result__container">
 
+                <div class="result__visual">
+                    <div class="visual-item">
+                        <img src="./assets/img/top.jpeg" alt="Áo" id="imgTop">
+                    </div>
+
+                    <div class="visual-item">
+                        <img src="./assets/img/bottom.jpeg" alt="Quần" id="imgBottom">
+                    </div>
+                </div>
+
+                <div class="result__content">
+                    <div class="result__header">
+                        <span class="result__tag">AI Recommendation</span>
+                        <h2 class="result__title" id="outfitStyle">Streetwear Năng Động</h2>
+                    </div>
+
+                    <p class="result__desc" id="outfitDesc">
+                        "Dựa trên thời tiết <b>24°C</b> và dịp <b>Đi chơi</b>, mình chọn cho bạn một set đồ thoải mái,
+                        vừa đủ ấm nhưng vẫn cực kỳ cool ngầu."
+                    </p>
+
+                    <div class="result__items">
+                        <div class="item-box">
+                            <i class="fa-brands fa-redhat item-icon"></i>
+                            <span id="itemHead">Mũ lưỡi trai đen</span>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-solid fa-shirt item-icon"></i>
+                            <span id="itemTopName">Hoodie Oversized xám</span>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-solid fa-vials item-icon"></i>
+                            <span id="itemBottomName">Quần Cargo túi hộp</span>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-solid fa-shoe-prints item-icon"></i>
+                            <span id="itemShoes">Sneaker Jordan 1 High</span>
+                        </div>
+                    </div>
+
+                    <div class="result__actions">
+                        <button class="button" onclick="app.resetForm()">
+                            <i class="fa-solid fa-rotate-right"></i> Thử lại
+                        </button>
+                    </div>
+
+                </div>
+            </div>
         </section>
 
         <!-- Footer -->

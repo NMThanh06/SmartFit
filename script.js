@@ -22,6 +22,7 @@ const app = {
         this.initAuthEvents();
         this.initUserMenu();
         this.startClock();
+        this.initFormEvent();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -250,6 +251,37 @@ const app = {
             });
         }
     },
+
+    initFormEvent: function() {
+        const configForm = document.querySelector('.config-form');
+        const resultSection = document.getElementById('result');
+
+        if (configForm) {
+            configForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                if (resultSection) {
+                    resultSection.style.display = 'flex';
+                    
+                    resultSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            });
+        }
+    },
+
+    resetForm: function() {
+        const resultSection = document.getElementById('result');
+        const configForm = document.querySelector('.config-form');
+        
+        if (resultSection) resultSection.style.display = 'none';
+        if (configForm) {
+            configForm.reset();
+            configForm.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
 };
 
 app.start();
