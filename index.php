@@ -27,12 +27,16 @@ unset($_SESSION['success'], $_SESSION['error']);
     <!-- My Library -->
     <link rel="stylesheet" href="./assets/css/grid.css">
     <link rel="stylesheet" href="./assets/css/base.css">
-    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/style.css?=v1">
     <link rel="stylesheet" href="./assets/css/responsive.css">
 
     <!-- Javascript -->
-    <script src="script.js" defer></script>
+    <script src="script.js?v=1<?php echo time(); ?>" defer></script>
 
+
+    <style>
+    
+    </style>
 </head>
 
 <body>
@@ -65,6 +69,11 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <span>Lịch sử phối đồ</span>
                             </a>
 
+                            <a href="includes/admin-add.php" class="user-dropdown__item">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>Thêm trang phục</span>
+                            </a>
+                            
                             <div class="user-dropdown__divider"></div>
 
                             <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
@@ -162,7 +171,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                         <label class="config-form__label config-form__label--color" for="color-pastel"
                             style="background: linear-gradient(#2C3E50, #3E5E5E);"></label>
 
-                        <input class="config-form__input" type="radio" id="color-neutral" name="color" value="pastel">
+                        <input class="config-form__input" type="radio" id="color-neutral" name="color" value="neutral">
                         <label class="config-form__label config-form__label--color" for="color-neutral"
                             style="background: linear-gradient(#fff, #000);"></label>
 
@@ -190,13 +199,20 @@ unset($_SESSION['success'], $_SESSION['error']);
                 </div>
             </form>
 
-            <button type="submit" class="confirm__button button" form="configForm">
+            <button id="PDN" type="submit" class="confirm__button button" form="configForm">
                 Phối đồ ngay ⭐
             </button>
         </section>
 
         <!-- Result Section -->
         <section class="result" id="result">
+            
+            <!-- Loanding -->
+            <div id="loadingProgress" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">AI đang suy nghĩ set đồ cực chất cho bạn... Vui lòng đợi vài giây nhé! ⏳</p>
+            </div>
+
             <div class="result__container">
 
                 <div class="result__visual">

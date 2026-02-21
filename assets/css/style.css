@@ -586,4 +586,51 @@
     border-right: 5px solid transparent;
     border-top: 5px solid #fff;
 }
+/* css cho result  */
+#result {
+    display: none;
+    padding: 50px 0;
+}
 
+.result__container {
+    display: block;
+}
+/* loading  */
+#loadingProgress {
+        margin: 20px auto;
+        text-align: center;
+        padding: 40px 20px;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        max-width: 500px;
+    }
+
+    .loading-spinner {
+        width: 60px;
+        height: 60px;
+        border: 6px solid #e0e0e0;
+        border-top: 6px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px auto;
+    }
+
+    .loading-text {
+        font-size: 16px;
+        color: #555;
+        font-weight: 600;
+        margin: 0;
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
