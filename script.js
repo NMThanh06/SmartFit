@@ -1,5 +1,5 @@
-const app = {
-    // --- 1. CẤU HÌNH (CONFIG) ---
+window.app = {
+     // --- 1. CẤU HÌNH (CONFIG) ---
     config: {
         apiKey: '2cb97f62395b42556d493874d4486859', // Key của bạn
         apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
@@ -20,7 +20,9 @@ const app = {
         console.log("🚀 Ứng dụng bắt đầu chạy...");
 
         this.initAuthEvents();
+        this.initUserMenu();
         this.startClock();
+        this.initFormEvent();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -66,8 +68,7 @@ const app = {
     getWeatherByPosition: function (position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-        console.log(`📍 Tìm thấy tọa độ: ${lat}, ${lon}`);
-
+        console.log(`📍 Tìm thấy tọa độ: ${lat}, ${lon}`); 
         const url = `${this.config.apiUrl}?lat=${lat}&lon=${lon}&appid=${this.config.apiKey}&units=metric&lang=vi`;
 
         fetch(url)
@@ -76,7 +77,7 @@ const app = {
                 return response.json();
             })
             .then(data => {
-                console.log("🌤 Dữ liệu thời tiết:", data);
+                console.log("🌤 Dữ liệu thời tiết:", data); 
                 this.updateUI(data);
             })
             .catch(error => {
@@ -100,54 +101,46 @@ const app = {
     },
 
     updateUI: function (data) {
+        if(!data.main) return;
+        
         const temp = Math.round(data.main.temp);
-        const condition = data.weather[0].main;
-        const locationName = data.name;
+        const condition = data.weather ? data.weather[0].main : 'Clouds';
+        const locationName = data.name || "Nơi này";
 
-        // --- CẬP NHẬT GIAO DIỆN ---
         // 1. Thay đổi số Độ
-        const tempElement = document.querySelector('.info__weather__temp');
-        if (tempElement) {
-            tempElement.innerHTML = `${temp}<span>°C</span>`;
-        }
+        const tempEl = document.querySelector('.info__weather__temp');
+        if (tempEl) tempEl.innerHTML = `${temp}<span>°C</span>`;
 
         // 2. Thay đổi icon thời tiết
-        const weatherIconElement = document.querySelector('.info__weather__icon');
-        if (weatherIconElement) {
+        const iconEl = document.querySelector('.info__weather__icon');
+        if (iconEl) {
             let weatherIconMsg = `☁️`;
-
             if (condition === 'Rain' || condition === 'Drizzle' || condition === 'Thunderstorm') weatherIconMsg = "🌧️";
             else if (condition === 'Clear') weatherIconMsg = "☀️";
             else if (condition === 'Snow') weatherIconMsg = "🌨️";
-            else if (condition === 'Clouds' || condition === 'Mist' || condition === 'Haze' || condition === 'Fog') weatherIconMsg = "☁️";
-
-            weatherIconElement.innerHTML = weatherIconMsg;
+            iconEl.innerHTML = weatherIconMsg;
         }
 
-        // 3. Thay đổi thời tiết
+        // 3. Thay đổi chữ thời tiết
         const weatherTextElement = document.querySelector('.info__weather__text');
         if (weatherTextElement) {
             let weatherTextMsg = `Trời mây&nbsp`;
-
             if (condition === 'Rain' || condition === 'Drizzle' || condition === 'Thunderstorm') weatherTextMsg = "Trời mưa&nbsp";
             else if (condition === 'Clear') weatherTextMsg = "Trời nắng&nbsp";
             else if (condition === 'Snow') weatherTextMsg = "Trời tuyết&nbsp";
-            else if (condition === 'Clouds' || condition === 'Mist' || condition === 'Haze' || condition === 'Fog') weatherTextMsg = "Trời mây&nbsp";
-
             weatherTextElement.innerHTML = weatherTextMsg;
         }
 
-        // 4. Thay đổi câu mô tả (Desc)
+        // 4. Thay đổi địa điểm và lời khuyên
         const descElement = document.querySelector('.info__desc');
         if (descElement) {
             let descMsg = `<b>${locationName}</b>`;
-
             if (condition === 'Rain' || condition === 'Drizzle') descMsg += " đang mưa đó ☔, nhớ mang ô nhé!";
             else if (temp > 32) descMsg += " trời đang khá nóng đấy 🥵, nhớ mặc đồ mát chút nhé!";
             else if (temp < 18) descMsg += " trời đang lạnh rồi đấy 🥶, nhớ mặc gì đó ấm nhé!";
             else if (condition === 'Clear') descMsg += " trời đang đẹp đấy ☀️, đi chơi thôi!";
             else descMsg += "✨ Thời tiết ổn, lên đồ thôi!";
-
+            
             descElement.innerHTML = descMsg;
         }
 
@@ -155,11 +148,8 @@ const app = {
         const videoElement = document.querySelector('.web__background');
         if (videoElement) {
             const videoSrc = this.config.videos[condition] || this.config.videos.Default;
-
-            if (!videoElement.src.includes(videoSrc.substring(2))) {
-                videoElement.src = videoSrc;
-                videoElement.load();
-                videoElement.play().catch(e => console.log("Video autoplay blocked"));
+            if (videoElement.src && !videoElement.src.includes(videoSrc.substring(2))) {
+                 videoElement.src = videoSrc;
             }
         }
     },
@@ -225,7 +215,213 @@ const app = {
         authOverlay.onclick = (e) => {
             if (e.target === authOverlay) authOverlay.style.display = 'none';
         };
+    },
+
+    // Submenu User
+    initUserMenu: function() {
+        const userInfo = document.getElementById('userInfoToggle');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userInfo && userDropdown) {
+            userInfo.onclick = (e) => {
+                e.stopPropagation(); 
+                userDropdown.classList.toggle('show');
+                userInfo.classList.toggle('active');  
+            };
+
+            document.addEventListener('click', (e) => {
+                if (!userInfo.contains(e.target)) {
+                    userDropdown.classList.remove('show');
+                    userInfo.classList.remove('active');
+                }
+            });
+        }
+    },
+
+    initFormEvent: function() {
+        const configForm = document.querySelector('.config-form');
+        const resultSection = document.getElementById('result');
+
+        if (configForm) {
+            configForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                if (resultSection) {
+                    resultSection.style.display = 'flex';
+                    
+                    resultSection.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            });
+        }
+    },
+
+    resetForm: function() {
+        const resultSection = document.getElementById('result');
+        const configForm = document.querySelector('.config-form');
+        
+        if (resultSection) resultSection.style.display = 'none';
+        if (configForm) {
+            configForm.reset();
+            configForm.scrollIntoView({ behavior: 'smooth' });
+        }
+    },
+
+    // Xử lý nút bấm 
+    initFormEvent: function() {
+        const submitBtn = document.querySelector('.confirm__button');
+        const configForm = document.getElementById('configForm');
+
+        if (!submitBtn || !configForm) {
+            console.error("❌ Không tìm thấy Form hoặc Nút bấm");
+            return;
+        }
+
+        const self = this;
+
+        submitBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            console.log("👆 Đã bấm nút 'Phối đồ ngay'!");
+
+            const formData = self.collectFormData();
+            if (!formData) return;
+
+            const loadingProgress = document.getElementById('loadingProgress');
+            const resultSection = document.getElementById('result');
+            const resultContainer = document.querySelector('.result__container');
+
+            // Ẩn kết quả cũ, hiện loading
+            if (resultSection) resultSection.style.display = 'block';
+            if (resultContainer) resultContainer.style.display = 'none';
+            if (loadingProgress) {
+                loadingProgress.style.display = 'block';
+                loadingProgress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
+                const response = await fetch('includes/suggest-outfit.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+
+                const textResponse = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(textResponse);
+                } catch (err) {
+                    throw new Error("Lỗi Server trả về không phải JSON");
+                }
+
+                console.log("✅ Kết quả trả về:", data);
+                
+                if (loadingProgress) loadingProgress.style.display = 'none';
+
+                if (data.success) {
+                    self.displayResult(data.data);
+                    self.showNotification('Đã phối đồ xong!', 'success');
+                } else {
+                    console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error); 
+                    self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
+                }
+
+                if (loadingProgress) loadingProgress.style.display = 'none';
+
+                if (data.success) {
+                    if (resultContainer) resultContainer.style.display = 'flex'; 
+                    
+                    self.displayResult(data.data);
+                    self.showNotification('Đã phối đồ xong!', 'success');
+                    
+                    if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+
+            } catch (error) {
+                console.error("❌ Lỗi:", error);
+                if (loadingProgress) loadingProgress.style.display = 'none';
+                self.showNotification(error.message, 'error');
+            }
+        });
+    },
+
+    // Chuyển đổi giá trị 
+    displayResult: function(data) {
+        // 1. Cập nhật Tiêu đề và Mô tả (Caption từ AI)
+        const styleEl = document.getElementById('outfitStyle');
+        const descEl = document.getElementById('outfitDesc');
+        
+        if (styleEl) styleEl.innerText = data.style; 
+        if (descEl) descEl.innerHTML = data.explanation; 
+
+        // 2. Cập nhật Hình ảnh (Chỉ Áo và Quần)
+        const setImg = (id, src) => {
+            const el = document.getElementById(id);
+            if (el) el.src = src;
+        };
+        setImg('imgTop', data.topImage);
+        setImg('imgBottom', data.bottomImage);
+
+        // 3. Cập nhật danh sách items
+        const setText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text;
+        };
+        setText('itemTopName', data.top);
+        setText('itemBottomName', data.bottom);
+        setText('itemShoes', data.shoes);
+        setText('itemHead', data.accessories);
+
+        // 4. Hiển thị Section kết quả
+        const resultSection = document.getElementById('result');
+        if (resultSection) {
+            resultSection.style.display = 'block';
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    },
+
+    // Lấy thông tin 
+    collectFormData: function() {
+        const occasion = document.querySelector('input[name="occasion"]:checked')?.value;
+        const gender = document.querySelector('input[name="gender"]:checked')?.value;
+        const style = document.querySelector('input[name="style"]:checked')?.value;
+        const color = document.querySelector('input[name="color"]:checked')?.value;
+        const fit = document.querySelector('input[name="fit"]:checked')?.value;
+        const note = document.querySelector('.config-form__textarea')?.value || '';
+
+        if (!occasion || !gender || !style || !color || !fit) {
+            this.showNotification('Vui lòng chọn đầy đủ thông tin!', 'error');
+            return null;
+        }
+
+        const tempText = document.querySelector('.info__weather__temp')?.innerText || '25'; 
+        return {
+            occasion, gender, style, color, fit, note,
+            weather: { temp: parseInt(tempText), condition: 'cloudy' },
+            timeOfDay: 'day'
+        };
+    },
+
+    resetForm: function() {
+        const configForm = document.getElementById('configForm');
+        const resultSection = document.getElementById('result');
+        if (configForm) configForm.reset();
+        if (resultSection) resultSection.style.display = 'none';
+        document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
+    },
+
+    showNotification: function(msg, type) {
+        if (window.showToast) window.showToast(msg, type);
+        else alert(msg);
     }
 };
 
-app.start();
+document.addEventListener('DOMContentLoaded', () => {
+    window.app.start();
+});

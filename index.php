@@ -8,6 +8,7 @@ unset($_SESSION['success'], $_SESSION['error']);
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -26,12 +27,16 @@ unset($_SESSION['success'], $_SESSION['error']);
     <!-- My Library -->
     <link rel="stylesheet" href="./assets/css/grid.css">
     <link rel="stylesheet" href="./assets/css/base.css">
-    <link rel="stylesheet" href="./assets/css/style.css">
+    <link rel="stylesheet" href="./assets/css/style.css?=v1">
     <link rel="stylesheet" href="./assets/css/responsive.css">
 
     <!-- Javascript -->
-    <script src="script.js" defer></script>
+    <script src="script.js?v=1<?php echo time(); ?>" defer></script>
 
+
+    <style>
+    
+    </style>
 </head>
 
 <body>
@@ -44,23 +49,48 @@ unset($_SESSION['success'], $_SESSION['error']);
         <!-- Navigation -->
         <nav class="navbar">
             <a href="" class="navbar__logo">SmartFit</a>
-            
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <a href="https://github.com/NMThanh06/SmartFit" class="navbar__github">
-                    <i class="fa-brands fa-square-github"></i>
-                </a>
 
+            <div class="navbar__auth">
                 <?php if (isset($_SESSION['user_name'])): ?>
-                    <span class="user-name"><?php echo htmlspecialchars($_SESSION['user_name']); ?></span>
-                    <button class="navbar__auth" onclick="if(confirm('Đăng xuất?')) window.location.href='includes/logout.php'">Đăng xuất</button>
+                    <div id="userInfoToggle" class="user-info">
+                        <div class="user-info__trigger">
+                            <span class="user-info__name"> Xin chào, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b></span>
+                            <i class="fa-solid fa-caret-down user-info__arrow"></i>
+                        </div>
+
+                        <div id="userDropdown" class="user-dropdown">
+                            <a href="./includes/" class="user-dropdown__item">
+                                <i class="fa-solid fa-id-card"></i>
+                                <span>Thông tin cá nhân</span>
+                            </a>
+
+                            <a href="./includes/" class="user-dropdown__item">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>Lịch sử phối đồ</span>
+                            </a>
+
+                            <a href="includes/admin-add.php" class="user-dropdown__item">
+                                <i class="fa-solid fa-clock-rotate-left"></i>
+                                <span>Thêm trang phục</span>
+                            </a>
+                            
+                            <div class="user-dropdown__divider"></div>
+
+                            <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                                <i class="fa-solid fa-right-from-bracket"></i>
+                                <span>Đăng xuất</span>
+                            </a>
+                        </div>
+                    </div>
+
                 <?php else: ?>
-                    <div id="loginBtn" class="navbar__auth">
+                    <div id="loginBtn">
                         <i class="fa-solid fa-circle-user"></i>
                         Đăng nhập
                     </div>
-                    <!-- <button class="logout-btn" onclick="window.location.href='assets/screen/login.html'">Đăng nhập</button> -->
                 <?php endif; ?>
             </div>
+
         </nav>
 
         <!-- Hero Section -->
@@ -76,7 +106,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
             </div>
 
-            <form class="config-form" action="">
+            <form id="configForm" class="config-form" action="">
 
                 <div class="config-form__group">
                     <h3 class="config-form__heading">Bạn mặc cho dịp gì ?</h3>
@@ -141,7 +171,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                         <label class="config-form__label config-form__label--color" for="color-pastel"
                             style="background: linear-gradient(#2C3E50, #3E5E5E);"></label>
 
-                        <input class="config-form__input" type="radio" id="color-neutral" name="color" value="pastel">
+                        <input class="config-form__input" type="radio" id="color-neutral" name="color" value="neutral">
                         <label class="config-form__label config-form__label--color" for="color-neutral"
                             style="background: linear-gradient(#fff, #000);"></label>
 
@@ -167,18 +197,75 @@ unset($_SESSION['success'], $_SESSION['error']);
                     <textarea class="config-form__textarea" name="note"
                         placeholder="VD: Tôi có đôi Jordan đỏ, tôi không thích mặc váy..."></textarea>
                 </div>
-
             </form>
 
-            <button type="submit" class="confirm__button button">
+            <button id="PDN" type="submit" class="confirm__button button" form="configForm">
                 Phối đồ ngay ⭐
             </button>
-
         </section>
 
         <!-- Result Section -->
         <section class="result" id="result">
+            
+            <!-- Loanding -->
+            <div id="loadingProgress" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">AI đang suy nghĩ set đồ cực chất cho bạn... Vui lòng đợi vài giây nhé! ⏳</p>
+            </div>
 
+            <div class="result__container">
+
+                <div class="result__visual">
+                    <div class="visual-item">
+                        <img src="./assets/img/top.jpeg" alt="Áo" id="imgTop">
+                    </div>
+
+                    <div class="visual-item">
+                        <img src="./assets/img/bottom.jpeg" alt="Quần" id="imgBottom">
+                    </div>
+                </div>
+
+                <div class="result__content">
+                    <div class="result__header">
+                        <span class="result__tag">AI Recommendation</span>
+                        <h2 class="result__title" id="outfitStyle">Streetwear Năng Động</h2>
+                    </div>
+
+                    <p class="result__desc" id="outfitDesc">
+                        "Dựa trên thời tiết <b>24°C</b> và dịp <b>Đi chơi</b>, mình chọn cho bạn một set đồ thoải mái,
+                        vừa đủ ấm nhưng vẫn cực kỳ cool ngầu."
+                    </p>
+
+                    <div class="result__items">
+                        <div class="item-box">
+                            <i class="fa-brands fa-redhat item-icon"></i>
+                            <span id="itemHead">Mũ lưỡi trai đen</span>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-solid fa-shirt item-icon"></i>
+                            <span id="itemTopName">Hoodie Oversized xám</span>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-solid fa-vials item-icon"></i>
+                            <span id="itemBottomName">Quần Cargo túi hộp</span>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-solid fa-shoe-prints item-icon"></i>
+                            <span id="itemShoes">Sneaker Jordan 1 High</span>
+                        </div>
+                    </div>
+
+                    <div class="result__actions">
+                        <button class="button" onclick="app.resetForm()">
+                            <i class="fa-solid fa-rotate-right"></i> Thử lại
+                        </button>
+                    </div>
+
+                </div>
+            </div>
         </section>
 
         <!-- Footer -->
@@ -216,8 +303,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <div class="auth-card__title">Đăng nhập</div>
                 <form action="includes/login.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tài khoản :</h4>
-                        <input type="text" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
+                        <h4 class="auth-card__heading">Email :</h4>
+                        <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
                     </div>
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Mật khẩu :</h4>
@@ -232,12 +319,12 @@ unset($_SESSION['success'], $_SESSION['error']);
                 <div class="auth-card__title">Đăng ký</div>
                 <form action="includes/signup-form.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tên đăng nhập :</h4>
-                        <input type="text" placeholder="Nhập tên đăng nhập của bạn." class="auth-card__input" name="name" required>
+                        <h4 class="auth-card__heading">Tên :</h4>
+                        <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
                     </div>
                     <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Gmail: </h4>
-                        <input type="email" placeholder="Nhập gmail của bạn." class="auth-card__input" name="email" required>
+                        <h4 class="auth-card__heading">Email :</h4>
+                        <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
                     </div>
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Mật khẩu :</h4>

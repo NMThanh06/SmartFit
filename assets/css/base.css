@@ -28,6 +28,14 @@ body {
     font-family: 'Be Vietnam Pro', sans-serif;
     font-size: 1.6rem;
     line-height: 1.6rem;
+
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100vh;
+
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 html, body {
@@ -177,10 +185,11 @@ html, body {
     text-decoration: none;
     font-weight: 600;
     margin-left: 5px;
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
 
 .auth-card__switch a:hover {
     text-decoration: underline;
     filter: brightness(1.2);
+    transform: translateY(-2px);
 }
