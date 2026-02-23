@@ -293,61 +293,98 @@ window.app = {
             const resultContainer = document.querySelector('.result__container');
 
             // Ẩn kết quả cũ, hiện loading
-            if (resultSection) resultSection.style.display = 'block';
+            if (resultSection) resultSection.style.display = 'flex';
             if (resultContainer) resultContainer.style.display = 'none';
             if (loadingProgress) {
-                loadingProgress.style.display = 'block';
-                loadingProgress.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                loadingProgress.style.display = 'flex';
+                loadingProgress.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
-                const response = await fetch('includes/suggest-outfit.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                    signal: controller.signal
-                });
+            //Gọi API thật
+        //     try {
+        //         const controller = new AbortController();
+        //         const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
+        //         const response = await fetch('includes/suggest-outfit.php', {
+        //             method: 'POST',
+        //             headers: { 'Content-Type': 'application/json' },
+        //             body: JSON.stringify(formData),
+        //             signal: controller.signal
+        //         });
 
-                clearTimeout(timeoutId);
+        //         clearTimeout(timeoutId);
 
-                const textResponse = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(textResponse);
-                } catch (err) {
-                    throw new Error("Lỗi Server trả về không phải JSON");
-                }
+        //         const textResponse = await response.text();
+        //         let data;
+        //         try {
+        //             data = JSON.parse(textResponse);
+        //         } catch (err) {
+        //             throw new Error("Lỗi Server trả về không phải JSON");
+        //         }
 
-                console.log("✅ Kết quả trả về:", data);
+        //         console.log("✅ Kết quả trả về:", data);
                 
-                if (loadingProgress) loadingProgress.style.display = 'none';
+        //         if (loadingProgress) loadingProgress.style.display = 'none';
 
-                if (data.success) {
-                    self.displayResult(data.data);
-                    self.showNotification('Đã phối đồ xong!', 'success');
-                } else {
-                    console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error); 
-                    self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
-                }
+        //         if (data.success) {
+        //             self.displayResult(data.data);
+        //             self.showNotification('Đã phối đồ xong!', 'success');
+        //         } else {
+        //             console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error); 
+        //             self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
+        //         }
 
-                if (loadingProgress) loadingProgress.style.display = 'none';
+        //         if (loadingProgress) loadingProgress.style.display = 'none';
 
-                if (data.success) {
-                    if (resultContainer) resultContainer.style.display = 'flex'; 
+        //         if (data.success) {
+        //             if (resultContainer) resultContainer.style.display = 'flex'; 
                     
-                    self.displayResult(data.data);
-                    self.showNotification('Đã phối đồ xong!', 'success');
+        //             self.displayResult(data.data);
+        //             self.showNotification('Đã phối đồ xong!', 'success');
                     
-                    if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                }
+        //             if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        //         }
 
-            } catch (error) {
-                console.error("❌ Lỗi:", error);
+        //     } catch (error) {
+        //         console.error("❌ Lỗi:", error);
+        //         if (loadingProgress) loadingProgress.style.display = 'none';
+        //         self.showNotification(error.message, 'error');
+        //     }
+
+            //Dữ liệu giả
+            // --- BẮT ĐẦU: DÙNG DATA GIẢ (MOCK DATA) ---
+            
+            // 1. Tạo cục dữ liệu giả
+            const mockData = {
+                success: true,
+                data: {
+                    style: "Streetwear Năng Động (Test Data)",
+                    explanation: "Dựa trên thời tiết 24°C và dịp Đi chơi, mình chọn cho bạn một set đồ thoải mái, vừa đủ ấm nhưng vẫn cực kỳ cool ngầu. (Đây là data giả nhé!)",
+                    // Lấy tạm 2 cái link ảnh trên mạng để test UI
+                    topImage: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=400&auto=format&fit=crop", 
+                    bottomImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=400&auto=format&fit=crop",
+                    top: "Áo thun đen form rộng",
+                    bottom: "Quần Jeans xanh ống suông",
+                    shoes: "Sneaker Nike Air Force 1",
+                    accessories: "Mũ lưỡi trai Balenciaga"
+                }
+            };
+
+            // 2. Giả lập thời gian chờ AI suy nghĩ (Ví dụ: 2 giây)
+            setTimeout(() => {
+                // Tắt vòng xoay loading
                 if (loadingProgress) loadingProgress.style.display = 'none';
-                self.showNotification(error.message, 'error');
-            }
+
+                // Bật thẻ kết quả lên
+                if (resultContainer) resultContainer.style.display = 'flex'; 
+                
+                // Đổ data giả vào giao diện
+                self.displayResult(mockData.data);
+                self.showNotification('Đã phối đồ xong (Data giả)!', 'success');
+                
+            }, 2000); // 2000 = 2 giây
+
+            // --- KẾT THÚC: DÙNG DATA GIẢ ---
+            
         });
     },
 

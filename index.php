@@ -35,7 +35,7 @@ unset($_SESSION['success'], $_SESSION['error']);
 
 
     <style>
-    
+
     </style>
 </head>
 
@@ -73,7 +73,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                                 <span>Thêm trang phục</span>
                             </a>
-                            
+
                             <div class="user-dropdown__divider"></div>
 
                             <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
@@ -206,11 +206,13 @@ unset($_SESSION['success'], $_SESSION['error']);
 
         <!-- Result Section -->
         <section class="result" id="result">
-            
-            <!-- Loanding -->
+
+            <!-- Loading -->
             <div id="loadingProgress" style="display: none;">
-                <div class="loading-spinner"></div>
-                <p class="loading-text">AI đang suy nghĩ set đồ cực chất cho bạn... Vui lòng đợi vài giây nhé! ⏳</p>
+                <div class="result-loading__box">
+                    <div class="result-loading__spinner"></div>
+                    <p class="result-loading__text">AI đang suy nghĩ set đồ cực chất cho bạn... Vui lòng đợi vài giây nhé! ⏳</p>
+                </div>
             </div>
 
             <div class="result__container">
