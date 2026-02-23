@@ -6,7 +6,6 @@ SmartFit là ứng dụng web thông minh hỗ trợ phối đồ tự động d
 Để chạy dự án này, môi trường của bạn cần đáp ứng các yêu cầu sau:
 - **Docker Desktop** đã được cài đặt và đang hoạt động trên máy.
 - Trình duyệt web hiện đại (Chrome, Edge, Firefox).
-- Kết nối Internet để tải các Image cần thiết và gọi Google Gemini API.
 
 ## 2. Hướng dẫn cài đặt môi trường (Installation)
 
@@ -23,10 +22,10 @@ define('GEMINI_API_KEY', 'ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY');
 
 ### 2.2. Khởi tạo Server và Cơ sở dữ liệu bằng Docker:
 
-Ở Terminal (CMD hoặc PowerShell) **tại thư mục chứa file** docker-compose.yml
-
+Mở Terminal (CMD hoặc PowerShell)
 Chạy câu lệnh sau:
 ```
+cd SmartFit-main
 docker-compose -f docker/docker-compose.yml up -d --build
 ```
 Đợi vài phút để quá trình cài đặt hoàn tất.
