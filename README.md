@@ -23,7 +23,7 @@ define('GEMINI_API_KEY', 'ĐIỀN_API_KEY_CỦA_BẠN_VÀO_ĐÂY');
 
 ### 2.2. Khởi tạo Server và Cơ sở dữ liệu bằng Docker:
 
-Ở Terminal (CMD hoặc PowerShell) tại thư mục chứa file docker-compose.yml
+Ở Terminal (CMD hoặc PowerShell) **tại thư mục chứa file** docker-compose.yml
 
 Chạy câu lệnh sau:
 ```
