@@ -14,7 +14,7 @@ unset($_SESSION['success'], $_SESSION['error']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartFit</title>
 
-    <!-- Font Outfit -->
+    <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -64,9 +64,9 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <span>Thông tin cá nhân</span>
                             </a>
 
-                            <a href="./includes/" class="user-dropdown__item">
+                            <a href="wardrobe.php" class="user-dropdown__item">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
-                                <span>Lịch sử phối đồ</span>
+                                <span>Bộ sưu tập</span>
                             </a>
 
                             <a href="includes/admin-add.php" class="user-dropdown__item">
@@ -261,8 +261,12 @@ unset($_SESSION['success'], $_SESSION['error']);
                     </div>
 
                     <div class="result__actions">
-                        <button class="button" onclick="app.resetForm()">
+                        <button class="button actions__button" onclick="app.resetForm()">
                             <i class="fa-solid fa-rotate-right"></i> Thử lại
+                        </button>
+
+                        <button class="button actions__button" onclick="app.toggleSaveOutfit(this)">
+                            <i class="fa-regular fa-bookmark"></i> <span>Lưu set đồ</span>
                         </button>
                     </div>
 

@@ -456,7 +456,27 @@ window.app = {
     showNotification: function(msg, type) {
         if (window.showToast) window.showToast(msg, type);
         else alert(msg);
-    }
+    },
+
+    //Nút lưu set đồ
+    toggleSaveOutfit: function(btnElement) {
+        btnElement.classList.toggle('is-saved');
+        
+        const icon = btnElement.querySelector('i');
+        const text = btnElement.querySelector('span');
+
+        if (btnElement.classList.contains('is-saved')) {
+            icon.classList.remove('fa-regular');
+            icon.classList.add('fa-solid');
+            text.innerText = " Đã lưu";
+            
+            this.showNotification("Đã lưu vào bộ sưu tập!", "success");
+        } else {
+            icon.classList.remove('fa-solid');
+            icon.classList.add('fa-regular');
+            text.innerText = " Lưu set đồ";
+        }
+    },
 };
 
 document.addEventListener('DOMContentLoaded', () => {
