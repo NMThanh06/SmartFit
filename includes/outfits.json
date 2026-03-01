@@ -3,314 +3,162 @@
         {
             "id": 1,
             "type": "top",
-            "name": "Áo thun trắng basic",
-            "gender": ["male"],
-            "occasion": ["study", "goout"],
-            "style": ["basic", "street"],
+            "name": "Áo thun nam",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
             "color": "light",
-            "fit": ["regular"],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/top.jpg"
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/default-top.jpg",
+            "price": 150000,
+            "sizes": {
+                "S": 10,
+                "M": 20,
+                "L": 15,
+                "XL": 5
+            },
+            "conflicts": []
         },
         {
             "id": 2,
-            "type": "top",
-            "name": "Hoodie oversized xám",
-            "gender": ["male"],
-            "occasion": ["goout"],
-            "style": ["street", "vintage"],
-            "color": "neutral",
-            "fit": ["oversized"],
-            "weather": ["cold", "mild"],
-            "image": "./assets/img/top2.jpg"
-        },
-        {
-            "id": 9,
-            "type": "top",
-            "name": "Áo Thun Trắng Oversized",
-            "gender": ["female"],
-            "occasion": ["goout", "date"],
-            "style": ["basic", "street"],
-            "color": "light",
-            "fit": ["oversized"],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/top-white.jpg"
-        },
-        {
-            "id": 10,
-            "type": "top",
-            "name": "Hoodie Đen Basic",
-            "gender": ["male", "female"],
-            "occasion": ["study", "goout"],
-            "style": ["street", "basic"],
+            "type": "bottom",
+            "name": "Quần jean nam",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
             "color": "dark",
-            "fit": ["oversized"],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/top-black-hoodie.jpg"
-        },
-        {
-            "id": 11,
-            "type": "top",
-            "name": "Sơ mi Lụa Pastel",
-            "gender": ["female"],
-            "occasion": ["date"],
-            "style": ["vintage", "basic"],
-            "color": "pastel",
-            "fit": ["regular", "slim"],
-            "weather": ["mild"],
-            "image": "./assets/img/top-pastel-shirt.jpg"
-        },
-        {
-            "id": 12,
-            "type": "top",
-            "name": "Áo Khoác Gió Đa Sắc",
-            "gender": ["male"],
-            "occasion": ["goout", "study"],
-            "style": ["street"],
-            "color": "colorful",
-            "fit": ["regular", "oversized"],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/top-windbreaker.jpg"
-        },
-        {
-            "id": 13,
-            "type": "top",
-            "name": "Áo Polo Xám Trung Tính",
-            "gender": ["male"],
-            "occasion": ["study", "date"],
-            "style": ["basic"],
-            "color": "neutral",
-            "fit": ["regular", "slim"],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/top-polo.jpg"
-        },
-        {
-            "id": 29,
-            "type": "top",
-            "name": "Vintage Khaki Blazer",
-            "gender": ["female"],
-            "occasion": ["date", "goout"],
-            "style": ["vintage", "basic"],
-            "color": "neutral",
-            "fit": ["regular"],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/1771575641_29 -TopVintag.jpg"
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/default-bottom.jpg",
+            "price": 250000,
+            "sizes": {
+                "S": 5,
+                "M": 10,
+                "L": 10,
+                "XL": 2
+            },
+            "conflicts": []
         },
         {
             "id": 3,
-            "type": "bottom",
-            "name": "Quần jean xanh",
-            "gender": ["male"],
-            "occasion": ["study", "goout"],
-            "style": ["basic", "street"],
-            "color": "dark",
-            "fit": ["regular", "slim"],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/bottom.jpg"
+            "type": "top",
+            "name": "Áo crop top Nữ ",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date"
+            ],
+            "style": [
+                "basic"
+            ],
+            "color": "light",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/female-default-top.jpg",
+            "price": 180000,
+            "sizes": {
+                "S": 15,
+                "M": 10,
+                "L": 5
+            },
+            "conflicts": []
         },
         {
             "id": 4,
             "type": "bottom",
-            "name": "Quần short kaki",
-            "gender": ["male"],
-            "occasion": ["goout"],
-            "style": ["basic"],
-            "color": "light",
-            "fit": ["regular"],
-            "weather": ["hot"],
-            "image": "./assets/img/bottom2.jpg"
-        },
-        {
-            "id": 14,
-            "type": "bottom",
-            "name": "Quần Jean Baggy Xanh",
-            "gender": ["female"],
-            "occasion": ["goout", "date"],
-            "style": ["street", "basic"],
+            "name": "Quần tây nữ",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "date"
+            ],
+            "style": [
+                "basic"
+            ],
             "color": "dark",
-            "fit": ["oversized"],
-            "weather": ["hot", "mild", "cold"],
-            "image": "./assets/img/bottom-jeans.jpeg"
-        },
-        {
-            "id": 15,
-            "type": "bottom",
-            "name": "Quần Tây Đen Slimfit",
-            "gender": ["male"],
-            "occasion": ["study", "date"],
-            "style": ["basic", "vintage"],
-            "color": "dark",
-            "fit": ["slim"],
-            "weather": ["hot", "mild", "cold"],
-            "image": "./assets/img/bottom-pant.jpg"
-        },
-        {
-            "id": 16,
-            "type": "bottom",
-            "name": "Quần Short Kaki Kem",
-            "gender": ["male"],
-            "occasion": ["goout", "study"],
-            "style": ["basic", "street"],
-            "color": "light",
-            "fit": ["regular"],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/bottom-short.jpg"
-        },
-        {
-            "id": 17,
-            "type": "bottom",
-            "name": "Quần Jogger Nỉ Xám",
-            "gender": ["male"],
-            "occasion": ["goout"],
-            "style": ["street"],
-            "color": "neutral",
-            "fit": ["oversized", "regular"],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/bottom-jogger.jpg"
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/female-default-bottom.jpg",
+            "price": 200000,
+            "sizes": {
+                "S": 10,
+                "M": 12,
+                "L": 8
+            },
+            "conflicts": []
         },
         {
             "id": 5,
             "type": "shoes",
-            "name": "Sneaker trắng",
-            "gender": ["male", "female"],
-            "occasion": ["study", "goout", "date"],
-            "style": ["basic", "street"],
+            "name": "Sneaker trắng nam",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
             "color": "light",
             "fit": [],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/shoes1.jpg"
-        },
-        {
-            "id": 6,
-            "type": "shoes",
-            "name": "Giày da lười",
-            "gender": ["male"],
-            "occasion": ["date"],
-            "style": ["vintage"],
-            "color": "dark",
-            "fit": [],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/shoes2.jpg"
-        },
-        {
-            "id": 19,
-            "type": "shoes",
-            "name": "Sneaker Trắng Cổ Thấp",
-            "gender": ["male", "female"],
-            "occasion": ["study", "goout"],
-            "style": ["basic", "street"],
-            "color": "light",
-            "fit": [],
-            "weather": ["hot", "mild", "cold"],
-            "image": "./assets/img/shoes-white.jpg"
-        },
-        {
-            "id": 20,
-            "type": "shoes",
-            "name": "Giày Boots Đen Ngầu",
-            "gender": ["male", "female"],
-            "occasion": ["goout", "date"],
-            "style": ["street", "vintage"],
-            "color": "dark",
-            "fit": [],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/shoes-boots.jpg"
-        },
-        {
-            "id": 21,
-            "type": "shoes",
-            "name": "Giày Lười Sáng Màu",
-            "gender": ["male", "female"],
-            "occasion": ["study", "date"],
-            "style": ["basic", "vintage"],
-            "color": "neutral",
-            "fit": [],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/shoes-loafer.jpg"
-        },
-        {
-            "id": 22,
-            "type": "shoes",
-            "name": "Sneaker Đa Sắc",
-            "gender": ["male"],
-            "occasion": ["goout"],
-            "style": ["street"],
-            "color": "colorful",
-            "fit": [],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/shoes-color.jpg"
-        },
-        {
-            "id": 7,
-            "type": "accessories",
-            "name": "Mũ lưỡi trai đen",
-            "gender": ["male"],
-            "occasion": ["goout"],
-            "style": ["street"],
-            "color": "dark",
-            "fit": [],
-            "weather": ["hot", "mild"],
-            "image": "./assets/img/accessory1.jpg"
-        },
-        {
-            "id": 8,
-            "type": "accessories",
-            "name": "Kính mát",
-            "gender": ["male", "female"],
-            "occasion": ["goout", "date"],
-            "style": ["basic", "street"],
-            "color": "dark",
-            "fit": [],
-            "weather": ["hot"],
-            "image": "./assets/img/accessory2.jpg"
-        },
-        {
-            "id": 25,
-            "type": "accessories",
-            "name": "Túi Tote Canvas",
-            "gender": ["female"],
-            "occasion": ["study", "goout"],
-            "style": ["basic", "vintage"],
-            "color": "light",
-            "fit": [],
-            "weather": ["hot", "mild", "cold"],
-            "image": "./assets/img/acc-tote.jpg"
-        },
-        {
-            "id": 26,
-            "type": "accessories",
-            "name": "Khăn Choàng Pastel",
-            "gender": ["female"],
-            "occasion": ["date"],
-            "style": ["vintage", "basic"],
-            "color": "pastel",
-            "fit": [],
-            "weather": ["cold"],
-            "image": "./assets/img/acc-scarf.jpg"
-        },
-        {
-            "id": 27,
-            "type": "accessories",
-            "name": "Đồng Hồ Kim Loại",
-            "gender": ["male", "female"],
-            "occasion": ["study", "date"],
-            "style": ["basic", "vintage"],
-            "color": "neutral",
-            "fit": [],
-            "weather": ["hot", "mild", "cold"],
-            "image": "./assets/img/acc-watch.jpg"
-        },
-        {
-            "id": 28,
-            "type": "accessories",
-            "name": "Tất Cao Cổ Họa Tiết",
-            "gender": ["male"],
-            "occasion": ["goout"],
-            "style": ["street"],
-            "color": "colorful",
-            "fit": [],
-            "weather": ["mild", "cold"],
-            "image": "./assets/img/acc-socks.jpg"
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/5.jpg",
+            "price": 350000,
+            "sizes": {
+                "39": 5,
+                "40": 10,
+                "41": 15,
+                "42": 8
+            },
+            "conflicts": [
+                "Quần tây nam âu phục"
+            ]
         }
     ]
 }

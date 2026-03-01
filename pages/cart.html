@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giỏ Hàng Của Bạn</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f4f9; padding: 20px; color: #333; }
+        .container { max-width: 800px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #fafafa; }
+        .cart-img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; vertical-align: middle; margin-right: 10px; }
+        
+        .qty-input { width: 50px; padding: 5px; text-align: center; }
+        .btn-remove { background: #ff4d4f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
+        .btn-remove:hover { background: #cc0000; }
+        
+        .cart-summary { margin-top: 20px; text-align: right; font-size: 1.2rem; font-weight: bold; }
+        .total-price { color: #e74c3c; font-size: 1.5rem; }
+        
+        .btn-checkout { background: #28a745; color: white; border: none; padding: 15px 30px; font-size: 1.1rem; border-radius: 4px; cursor: pointer; margin-top: 20px; width: 100%; font-weight: bold; }
+        .btn-checkout:hover { background: #218838; }
+        .empty-cart { text-align: center; padding: 30px; color: #777; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <a href="store.php" style="text-decoration: none; color: #555;">⬅ Tiếp tục mua sắm</a>
+    <h2>Giỏ Hàng Của Bạn</h2>
+
+    <div id="cartContent">
+        </div>
+</div>
+
+<script>
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    }
+
+    function renderCart() {
+        const cartContent = document.getElementById('cartContent');
+        let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+
+        if (cart.length === 0) {
+            cartContent.innerHTML = '<div class="empty-cart">Giỏ hàng của bạn đang trống!</div>';
+            return;
+        }
+
+        let html = `
+            <table>
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Đơn giá</th>
+                        <th>Số lượng</th>
+                        <th>Thành tiền</th>
+                        <th>Xóa</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        let totalAmount = 0;
+
+        cart.forEach((item, index) => {
+            let itemTotal = item.price * item.quantity;
+            totalAmount += itemTotal;
+
+            html += `
+                <tr>
+                    <td>
+                        <img src="${item.image}" class="cart-img" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                        ${item.name}
+                    </td>
+                    <td>${formatPrice(item.price)}</td>
+                    <td>
+                        <input type="number" class="qty-input" value="${item.quantity}" min="1" onchange="updateQty(${index}, this.value)">
+                    </td>
+                    <td style="font-weight:bold;">${formatPrice(itemTotal)}</td>
+                    <td><button class="btn-remove" onclick="removeItem(${index})">X</button></td>
+                </tr>
+            `;
+        });
+
+        html += `
+                </tbody>
+            </table>
+            <div class="cart-summary">
+                Tổng cộng: <span class="total-price">${formatPrice(totalAmount)}</span>
+            </div>
+            <button class="btn-checkout" onclick="proceedToCheckout()">ĐI ĐẾN THANH TOÁN</button>
+        `;
+
+        cartContent.innerHTML = html;
+    }
+
+    function updateQty(index, newQty) {
+        let cart = JSON.parse(localStorage.getItem('smartfit_cart'));
+        if (newQty < 1) newQty = 1;
+        cart[index].quantity = parseInt(newQty);
+        localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+        renderCart(); // Vẽ lại giỏ hàng để cập nhật giá
+    }
+
+    function removeItem(index) {
+        let cart = JSON.parse(localStorage.getItem('smartfit_cart'));
+        cart.splice(index, 1); // Cắt bỏ sản phẩm khỏi mảng
+        localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+        renderCart();
+    }
+
+    function proceedToCheckout() {
+        // Chuyển hướng sang trang thanh toán
+        window.location.href = 'checkout.php'; 
+    }
+
+    // Chạy hàm vẽ giỏ hàng khi load trang
+    window.onload = renderCart;
+</script>
+
+</body>
+</html>
