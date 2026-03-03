@@ -477,6 +477,21 @@ window.app = {
             text.innerText = " Lưu set đồ";
         }
     },
+
+    // Mở / đóng giỏ hàng
+    openCart: function() {
+        document.getElementById('cartOverlay').classList.add('show');
+        document.getElementById('cartDrawer').classList.add('open');
+        
+        document.body.style.overflow = 'hidden'; 
+    },
+
+    closeCart: function() {
+        document.getElementById('cartOverlay').classList.remove('show');
+        document.getElementById('cartDrawer').classList.remove('open');
+        
+        document.body.style.overflow = ''; 
+    },
 };
 
 document.addEventListener('DOMContentLoaded', () => {

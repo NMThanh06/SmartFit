@@ -69,6 +69,11 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <span>Bộ sưu tập</span>
                             </a>
 
+                            <a href="shop.php" class="user-dropdown__item">
+                                <i class="fa-solid fa-store"></i>
+                                <span>Cửa hàng</span>
+                            </a>
+
                             <a href="includes/admin-add.php" class="user-dropdown__item">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                                 <span>Thêm trang phục</span>

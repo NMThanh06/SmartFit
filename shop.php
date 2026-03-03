@@ -14,7 +14,7 @@ unset($_SESSION['success'], $_SESSION['error']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartFit</title>
 
-    <!-- Font  -->
+    <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -32,107 +32,113 @@ unset($_SESSION['success'], $_SESSION['error']);
 
     <!-- Javascript -->
     <script src="script.js?v=1<?php echo time(); ?>" defer></script>
+
+
+    <style>
+
+    </style>
 </head>
 
 <body>
     <div class="web__background--overlay"></div>
 
-    <main class="web__container">
+    <main class="web__container ">
         <!-- Navigation -->
         <nav class="navbar">
             <a href="" class="navbar__logo">SmartFit</a>
 
-            <div class="navbar__auth">
-                <?php if (isset($_SESSION['user_name'])): ?>
-                    <div id="userInfoToggle" class="user-info">
-                        <div class="user-info__trigger">
-                            <span class="user-info__name"> Xin chào, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b></span>
-                            <i class="fa-solid fa-caret-down user-info__arrow"></i>
+            <div class="navbar__shop">
+                <div class="navbar__cart" onclick="app.openCart()">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                </div>
+
+                <div class="navbar__auth">
+                    <?php if (isset($_SESSION['user_name'])): ?>
+                        <div id="userInfoToggle" class="user-info">
+                            <div class="user-info__trigger">
+                                <span class="user-info__name"> Xin chào, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b></span>
+                                <i class="fa-solid fa-caret-down user-info__arrow"></i>
+                            </div>
+
+                            <div id="userDropdown" class="user-dropdown">
+                                <a href="./includes/" class="user-dropdown__item">
+                                    <i class="fa-solid fa-id-card"></i>
+                                    <span>Thông tin cá nhân</span>
+                                </a>
+
+                                <a href="wardrobe.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Bộ sưu tập</span>
+                                </a>
+
+                                <a href="shop.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-store"></i>
+                                    <span>Cửa hàng</span>
+                                </a>
+
+                                <a href="includes/admin-add.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Thêm trang phục</span>
+                                </a>
+
+                                <div class="user-dropdown__divider"></div>
+
+                                <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                                    <i class="fa-solid fa-right-from-bracket"></i>
+                                    <span>Đăng xuất</span>
+                                </a>
+                            </div>
                         </div>
 
-                        <div id="userDropdown" class="user-dropdown">
-                            <a href="./includes/" class="user-dropdown__item">
-                                <i class="fa-solid fa-id-card"></i>
-                                <span>Thông tin cá nhân</span>
-                            </a>
-
-                            <a href="wardrobe.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
-                                <span>Bộ sưu tập</span>
-                            </a>
-
-                            <a href="shop.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-store"></i>
-                                <span>Cửa hàng</span>
-                            </a>
-
-                            <a href="includes/admin-add.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
-                                <span>Thêm trang phục</span>
-                            </a>
-
-                            <div class="user-dropdown__divider"></div>
-
-                            <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                                <span>Đăng xuất</span>
-                            </a>
+                    <?php else: ?>
+                        <div id="loginBtn">
+                            <i class="fa-solid fa-circle-user"></i>
+                            Đăng nhập
                         </div>
-                    </div>
+                    <?php endif; ?>
+                </div>
 
-                <?php else: ?>
-                    <div id="loginBtn">
-                        <i class="fa-solid fa-circle-user"></i>
-                        Đăng nhập
-                    </div>
-                <?php endif; ?>
             </div>
 
         </nav>
 
-        <!-- Wardrobe Section-->
-        <section class="wardrobe-page">
+        <!-- Shop Section -->
+        <section class="shop-page">
             <div class="grid wide">
+
                 <div class="row">
                     <div class="col l-12 m-12 c-12">
-                        <div class="wardrobe__header">
-                            <h1 class="wardrobe__title">Bộ sưu tập</h1>
+                        <div class="shop__header">
+                            <h1 class="shop__title">Cửa hàng SmartFit</h1>
+                            <div class="shop__filters">
+                                <button class="button filter-btn active">Tất cả</button>
+                                <button class="button filter-btn">Áo</button>
+                                <button class="button filter-btn">Quần</button>
+                                <button class="button filter-btn">Giày & Phụ kiện</button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <div class="col l-3 m-4 c-12">
-            <div class="wardrobe-card">
-                <div class="wardrobe-card__images">
-                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo">
-                    <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200&auto=format&fit=crop" alt="Quần">
-                </div>
-
-                <div class="wardrobe-card__info">
-                    <div class="wardrobe-card__header">
-                        <h3 class="wardrobe-card__title">Streetwear</h3>
-                        <button class="wardrobe-card__delete" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                <div class="row shop__products">
+                    <div class="col l-3 m-4 c-6">
+                        <a href="#" class="product-card">
+                            <div class="product-card__img">
+                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=300&auto=format&fit=crop" alt="Áo thun">
+                            </div>
+                            <div class="product-card__info">
+                                <h3 class="product-card__name">Áo thun Oversize Basic Trắng</h3>
+                                <div class="product-card__price">250.000 ₫</div>
+                                <div class="product-card__buy">
+                                    <i class="fa-solid fa-cart-shopping"></i> Xem ngay
+                                </div>
+                            </div>
+                        </a>
                     </div>
 
-                    <ul class="wardrobe-card__items">
-                        <li><span>👕</span>
-                            <p>Áo thun đen form rộng</p>
-                        </li>
-                        <li><span>👖</span>
-                            <p>Quần Jeans xanh rách gối</p>
-                        </li>
-                        <li><span>👟</span>
-                            <p>Sneaker Nike Air Force 1</p>
-                        </li>
-                        <li><span>🧢</span>
-                            <p>Mũ lưỡi trai đen</p>
-                        </li>
-                    </ul>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Footer -->
         <footer class="footer">
@@ -227,6 +233,56 @@ unset($_SESSION['success'], $_SESSION['error']);
             <?php endif; ?>
         };
     </script>
+
+    <!-- Giỏ hàng -->
+    <div class="cart-overlay" id="cartOverlay" onclick="app.closeCart()"></div>
+
+    <div class="cart-drawer" id="cartDrawer">
+
+        <div class="cart-drawer__header">
+            <h2>Giỏ hàng của bạn</h2>
+            <button class="cart-close-btn" onclick="app.closeCart()"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <div class="cart-drawer__body">
+
+            <div class="cart-empty" id="cartEmpty" style="display: none;">
+                <i class="fa-solid fa-box-open empty-icon"></i>
+                <p>Giỏ hàng của bạn đang trống</p>
+                <button class="btn-shopping" onclick="app.closeCart()">Tiếp tục mua sắm</button>
+            </div>
+
+            <div class="cart-items" id="cartItems">
+                <div class="cart-item">
+                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo" class="cart-item__img">
+                    <div class="cart-item__info">
+                        <h4 class="cart-item__name">Áo thun Oversize Basic Trắng</h4>
+                        <div class="cart-item__meta">Size: L</div>
+                        <div class="cart-item__price">250.000 ₫</div>
+
+                        <div class="cart-item__qty">
+                            <button class="qty-btn">-</button>
+                            <input type="text" value="1" readonly>
+                            <button class="qty-btn">+</button>
+                        </div>
+                    </div>
+                    <button class="cart-item__remove" title="Xóa"><i class="fa-solid fa-trash"></i></button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="cart-drawer__footer" id="cartFooter">
+            <div class="cart-total">
+                <span>Tổng cộng:</span>
+                <span class="total-price">250.000 ₫</span>
+            </div>
+            <button class="btn-checkout">Thanh toán ngay</button>
+        </div>
+
+    </div>
+
 </body>
 
 </html>
