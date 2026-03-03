@@ -159,6 +159,37 @@
             "conflicts": [
                 "Quần tây nam âu phục"
             ]
+        },
+        {
+            "id": 1772550289,
+            "type": "top",
+            "name": "Áo thun đen cổ tròn",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
+            "color": "dark",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1772550289_1175.jpeg",
+            "price": 250000,
+            "sizes": {
+                "M": 1
+            },
+            "conflicts": []
         }
     ]
 }

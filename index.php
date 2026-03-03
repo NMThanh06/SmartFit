@@ -74,8 +74,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <span>Cửa hàng</span>
                             </a>
 
-                            <a href="includes/admin-add.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            <a href="pages/add-outfit.php" class="user-dropdown__item">
+                                <i class="fa-solid fa-plus"></i>
                                 <span>Thêm trang phục</span>
                             </a>
 

@@ -45,7 +45,7 @@ unset($_SESSION['success'], $_SESSION['error']);
     <main class="web__container ">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="" class="navbar__logo">SmartFit</a>
+            <a href="index.php" class="navbar__logo">SmartFit</a>
 
             <div class="navbar__shop">
                 <div class="navbar__cart" onclick="app.openCart()">
@@ -76,8 +76,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     <span>Cửa hàng</span>
                                 </a>
 
-                                <a href="includes/admin-add.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                <a href="pages/add-outfit.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-plus"></i>
                                     <span>Thêm trang phục</span>
                                 </a>
 
@@ -120,21 +120,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                     </div>
                 </div>
 
-                <div class="row shop__products">
-                    <div class="col l-3 m-4 c-6">
-                        <a href="#" class="product-card">
-                            <div class="product-card__img">
-                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=300&auto=format&fit=crop" alt="Áo thun">
-                            </div>
-                            <div class="product-card__info">
-                                <h3 class="product-card__name">Áo thun Oversize Basic Trắng</h3>
-                                <div class="product-card__price">250.000 ₫</div>
-                                <div class="product-card__buy">
-                                    <i class="fa-solid fa-cart-shopping"></i> Xem ngay
-                                </div>
-                            </div>
-                        </a>
-                    </div>
+                <div id="productGrid" class="row shop__products">
 
                 </div>
             </div>
@@ -224,14 +210,6 @@ unset($_SESSION['success'], $_SESSION['error']);
                 toast.remove();
             }, 3000);
         }
-
-        window.onload = function() {
-            <?php if ($success): ?>
-                showToast('<?php echo addslashes($success); ?>', 'success');
-            <?php elseif ($error): ?>
-                showToast('<?php echo addslashes($error); ?>', 'error');
-            <?php endif; ?>
-        };
     </script>
 
     <!-- Giỏ hàng -->
@@ -253,21 +231,6 @@ unset($_SESSION['success'], $_SESSION['error']);
             </div>
 
             <div class="cart-items" id="cartItems">
-                <div class="cart-item">
-                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo" class="cart-item__img">
-                    <div class="cart-item__info">
-                        <h4 class="cart-item__name">Áo thun Oversize Basic Trắng</h4>
-                        <div class="cart-item__meta">Size: L</div>
-                        <div class="cart-item__price">250.000 ₫</div>
-
-                        <div class="cart-item__qty">
-                            <button class="qty-btn">-</button>
-                            <input type="text" value="1" readonly>
-                            <button class="qty-btn">+</button>
-                        </div>
-                    </div>
-                    <button class="cart-item__remove" title="Xóa"><i class="fa-solid fa-trash"></i></button>
-                </div>
 
             </div>
 
@@ -276,12 +239,163 @@ unset($_SESSION['success'], $_SESSION['error']);
         <div class="cart-drawer__footer" id="cartFooter">
             <div class="cart-total">
                 <span>Tổng cộng:</span>
-                <span class="total-price">250.000 ₫</span>
+                <span class="total-price"></span>
             </div>
-            <button class="btn-checkout">Thanh toán ngay</button>
+            <button class="btn-checkout" onclick="window.location.href='pages/checkout.php'">Thanh toán ngay</button>
         </div>
 
     </div>
+
+    <!-- Backend cho trang cửa hàng -->
+    <script>
+        // 1. Hàm định dạng tiền tệ
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(price);
+        }
+
+        // 2. HÀM TẢI SẢN PHẨM LÊN CỬA HÀNG
+        async function loadProducts() {
+            try {
+                // Gọi API của bạn Backend
+                const response = await fetch('includes/api_outfits.php');
+                const data = await response.json();
+
+                const grid = document.getElementById('productGrid');
+                grid.innerHTML = '';
+
+                data.items.forEach(item => {
+                    // Vẽ thẻ HTML đúng theo chuẩn CSS của bạn
+                    grid.innerHTML += `
+                    <div class="col l-3 m-4 c-6">
+                        <a href="#" class="product-card" onclick="event.preventDefault()">
+                            <div class="product-card__img">
+                                <img src="${item.image}" alt="${item.name}" onerror="this.src='./assets/img/default-placeholder.jpg'">
+                            </div>
+                            <div class="product-card__info">
+                                <h3 class="product-card__name">${item.name}</h3>
+                                <div class="product-card__price">${formatPrice(item.price)}</div>
+                                <div class="product-card__buy" onclick="addToCart(event, ${item.id}, '${item.name}', ${item.price}, '${item.image}')">
+                                    <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                `;
+                });
+            } catch (error) {
+                console.error("Lỗi tải sản phẩm:", error);
+            }
+        }
+
+        // 3. HÀM THÊM VÀO GIỎ HÀNG (Lưu vào LocalStorage của bạn Backend)
+        function addToCart(event, id, name, price, image) {
+            event.preventDefault();
+
+            let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+            let existingItem = cart.find(item => item.id === id);
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({
+                    id: id,
+                    name: name,
+                    price: price,
+                    image: image,
+                    quantity: 1
+                });
+            }
+            localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+
+            // Hiện thông báo (Dùng hàm toast có sẵn của bạn)
+            showToast('Đã thêm ' + name + ' vào giỏ!', 'success');
+
+            // Vẽ lại giỏ hàng luôn cho nóng
+            renderCart();
+        }
+
+        // 4. HÀM HIỂN THỊ GIỎ HÀNG (Thanh trượt bên phải của bạn)
+        function renderCart() {
+            let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+            const cartEmpty = document.getElementById('cartEmpty');
+            const cartItems = document.getElementById('cartItems');
+            const cartFooter = document.getElementById('cartFooter');
+
+            // Nếu giỏ trống -> Bật hình hộp rỗng, tắt khu vực tính tiền
+            if (cart.length === 0) {
+                cartEmpty.style.display = 'flex';
+                cartItems.style.display = 'none';
+                cartFooter.style.display = 'none';
+                return;
+            }
+
+            // Nếu có hàng -> Hiện hàng, tắt hộp rỗng
+            cartEmpty.style.display = 'none';
+            cartItems.style.display = 'block';
+            cartFooter.style.display = 'block';
+
+            let html = '';
+            let totalAmount = 0;
+
+            cart.forEach((item, index) => {
+                totalAmount += item.price * item.quantity;
+
+                // Vẽ thẻ sản phẩm trong Giỏ hàng
+                html += `
+                <div class="cart-item">
+                    <img src="${item.image}" alt="${item.name}" onerror="this.src='./assets/img/default-placeholder.jpg'" class="cart-item__img">
+                    <div class="cart-item__info">
+                        <h4 class="cart-item__name">${item.name}</h4>
+                        <div class="cart-item__price">${formatPrice(item.price)}</div>
+                        
+                        <div class="cart-item__qty">
+                            <button class="qty-btn" onclick="updateQty(${index}, ${item.quantity - 1})">-</button>
+                            <input type="text" value="${item.quantity}" readonly>
+                            <button class="qty-btn" onclick="updateQty(${index}, ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <button class="cart-item__remove" title="Xóa" onclick="removeItem(${index})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `;
+            });
+
+            cartItems.innerHTML = html;
+            document.querySelector('.total-price').innerText = formatPrice(totalAmount);
+        }
+
+        // 5. CÁC HÀM XỬ LÝ NÚT BẤM TRONG GIỎ HÀNG
+        function updateQty(index, newQty) {
+            let cart = JSON.parse(localStorage.getItem('smartfit_cart'));
+            if (newQty < 1) newQty = 1; // Không cho giảm dưới 1
+            cart[index].quantity = newQty;
+            localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        function removeItem(index) {
+            let cart = JSON.parse(localStorage.getItem('smartfit_cart'));
+            cart.splice(index, 1);
+            localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+            renderCart();
+        }
+
+        // --- KÍCH HOẠT KHI TẢI TRANG ---
+        window.onload = function() {
+            loadProducts(); // Load hàng lên kệ
+            renderCart(); // Load giỏ hàng
+
+            // (Giữ lại đoạn code báo lỗi/thành công cũ của bạn)
+            <?php if ($success): ?> showToast('<?php echo addslashes($success); ?>', 'success');
+            <?php endif; ?>
+            <?php if ($error): ?> showToast('<?php echo addslashes($error); ?>', 'error');
+            <?php endif; ?>
+        };
+    </script>
 
 </body>
 

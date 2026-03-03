@@ -40,7 +40,7 @@ unset($_SESSION['success'], $_SESSION['error']);
     <main class="web__container">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="" class="navbar__logo">SmartFit</a>
+            <a href="index.php" class="navbar__logo">SmartFit</a>
 
             <div class="navbar__auth">
                 <?php if (isset($_SESSION['user_name'])): ?>
@@ -66,8 +66,8 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <span>Cửa hàng</span>
                             </a>
 
-                            <a href="includes/admin-add.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
+                            <a href="pages/add-outfit.php" class="user-dropdown__item">
+                                <i class="fa-solid fa-plus"></i>
                                 <span>Thêm trang phục</span>
                             </a>
 
