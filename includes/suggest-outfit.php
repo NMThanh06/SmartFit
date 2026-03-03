@@ -68,22 +68,34 @@ $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-
     $shoes = findItem($cleanJson['ids']['shoes'] ?? null, $wardrobeData);
     $acc = findItem($cleanJson['ids']['acc'] ?? null, $wardrobeData);
 
-    // Trả về JSON với đầy đủ các key
-    echo json_encode([
-        'success' => true,
-        'data' => [
-            'top' => $top['name'] ?? 'Chưa xác định',
-            'topImage' => $top['image'] ?? './assets/img/default-top.jpg',
-            'bottom' => $bottom['name'] ?? 'Chưa xác định',
-            'bottomImage' => $bottom['image'] ?? './assets/img/default-bottom.jpg',
-            'shoes' => $shoes['name'] ?? 'Chưa xác định',
-            'shoesImage' => $shoes['image'] ?? './assets/img/default-shoes.jpg',
-            'accessories' => $acc['name'] ?? 'Không có',
-            'accImage' => $acc['image'] ?? '',
-            'style' => $cleanJson['styleName'] ?? 'Basic',
-            'explanation' => $cleanJson['caption'] ?? 'Set đồ thoải mái, phù hợp thời tiết.'
-        ]
-    ]);
+    $gender = $_POST['gender'] ?? 'male'; 
+
+// Thiết lập ảnh mặc định dựa trên giới tính
+if ($gender === 'female') {
+    $defaultTop = './assets/img/female-default-top.jpg';
+    $defaultBottom = './assets/img/female-default-bottom.jpg';
+} else {
+    // Giữ nguyên trang phục mặc định cho nam như cũ
+    $defaultTop = './assets/img/default-top.jpg';
+    $defaultBottom = './assets/img/default-bottom.jpg';
+}
+
+// Trả về JSON với các biến mặc định đã được phân loại
+echo json_encode([
+    'success' => true,
+    'data' => [
+        'top' => $top['name'] ?? 'Chưa xác định',
+        'topImage' => $top['image'] ?? $defaultTop,
+        'bottom' => $bottom['name'] ?? 'Chưa xác định',
+        'bottomImage' => $bottom['image'] ?? $defaultBottom,
+        'shoes' => $shoes['name'] ?? 'Chưa xác định',
+        'shoesImage' => $shoes['image'] ?? '',
+        'accessories' => $acc['name'] ?? 'Không có',
+        'accImage' => $acc['image'] ?? '',
+        'style' => $cleanJson['styleName'] ?? 'Basic',
+        'explanation' => $cleanJson['caption'] ?? 'Set đồ thoải mái, phù hợp thời tiết.'
+    ]
+]);
 
 } catch (Exception $e) {
     http_response_code(500);

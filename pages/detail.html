@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi Tiết Sản Phẩm - SmartFit</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; gap: 40px; }
+        
+        /* Cột trái: Ảnh */
+        .left-col { flex: 1; }
+        .product-image { width: 100%; border-radius: 8px; object-fit: cover; border: 1px solid #eee; }
+
+        /* Cột phải: Thông tin */
+        .right-col { flex: 1; display: flex; flex-direction: column; }
+        .product-name { font-size: 2rem; margin: 0 0 10px 0; color: #2c3e50; }
+        .product-price { font-size: 1.5rem; color: #e74c3c; font-weight: bold; margin-bottom: 20px; }
+        .product-desc { margin-bottom: 20px; line-height: 1.6; color: #555; background: #f1f3f5; padding: 15px; border-radius: 6px; }
+
+        /* Khung chọn Size */
+        .section-title { font-weight: bold; margin-bottom: 10px; display: block; }
+        .size-container { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .size-btn { padding: 10px 20px; border: 2px solid #ccc; background: white; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .size-btn:hover { border-color: #888; }
+        .size-btn.active { border-color: #28a745; background: #e8f5e9; color: #28a745; }
+        .size-btn:disabled { background: #eee; color: #aaa; border-color: #eee; cursor: not-allowed; }
+
+        /* Khung chọn Số lượng */
+        .qty-container { display: flex; align-items: center; gap: 10px; margin-bottom: 30px; }
+        .qty-btn { width: 40px; height: 40px; border: 1px solid #ccc; background: white; font-size: 1.2rem; cursor: pointer; border-radius: 6px; }
+        .qty-btn:hover:not(:disabled) { background: #f0f0f0; }
+        .qty-btn:disabled { cursor: not-allowed; opacity: 0.5; }
+        .qty-input { width: 60px; height: 40px; text-align: center; border: 1px solid #ccc; border-radius: 6px; font-size: 1.1rem; pointer-events: none; }
+        .stock-info { color: #666; font-size: 0.9rem; }
+
+        /* Nút Mua hàng */
+        .btn-buy { padding: 15px; background: #28a745; color: white; border: none; border-radius: 6px; font-size: 1.2rem; font-weight: bold; cursor: pointer; transition: 0.3s; text-align: center; width: 100%; }
+        .btn-buy:hover { background: #218838; }
+        .btn-buy:disabled { background: #ccc; cursor: not-allowed; }
+
+        .btn-back { display: inline-block; margin-bottom: 20px; text-decoration: none; color: #007bff; font-weight: bold; }
+        .btn-back:hover { text-decoration: underline; }
+
+        @media (max-width: 768px) {
+            .container { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+    <a href="store.php" class="btn-back">⬅ Quay lại Cửa hàng</a>
+
+    <div class="container" id="productDetail">
+        <h2 style="width: 100%; text-align: center;">Đang tải thông tin sản phẩm...</h2>
+    </div>
+
+    <script>
+        let currentProduct = null;
+        let selectedSize = null;
+        let maxStock = 0;
+        let currentQty = 1;
+
+        // Hàm định dạng tiền tệ
+        function formatPrice(price) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+        }
+
+        // 1. Lấy ID từ URL (vd: detail.html?id=123)
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+
+        async function loadProductDetail() {
+            if (!productId) {
+                document.getElementById('productDetail').innerHTML = '<h2>Không tìm thấy mã sản phẩm!</h2>';
+                return;
+            }
+
+            try {
+                // Đọc file JSON (Chỉnh lại đường dẫn nếu cần, hiện đang trỏ về includes)
+                const response = await fetch('/SmartFit/includes/outfits.json');
+                const data = await response.json();
+                
+                // Tìm sản phẩm khớp ID
+                currentProduct = data.items.find(item => item.id == productId);
+
+                if (!currentProduct) {
+                    document.getElementById('productDetail').innerHTML = '<h2>Sản phẩm không tồn tại hoặc đã bị xóa!</h2>';
+                    return;
+                }
+
+                renderProduct();
+            } catch (error) {
+                console.error("Lỗi:", error);
+                document.getElementById('productDetail').innerHTML = '<h2>Lỗi kết nối dữ liệu!</h2>';
+            }
+        }
+
+        function renderProduct() {
+            const container = document.getElementById('productDetail');
+            
+            // Xử lý nút Size
+            let sizeHtml = '';
+            for (const [size, stock] of Object.entries(currentProduct.sizes)) {
+                if (stock > 0) {
+                    sizeHtml += `<button class="size-btn" onclick="selectSize('${size}', ${stock}, this)">${size}</button>`;
+                } else {
+                    sizeHtml += `<button class="size-btn" disabled title="Hết hàng">${size}</button>`;
+                }
+            }
+            if (sizeHtml === '') sizeHtml = '<span style="color:red">Đã hết hàng mọi size</span>';
+
+            // Xử lý các thuộc tính (dịch ra tiếng Việt cơ bản)
+            const styleText = currentProduct.style ? currentProduct.style.join(', ') : 'Cơ bản';
+            const occasionText = currentProduct.occasion ? currentProduct.occasion.join(', ') : 'Đa dụng';
+
+            container.innerHTML = `
+                <div class="left-col">
+                    <img src="${currentProduct.image}" alt="${currentProduct.name}" class="product-image" onerror="this.onerror=null; this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                </div>
+                <div class="right-col">
+                    <h1 class="product-name">${currentProduct.name}</h1>
+                    <div class="product-price">${formatPrice(currentProduct.price)}</div>
+                    
+                    <div class="product-desc">
+                        <strong>Loại:</strong> ${currentProduct.type === 'top' ? 'Áo' : currentProduct.type === 'bottom' ? 'Quần/Váy' : currentProduct.type === 'shoes' ? 'Giày' : 'Phụ kiện'}<br>
+                        <strong>Phong cách:</strong> ${styleText}<br>
+                        <strong>Phù hợp:</strong> ${occasionText}
+                    </div>
+
+                    <span class="section-title">Chọn Kích Cỡ:</span>
+                    <div class="size-container" id="sizeBox">
+                        ${sizeHtml}
+                    </div>
+
+                    <span class="section-title">Số Lượng:</span>
+                    <div class="qty-container">
+                        <button class="qty-btn" id="btnMinus" onclick="changeQty(-1)" disabled>-</button>
+                        <input type="text" class="qty-input" id="qtyInput" value="1" readonly>
+                        <button class="qty-btn" id="btnPlus" onclick="changeQty(1)" disabled>+</button>
+                        <span class="stock-info" id="stockInfo">Vui lòng chọn size</span>
+                    </div>
+
+                    <button class="btn-buy" id="btnBuy" onclick="addToCartAndCheckout()" disabled>THÊM VÀO GIỎ & THANH TOÁN</button>
+                </div>
+            `;
+        }
+
+        // 2. Hàm xử lý khi khách bấm chọn 1 Size
+        function selectSize(size, stock, btnElement) {
+            selectedSize = size;
+            maxStock = stock;
+            currentQty = 1; // Reset về 1 mỗi khi đổi size
+
+            // Xóa class active ở tất cả nút, thêm vào nút vừa bấm
+            document.querySelectorAll('.size-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            // Cập nhật giao diện số lượng
+            document.getElementById('qtyInput').value = currentQty;
+            document.getElementById('stockInfo').innerText = `(Còn ${stock} sản phẩm trong kho)`;
+            
+            // Mở khóa các nút
+            document.getElementById('btnBuy').disabled = false;
+            updateQtyButtons();
+        }
+
+        // 3. Hàm xử lý nút Cộng / Trừ
+        function changeQty(amount) {
+            currentQty += amount;
+            
+            // Đảm bảo không vượt quá giới hạn
+            if (currentQty < 1) currentQty = 1;
+            if (currentQty > maxStock) currentQty = maxStock;
+
+            document.getElementById('qtyInput').value = currentQty;
+            updateQtyButtons();
+        }
+
+        // Hàm phụ để bật/tắt nút cộng trừ
+        function updateQtyButtons() {
+            document.getElementById('btnMinus').disabled = (currentQty <= 1);
+            document.getElementById('btnPlus').disabled = (currentQty >= maxStock);
+        }
+
+        // 4. Hàm lưu vào giỏ hàng và chuyển hướng
+        function addToCartAndCheckout() {
+            if (!selectedSize) {
+                alert("Vui lòng chọn kích cỡ trước khi mua!");
+                return;
+            }
+
+            // Tạo đối tượng món hàng để lưu
+            const cartItem = {
+                id: currentProduct.id,
+                name: currentProduct.name,
+                image: currentProduct.image,
+                price: currentProduct.price,
+                size: selectedSize,
+                quantity: currentQty
+            };
+
+            // Lưu vào mảng giỏ hàng trong LocalStorage
+            let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+            
+            // Kiểm tra xem món này (cùng ID, cùng Size) đã có trong giỏ chưa
+            const existingItemIndex = cart.findIndex(item => item.id === cartItem.id && item.size === cartItem.size);
+            
+            if (existingItemIndex !== -1) {
+                // Nếu có rồi thì cộng dồn số lượng
+                cart[existingItemIndex].quantity += currentQty;
+            } else {
+                // Nếu chưa có thì đẩy vào mảng
+                cart.push(cartItem);
+            }
+
+            localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+
+            // Chuyển hướng sang trang thanh toán
+            window.location.href = 'checkout.php'; // Sửa tên file này nếu trang thanh toán của bạn tên khác
+        }
+
+        // Chạy hàm khi mở trang
+        window.onload = loadProductDetail;
+    </script>
+</body>
+</html>
