@@ -301,89 +301,105 @@ window.app = {
             }
 
             //Gọi API thật
-        //     try {
-        //         const controller = new AbortController();
-        //         const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
-        //         const response = await fetch('includes/suggest-outfit.php', {
-        //             method: 'POST',
-        //             headers: { 'Content-Type': 'application/json' },
-        //             body: JSON.stringify(formData),
-        //             signal: controller.signal
-        //         });
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
+                const response = await fetch('includes/suggest-outfit.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    signal: controller.signal
+                });
 
-        //         clearTimeout(timeoutId);
+                clearTimeout(timeoutId);
 
-        //         const textResponse = await response.text();
-        //         let data;
-        //         try {
-        //             data = JSON.parse(textResponse);
-        //         } catch (err) {
-        //             throw new Error("Lỗi Server trả về không phải JSON");
-        //         }
-
-        //         console.log("✅ Kết quả trả về:", data);
-                
-        //         if (loadingProgress) loadingProgress.style.display = 'none';
-
-        //         if (data.success) {
-        //             self.displayResult(data.data);
-        //             self.showNotification('Đã phối đồ xong!', 'success');
-        //         } else {
-        //             console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error); 
-        //             self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
-        //         }
-
-        //         if (loadingProgress) loadingProgress.style.display = 'none';
-
-        //         if (data.success) {
-        //             if (resultContainer) resultContainer.style.display = 'flex'; 
-                    
-        //             self.displayResult(data.data);
-        //             self.showNotification('Đã phối đồ xong!', 'success');
-                    
-        //             if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        //         }
-
-        //     } catch (error) {
-        //         console.error("❌ Lỗi:", error);
-        //         if (loadingProgress) loadingProgress.style.display = 'none';
-        //         self.showNotification(error.message, 'error');
-        //     }
-
-            //Dữ liệu giả
-            // --- BẮT ĐẦU: DÙNG DATA GIẢ (MOCK DATA) ---
-            
-            // 1. Tạo cục dữ liệu giả
-            const mockData = {
-                success: true,
-                data: {
-                    style: "Streetwear Năng Động (Test Data)",
-                    explanation: "Dựa trên thời tiết 24°C và dịp Đi chơi, mình chọn cho bạn một set đồ thoải mái, vừa đủ ấm nhưng vẫn cực kỳ cool ngầu. (Đây là data giả nhé!)",
-                    // Lấy tạm 2 cái link ảnh trên mạng để test UI
-                    topImage: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=400&auto=format&fit=crop", 
-                    bottomImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=400&auto=format&fit=crop",
-                    top: "Áo thun đen form rộng",
-                    bottom: "Quần Jeans xanh ống suông",
-                    shoes: "Sneaker Nike Air Force 1",
-                    accessories: "Mũ lưỡi trai Balenciaga"
+                const textResponse = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(textResponse);
+                } catch (err) {
+                    throw new Error("Lỗi Server trả về không phải JSON");
                 }
-            };
 
-            // 2. Giả lập thời gian chờ AI suy nghĩ (Ví dụ: 2 giây)
-            setTimeout(() => {
-                // Tắt vòng xoay loading
+                console.log("✅ Kết quả trả về:", data);
+                
                 if (loadingProgress) loadingProgress.style.display = 'none';
 
-                // Bật thẻ kết quả lên
-                if (resultContainer) resultContainer.style.display = 'flex'; 
-                
-                // Đổ data giả vào giao diện
-                self.displayResult(mockData.data);
-                self.showNotification('Đã phối đồ xong (Data giả)!', 'success');
-                
-            }, 2000); // 2000 = 2 giây
+                if (data.success) {
+                    self.displayResult(data.data);
+                    self.showNotification('Đã phối đồ xong!', 'success');
+                } else {
+                    console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error); 
+                    self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
+                }
 
-            // --- KẾT THÚC: DÙNG DATA GIẢ ---
+                if (loadingProgress) loadingProgress.style.display = 'none';
+
+                if (data.success) {
+                    if (resultContainer) resultContainer.style.display = 'flex'; 
+                    
+                    self.displayResult(data.data);
+                    self.showNotification('Đã phối đồ xong!', 'success');
+                    
+                    if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    //================ save ofits
+                    const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+                    if (btnSave && data.data) {
+                        btnSave.setAttribute('data-top', data.data.topId);
+                        btnSave.setAttribute('data-bottom', data.data.bottomId);
+                        btnSave.setAttribute('data-shoes', data.data.shoesId);
+                        btnSave.setAttribute('data-acc', data.data.accId || 'null');
+                        btnSave.setAttribute('data-style', data.data.style);
+                        
+                        // Reset icon về rỗng
+                        const icon = btnSave.querySelector('i');
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                        btnSave.querySelector('span').innerText = 'Lưu set đồ';
+                    }
+                }
+
+            } catch (error) {
+                console.error("❌ Lỗi:", error);
+                if (loadingProgress) loadingProgress.style.display = 'none';
+                self.showNotification(error.message, 'error');
+            }
+
+        //     //Dữ liệu giả
+        //     // --- BẮT ĐẦU: DÙNG DATA GIẢ (MOCK DATA) ---
+            
+        //     // 1. Tạo cục dữ liệu giả
+        //     const mockData = {
+        //         success: true,
+        //         data: {
+        //             style: "Streetwear Năng Động (Test Data)",
+        //             explanation: "Dựa trên thời tiết 24°C và dịp Đi chơi, mình chọn cho bạn một set đồ thoải mái, vừa đủ ấm nhưng vẫn cực kỳ cool ngầu. (Đây là data giả nhé!)",
+        //             // Lấy tạm 2 cái link ảnh trên mạng để test UI
+        //             topImage: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=400&auto=format&fit=crop", 
+        //             bottomImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=400&auto=format&fit=crop",
+        //             top: "Áo thun đen form rộng",
+        //             bottom: "Quần Jeans xanh ống suông",
+        //             shoes: "Sneaker Nike Air Force 1",
+        //             accessories: "Mũ lưỡi trai Balenciaga"
+        //         }
+        //     };
+
+        //     // 2. Giả lập thời gian chờ AI suy nghĩ (Ví dụ: 2 giây)
+        //     setTimeout(() => {
+        //         // Tắt vòng xoay loading
+        //         if (loadingProgress) loadingProgress.style.display = 'none';
+
+        //         // Bật thẻ kết quả lên
+        //         if (resultContainer) resultContainer.style.display = 'flex'; 
+                
+        //         // Đổ data giả vào giao diện
+        //         self.displayResult(mockData.data);
+        //         self.showNotification('Đã phối đồ xong (Data giả)!', 'success');
+                
+        //     }, 2000); // 2000 = 2 giây
+
+        // // --- KẾT THÚC: DÙNG DATA GIẢ ---
             
         });
     },
@@ -492,6 +508,73 @@ window.app = {
         
         document.body.style.overflow = ''; 
     },
+
+    // lưu trang phục
+  toggleSaveOutfit: function(btnElement) {
+        const self = this;
+        // 1. CHỈ ĐỌC dữ liệu từ các thuộc tính data-* của nút bấm
+        const topId = btnElement.getAttribute('data-top');
+        const bottomId = btnElement.getAttribute('data-bottom');
+        const shoesId = btnElement.getAttribute('data-shoes');
+        const accId = btnElement.getAttribute('data-acc');
+        const styleName = btnElement.getAttribute('data-style');
+
+        // 2. Gom dữ liệu gửi đi 
+        const dataToSend = {
+            top_id: topId,
+            bottom_id: bottomId,
+            shoes_id: shoesId,
+            acc_id: (accId && accId !== 'null' && accId !== '') ? accId : null, 
+            style_name: styleName || "Phong cách gợi ý"
+        };
+
+        // 3. Gửi xuống PHP
+        fetch('includes/save_outfit.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const icon = btnElement.querySelector('i');
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+                btnElement.querySelector('span').innerText = 'Đã lưu';
+                
+                self.showNotification('Đã lưu set đồ thành công!', 'success');
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi mạng xảy ra khi lưu.');
+        });
+    },
+    deleteSavedOutfit: function(id, btnElement) { 
+            // if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
+
+            fetch('../includes/delete_saved_outfit.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const cardItem = btnElement.closest('.col'); 
+                    if (cardItem) cardItem.remove();
+                    if (window.showToast) showToast('Đã xóa thành công!', 'success');
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+        },
+
+    
 };
 
 document.addEventListener('DOMContentLoaded', () => {

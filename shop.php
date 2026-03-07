@@ -66,7 +66,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     <span>Thông tin cá nhân</span>
                                 </a>
 
-                                <a href="wardrobe.php" class="user-dropdown__item">
+                                <a href="pages/wardrobe.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-clock-rotate-left"></i>
                                     <span>Bộ sưu tập</span>
                                 </a>
