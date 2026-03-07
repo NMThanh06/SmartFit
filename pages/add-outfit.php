@@ -2,7 +2,6 @@
 require_once '../includes/config.php';
 $message = '';
 
-// 1. SỬA LỖI ĐƯỜNG DẪN: Trỏ đúng vào thư mục includes của dự án
 $jsonFile = '../includes/outfits.json'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -14,13 +13,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $price = (int)$_POST['price'];
     $type = $_POST['type'];
     
-    // 3. LẤY CÁC THUỘC TÍNH MỚI TỪ FORM
-    // Dùng toán tử ?? để nếu người dùng quên tick thì gán mảng rỗng hoặc giá trị mặc định
+    // Lấy các thuộc tính từ Form
     $gender = $_POST['gender'] ?? [];
     $occasion = $_POST['occasion'] ?? [];
     $style = $_POST['style'] ?? [];
     $fit = $_POST['fit'] ?? [];
-    $color = $_POST['color'] ?? 'neutral'; // Color là chuỗi (string) không phải mảng
+    $color = $_POST['color'] ?? 'neutral';
 
     $conflicts = [];
     if (!empty($_POST['conflicts'])) {
@@ -41,9 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Xử lý Upload Hình ảnh
     $imagePath = '';
     if (isset($_FILES['imageFile']) && $_FILES['imageFile']['error'] === UPLOAD_ERR_OK) {
-        // Đảm bảo thư mục lưu ảnh tồn tại (tùy chỉnh lại đường dẫn nếu cần)
         $uploadDir = '../assets/img/';
-        
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -53,13 +49,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $targetFilePath = $uploadDir . $newFileName;
 
         if (move_uploaded_file($_FILES['imageFile']['tmp_name'], $targetFilePath)) {
-            // Lưu đường dẫn tuyệt đối vào JSON (cập nhật lại thư mục gốc nếu cần)
             $imagePath = '/SmartFit/assets/img/' . $newFileName;
         } else {
             $message = "<div class='alert' style='background:#f8d7da; color:#721c24;'>❌ Lỗi: Không thể lưu file ảnh vào hệ thống!</div>";
         }
     }
 
+    //tiến hành xử lý DB và JSON
     if (strpos($message, 'Lỗi') === false) {
         $existsIndex = -1;
         foreach ($currentData['items'] as $index => $item) {
@@ -70,9 +66,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         if ($existsIndex !== -1) {
-            // CẬP NHẬT
+            // ==========================================
+            // TRƯỜNG HỢP 1: CẬP NHẬT SẢN PHẨM ĐÃ CÓ (Xử lý MySQL trước) -- chưa hoàn thiện
+            // ==========================================
+            $outfit_id = (int)$currentData['items'][$existsIndex]['id'];
+            $color_esc = mysqli_real_escape_string($conn, $color);
+            $gender_esc = mysqli_real_escape_string($conn, json_encode($gender, JSON_UNESCAPED_UNICODE));
+            $occasion_esc = mysqli_real_escape_string($conn, json_encode($occasion, JSON_UNESCAPED_UNICODE));
+            $style_esc = mysqli_real_escape_string($conn, json_encode($style, JSON_UNESCAPED_UNICODE));
+            $fit_esc = mysqli_real_escape_string($conn, json_encode($fit, JSON_UNESCAPED_UNICODE));
+
+            if ($imagePath !== '') {
+                $image_esc = mysqli_real_escape_string($conn, $imagePath);
+                $sql_update_outfit = "UPDATE outfits SET price = $price, color = '$color_esc', gender = '$gender_esc', occasion = '$occasion_esc', style = '$style_esc', fit = '$fit_esc', image = '$image_esc' WHERE id = $outfit_id";
+            } else {
+                $sql_update_outfit = "UPDATE outfits SET price = $price, color = '$color_esc', gender = '$gender_esc', occasion = '$occasion_esc', style = '$style_esc', fit = '$fit_esc' WHERE id = $outfit_id";
+            }
+            mysqli_query($conn, $sql_update_outfit);
+
+            foreach ($sizes as $sName => $qty) {
+                $sName_esc = mysqli_real_escape_string($conn, $sName);
+                
+                $check_size = mysqli_query($conn, "SELECT * FROM outfit_sizes WHERE outfit_id = $outfit_id AND size_name = '$sName_esc'");
+                
+                if (mysqli_num_rows($check_size) > 0) {
+                    mysqli_query($conn, "UPDATE outfit_sizes SET quantity = quantity + $qty WHERE outfit_id = $outfit_id AND size_name = '$sName_esc'");
+                } else {
+                    mysqli_query($conn, "INSERT INTO outfit_sizes (outfit_id, size_name, quantity) VALUES ($outfit_id, '$sName_esc', $qty)");
+                }
+            }
+
+            if (!empty($conflicts)) {
+                mysqli_query($conn, "DELETE FROM outfit_conflicts WHERE outfit_id = $outfit_id");
+                foreach ($conflicts as $conflict_name) {
+                    $c_name_esc = mysqli_real_escape_string($conn, $conflict_name);
+                    mysqli_query($conn, "INSERT INTO outfit_conflicts (outfit_id, conflict_name) VALUES ($outfit_id, '$c_name_esc')");
+                }
+            }
+
+            // ==========================================
+            // CẬP NHẬT FILE JSON 
+            // ==========================================
             $currentData['items'][$existsIndex]['price'] = $price;
-            // Cập nhật lại các thuộc tính nếu người dùng có sửa form
             $currentData['items'][$existsIndex]['gender'] = $gender;
             $currentData['items'][$existsIndex]['occasion'] = $occasion;
             $currentData['items'][$existsIndex]['style'] = $style;
@@ -90,33 +125,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $currentData['items'][$existsIndex]['sizes'][$sName] = $qty;
                 }
             }
+            
+            if (!empty($conflicts)) {
+                $currentData['items'][$existsIndex]['conflicts'] = array_values($conflicts);
+            }
+
             $message = "<div class='alert success'>✅ Đã cập nhật & cộng dồn số lượng cho: <strong>$name</strong></div>";
+            
         } else {
-            // THÊM MỚI
+            // ==========================================
+            // TRƯỜNG HỢP 2: THÊM MỚI (LƯU MYSQL TRƯỚC -> LẤY ID -> LƯU JSON)
+            // ==========================================
             if ($imagePath === '') {
                 $imagePath = '/SmartFit/assets/img/default-placeholder.jpg';
             }
 
-            $newItem = [
-                'id' => time(),
-                'type' => $type,
-                'name' => $name,
-                'gender' => $gender, 
-                'occasion' => $occasion,
-                'style' => $style,
-                'color' => $color,
-                'fit' => $fit,
-                'weather' => ['hot', 'mild', 'cold'], // Thời tiết bạn có thể thêm checkbox tương tự nếu cần
-                'image' => $imagePath, 
-                'price' => $price,
-                'sizes' => $sizes,
-                'conflicts' => array_values($conflicts)
-            ];
-            $currentData['items'][] = $newItem;
-            $message = "<div class='alert success'>✨ Đã thêm mới sản phẩm: <strong>$name</strong></div>";
-        }
-
-        // --- CODE THÊM VÀO DATABASE ---
+            // 1. Chuẩn bị dữ liệu an toàn cho MySQL
             $name_esc = mysqli_real_escape_string($conn, $name);
             $type_esc = mysqli_real_escape_string($conn, $type);
             $color_esc = mysqli_real_escape_string($conn, $color);
@@ -127,11 +151,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fit_esc = mysqli_real_escape_string($conn, json_encode($fit, JSON_UNESCAPED_UNICODE));
             $weather_esc = mysqli_real_escape_string($conn, json_encode(['hot', 'mild', 'cold'], JSON_UNESCAPED_UNICODE));
 
+            // 2. Chèn vào MySQL ĐẦU TIÊN
             $sql_insert = "INSERT INTO outfits (name, type, color, price, image, style, occasion, weather, fit, gender) 
                            VALUES ('$name_esc', '$type_esc', '$color_esc', $price, '$image_esc', '$style_esc', '$occasion_esc', '$weather_esc', '$fit_esc', '$gender_esc')";
             
             if (mysqli_query($conn, $sql_insert)) {
-                $outfit_id = mysqli_insert_id($conn); // Lấy ID vừa tạo
+                
+                // 3. LẤY ID THỰC TẾ DO MYSQL VỪA TẠO RA
+                $outfit_id = mysqli_insert_id($conn); 
                 
                 // Lưu bảng sizes
                 foreach ($sizes as $sName => $qty) {
@@ -144,11 +171,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $c_name_esc = mysqli_real_escape_string($conn, $conflict_name);
                     mysqli_query($conn, "INSERT INTO outfit_conflicts (outfit_id, conflict_name) VALUES ($outfit_id, '$c_name_esc')");
                 }
-            }
-            // ------------------------------
 
-        // 2. SỬA LỖI ĐƯỜNG DẪN ẢNH: Thêm JSON_UNESCAPED_SLASHES
-        file_put_contents($jsonFile, json_encode($currentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                // 4. TIẾN HÀNH THÊM VÀO MẢNG JSON VỚI ID CỦA MYSQL
+                $newItem = [
+                    'id' => (string)$outfit_id, // Gắn ID chuẩn của MySQL vào JSON
+                    'type' => $type,
+                    'name' => $name,
+                    'gender' => $gender, 
+                    'occasion' => $occasion,
+                    'style' => $style,
+                    'color' => $color,
+                    'fit' => $fit,
+                    'weather' => ['hot', 'mild', 'cold'], 
+                    'image' => $imagePath, 
+                    'price' => $price,
+                    'sizes' => $sizes,
+                    'conflicts' => array_values($conflicts)
+                ];
+                $currentData['items'][] = $newItem;
+                $message = "<div class='alert success'>✨ Đã thêm mới sản phẩm: <strong>$name</strong> (Mã ID: $outfit_id)</div>";
+                
+            } else {
+                $message = "<div class='alert' style='background:#f8d7da; color:#721c24;'>❌ Lỗi lưu MySQL: " . mysqli_error($conn) . "</div>";
+            }
+        }
+
+        // 5. CHỈ GHI LẠI FILE JSON KHI KHÔNG CÓ LỖI MYSQL
+        if (strpos($message, 'Lỗi') === false) {
+            file_put_contents($jsonFile, json_encode($currentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
     }
 }
 ?>

@@ -39,6 +39,10 @@
     margin: 0 32px;
 
     z-index: 100;
+    /* cố định khi cuộn */
+    position: sticky; 
+    top: 0;
+    z-index: 1000; 
 }
 
 .navbar__logo {

@@ -342,6 +342,22 @@ window.app = {
                     self.showNotification('Đã phối đồ xong!', 'success');
                     
                     if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    //================ save ofits
+                    const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+                    if (btnSave && data.data) {
+                        btnSave.setAttribute('data-top', data.data.topId);
+                        btnSave.setAttribute('data-bottom', data.data.bottomId);
+                        btnSave.setAttribute('data-shoes', data.data.shoesId);
+                        btnSave.setAttribute('data-acc', data.data.accId || 'null');
+                        btnSave.setAttribute('data-style', data.data.style);
+                        
+                        // Reset icon về rỗng
+                        const icon = btnSave.querySelector('i');
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                        btnSave.querySelector('span').innerText = 'Lưu set đồ';
+                    }
                 }
 
             } catch (error) {
@@ -383,7 +399,7 @@ window.app = {
                 
         //     }, 2000); // 2000 = 2 giây
 
-        //     // --- KẾT THÚC: DÙNG DATA GIẢ ---
+        // // --- KẾT THÚC: DÙNG DATA GIẢ ---
             
         });
     },
@@ -492,6 +508,73 @@ window.app = {
         
         document.body.style.overflow = ''; 
     },
+
+    // lưu trang phục
+  toggleSaveOutfit: function(btnElement) {
+        const self = this;
+        // 1. CHỈ ĐỌC dữ liệu từ các thuộc tính data-* của nút bấm
+        const topId = btnElement.getAttribute('data-top');
+        const bottomId = btnElement.getAttribute('data-bottom');
+        const shoesId = btnElement.getAttribute('data-shoes');
+        const accId = btnElement.getAttribute('data-acc');
+        const styleName = btnElement.getAttribute('data-style');
+
+        // 2. Gom dữ liệu gửi đi 
+        const dataToSend = {
+            top_id: topId,
+            bottom_id: bottomId,
+            shoes_id: shoesId,
+            acc_id: (accId && accId !== 'null' && accId !== '') ? accId : null, 
+            style_name: styleName || "Phong cách gợi ý"
+        };
+
+        // 3. Gửi xuống PHP
+        fetch('includes/save_outfit.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const icon = btnElement.querySelector('i');
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+                btnElement.querySelector('span').innerText = 'Đã lưu';
+                
+                self.showNotification('Đã lưu set đồ thành công!', 'success');
+            } else {
+                alert('Lỗi: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Có lỗi mạng xảy ra khi lưu.');
+        });
+    },
+    deleteSavedOutfit: function(id, btnElement) { 
+            // if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
+
+            fetch('../includes/delete_saved_outfit.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const cardItem = btnElement.closest('.col'); 
+                    if (cardItem) cardItem.remove();
+                    if (window.showToast) showToast('Đã xóa thành công!', 'success');
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+        },
+
+    
 };
 
 document.addEventListener('DOMContentLoaded', () => {
