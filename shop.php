@@ -270,7 +270,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                     // Vẽ thẻ HTML đúng theo chuẩn CSS của bạn
                     grid.innerHTML += `
                     <div class="col l-3 m-4 c-6">
-                        <a href="#" class="product-card" onclick="event.preventDefault()">
+                        <a href="detail.php?id=${item.id}" class="product-card">
                             <div class="product-card__img">
                                 <img src="${item.image}" alt="${item.name}" onerror="this.src='./assets/img/default-placeholder.jpg'">
                             </div>
@@ -293,6 +293,7 @@ unset($_SESSION['success'], $_SESSION['error']);
         // 3. HÀM THÊM VÀO GIỎ HÀNG (Lưu vào LocalStorage của bạn Backend)
         function addToCart(event, id, name, price, image) {
             event.preventDefault();
+            event.stopPropagation();
 
             let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
             let existingItem = cart.find(item => item.id === id);
