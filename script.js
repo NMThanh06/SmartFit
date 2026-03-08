@@ -574,6 +574,38 @@ window.app = {
             });
         },
 
+        // Hàm tạo hiệu ứng bay
+    flyToCart: function(imgElement, cartIconElement) {
+        if (!imgElement || !cartIconElement) return;
+
+        // Tạo bản sao của ảnh
+        const flyImg = imgElement.cloneNode();
+        const imgRect = imgElement.getBoundingClientRect();
+        const cartRect = cartIconElement.getBoundingClientRect();
+
+        // Thêm class css cho hiệu ứng
+        flyImg.classList.add('fly-item');
+        
+        // Vị trí bắt đầu (Tại vị trí ảnh gốc)
+        flyImg.style.top = `${imgRect.top}px`;
+        flyImg.style.left = `${imgRect.left}px`;
+        flyImg.style.width = `${imgRect.width}px`;
+        flyImg.style.height = `${imgRect.height}px`;
+
+        document.body.appendChild(flyImg);
+
+        // Vị trí kết thúc (Bay tới icon giỏ hàng)
+        setTimeout(() => {
+            flyImg.style.top = `${cartRect.top + 10}px`;
+            flyImg.style.left = `${cartRect.left + 10}px`;
+            flyImg.style.width = '20px';
+            flyImg.style.height = '20px';
+            flyImg.style.opacity = '0';
+        }, 10);
+
+        // Xóa ảnh sau khi bay xong (0.8 giây)
+        setTimeout(() => flyImg.remove(), 800);
+    },
     
 };
 
