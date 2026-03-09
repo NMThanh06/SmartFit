@@ -88,12 +88,14 @@ unset($_SESSION['success'], $_SESSION['error']);
                         </div>
                     </div>
 
-                <?php else: ?>
+                <?php
+else: ?>
                     <div id="loginBtn">
                         <i class="fa-solid fa-circle-user"></i>
                         Đăng nhập
                     </div>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
 
         </nav>
@@ -373,9 +375,11 @@ unset($_SESSION['success'], $_SESSION['error']);
         window.onload = function() {
             <?php if ($success): ?>
                 showToast('<?php echo addslashes($success); ?>', 'success');
-            <?php elseif ($error): ?>
+            <?php
+elseif ($error): ?>
                 showToast('<?php echo addslashes($error); ?>', 'error');
-            <?php endif; ?>
+            <?php
+endif; ?>
         };
     </script>
 </body>
