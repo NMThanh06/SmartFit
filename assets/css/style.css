@@ -758,6 +758,8 @@
 
 .wardrobe-card__images {
     display: flex;
+    align-self: center;
+    justify-content: center;
     height: 160px;
     background: #fff;
     padding: 8px;

@@ -100,39 +100,135 @@ unset($_SESSION['success'], $_SESSION['error']);
                         </div>
                     </div>
                 </div>
-            </div>
-        </section>
 
-        <div class="col l-3 m-4 c-12">
-            <div class="wardrobe-card">
-                <div class="wardrobe-card__images">
-                    <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo">
-                    <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200&auto=format&fit=crop" alt="Quần">
-                </div>
+                <div class="row">
+                    <div class="col l-3 m-4 c-12">
+                        <div class="wardrobe-card">
+                            <div class="wardrobe-card__images">
+                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo">
+                                <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200&auto=format&fit=crop" alt="Quần">
+                            </div>
 
-                <div class="wardrobe-card__info">
-                    <div class="wardrobe-card__header">
-                        <h3 class="wardrobe-card__title">Streetwear</h3>
-                        <button class="wardrobe-card__delete" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                            <div class="wardrobe-card__info">
+                                <div class="wardrobe-card__header">
+                                    <h3 class="wardrobe-card__title">Streetwear</h3>
+                                    <button class="wardrobe-card__delete" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+
+                                <ul class="wardrobe-card__items">
+                                    <li><span>👕</span>
+                                        <p>Áo thun đen form rộng</p>
+                                    </li>
+                                    <li><span>👖</span>
+                                        <p>Quần Jeans xanh rách gối</p>
+                                    </li>
+                                    <li><span>👟</span>
+                                        <p>Sneaker Nike Air Force 1</p>
+                                    </li>
+                                    <li><span>🧢</span>
+                                        <p>Mũ lưỡi trai đen</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
 
-                    <ul class="wardrobe-card__items">
-                        <li><span>👕</span>
-                            <p>Áo thun đen form rộng</p>
-                        </li>
-                        <li><span>👖</span>
-                            <p>Quần Jeans xanh rách gối</p>
-                        </li>
-                        <li><span>👟</span>
-                            <p>Sneaker Nike Air Force 1</p>
-                        </li>
-                        <li><span>🧢</span>
-                            <p>Mũ lưỡi trai đen</p>
-                        </li>
-                    </ul>
+                    <div class="col l-3 m-4 c-12">
+                        <div class="wardrobe-card">
+                            <div class="wardrobe-card__images">
+                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo">
+                                <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200&auto=format&fit=crop" alt="Quần">
+                            </div>
+
+                            <div class="wardrobe-card__info">
+                                <div class="wardrobe-card__header">
+                                    <h3 class="wardrobe-card__title">Streetwear</h3>
+                                    <button class="wardrobe-card__delete" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+
+                                <ul class="wardrobe-card__items">
+                                    <li><span>👕</span>
+                                        <p>Áo thun đen form rộng</p>
+                                    </li>
+                                    <li><span>👖</span>
+                                        <p>Quần Jeans xanh rách gối</p>
+                                    </li>
+                                    <li><span>👟</span>
+                                        <p>Sneaker Nike Air Force 1</p>
+                                    </li>
+                                    <li><span>🧢</span>
+                                        <p>Mũ lưỡi trai đen</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col l-3 m-4 c-12">
+                        <div class="wardrobe-card">
+                            <div class="wardrobe-card__images">
+                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo">
+                                <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200&auto=format&fit=crop" alt="Quần">
+                            </div>
+
+                            <div class="wardrobe-card__info">
+                                <div class="wardrobe-card__header">
+                                    <h3 class="wardrobe-card__title">Streetwear</h3>
+                                    <button class="wardrobe-card__delete" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+
+                                <ul class="wardrobe-card__items">
+                                    <li><span>👕</span>
+                                        <p>Áo thun đen form rộng</p>
+                                    </li>
+                                    <li><span>👖</span>
+                                        <p>Quần Jeans xanh rách gối</p>
+                                    </li>
+                                    <li><span>👟</span>
+                                        <p>Sneaker Nike Air Force 1</p>
+                                    </li>
+                                    <li><span>🧢</span>
+                                        <p>Mũ lưỡi trai đen</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col l-3 m-4 c-12">
+                        <div class="wardrobe-card">
+                            <div class="wardrobe-card__images">
+                                <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=200&auto=format&fit=crop" alt="Áo">
+                                <img src="https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=200&auto=format&fit=crop" alt="Quần">
+                            </div>
+
+                            <div class="wardrobe-card__info">
+                                <div class="wardrobe-card__header">
+                                    <h3 class="wardrobe-card__title">Streetwear</h3>
+                                    <button class="wardrobe-card__delete" title="Xóa"><i class="fa-solid fa-trash-can"></i></button>
+                                </div>
+
+                                <ul class="wardrobe-card__items">
+                                    <li><span>👕</span>
+                                        <p>Áo thun đen form rộng</p>
+                                    </li>
+                                    <li><span>👖</span>
+                                        <p>Quần Jeans xanh rách gối</p>
+                                    </li>
+                                    <li><span>👟</span>
+                                        <p>Sneaker Nike Air Force 1</p>
+                                    </li>
+                                    <li><span>🧢</span>
+                                        <p>Mũ lưỡi trai đen</p>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
             </div>
-        </div>
+        </section>
 
         <!-- Footer -->
         <footer class="footer">
