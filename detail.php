@@ -102,7 +102,7 @@ endforeach; ?>
             </div>
 
             <button onclick="addToCartFromDetail()" class="button" style="width: 100%; padding: 18px; background: #ff4d4f; color: white; border: none; font-size: 1.6rem; font-weight: bold; cursor: pointer; border-radius: 6px;">
-                <i class="fa-solid fa-cart-shopping"></i> THÊM VÀO GIỎ HÀNG hehe
+                <i class="fa-solid fa-cart-shopping"></i> THÊM VÀO GIỎ HÀNG
             </button>
         </div>
     </div>
