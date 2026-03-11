@@ -105,7 +105,7 @@ $ordersResult = mysqli_stmt_get_result($stmt);
                     while ($item = mysqli_fetch_assoc($detailsResult)):
                 ?>
                     <div class="order-item">
-                        <img src="../<?php echo htmlspecialchars($item['image']); ?>" class="item-img" onerror="this.src='../assets/img/default-placeholder.jpg'">
+                        <img src="<?php echo htmlspecialchars($item['image']); ?>" class="item-img" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
                         <div class="item-info">
                             <p class="item-name"><?php echo htmlspecialchars($item['name']); ?></p>
                             <p class="item-meta">Size: <?php echo htmlspecialchars($item['size_name']); ?> | Số lượng: <?php echo $item['quantity']; ?></p>

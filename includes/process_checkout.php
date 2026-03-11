@@ -17,65 +17,127 @@ $phone = $data['phone'] ?? '';
 $address = $data['address'] ?? '';
 $note = $data['note'] ?? '';
 $payment_method = $data['payment_method'] ?? 'cod';
+$cartItems = $data['cart_items'] ?? []; // Giỏ hàng gửi từ localStorage
 
 if (empty($fullname) || empty($phone) || empty($address)) {
     echo json_encode(['status' => 'error', 'message' => 'Vui lòng điền đầy đủ thông tin bắt buộc!']);
     exit;
 }
 
-// Bắt đầu Transaction (Đảm bảo an toàn dữ liệu)
+if (count($cartItems) == 0) {
+    echo json_encode(['status' => 'error', 'message' => 'Giỏ hàng của bạn đang trống!']);
+    exit;
+}
+
+// ========================================
+// BẮT ĐẦU DATABASE TRANSACTION
+// ========================================
 mysqli_begin_transaction($conn);
 
 try {
-    // 1. Tính tổng tiền từ giỏ hàng (Không lấy từ Frontend để tránh bị hack đổi giá)
-    $cartSql = "SELECT c.*, o.price FROM shopping_cart c JOIN outfits o ON c.outfit_id = o.id WHERE c.user_id = ?";
-    $cartStmt = mysqli_prepare($conn, $cartSql);
-    mysqli_stmt_bind_param($cartStmt, "i", $userId);
-    mysqli_stmt_execute($cartStmt);
-    $cartResult = mysqli_stmt_get_result($cartStmt);
-
+    // ========================================
+    // BƯỚC 1: TÍNH TỔNG TIỀN TỪ GIÁ TRONG DATABASE (Chống hack đổi giá)
+    // + KIỂM TRA TỒN KHO (SELECT ... FOR UPDATE — Khóa dòng để tránh race condition)
+    // ========================================
     $totalAmount = 0;
-    $cartItems = [];
-    while ($row = mysqli_fetch_assoc($cartResult)) {
-        $totalAmount += $row['price'] * $row['quantity'];
-        $cartItems[] = $row;
+    $validatedItems = []; // Mảng chứa dữ liệu đã xác thực từ DB
+
+    foreach ($cartItems as $item) {
+        $outfitId = intval($item['id'] ?? 0);
+        $sizeName = $item['size'] ?? '';
+        $quantity = intval($item['quantity'] ?? 0);
+
+        if ($outfitId <= 0 || empty($sizeName) || $quantity <= 0) {
+            throw new Exception("Dữ liệu giỏ hàng không hợp lệ!");
+        }
+
+        // Lấy giá thực từ DB (không tin giá từ frontend)
+        $priceSql = "SELECT price, name FROM outfits WHERE id = ?";
+        $priceStmt = mysqli_prepare($conn, $priceSql);
+        mysqli_stmt_bind_param($priceStmt, "i", $outfitId);
+        mysqli_stmt_execute($priceStmt);
+        $priceResult = mysqli_stmt_get_result($priceStmt);
+        $outfit = mysqli_fetch_assoc($priceResult);
+
+        if (!$outfit) {
+            throw new Exception("Sản phẩm ID $outfitId không tồn tại trong hệ thống!");
+        }
+
+        // Kiểm tra tồn kho với SELECT ... FOR UPDATE (Khóa dòng tránh đặt đồng thời)
+        $stockSql = "SELECT quantity FROM outfit_sizes WHERE outfit_id = ? AND size_name = ? FOR UPDATE";
+        $stockStmt = mysqli_prepare($conn, $stockSql);
+        mysqli_stmt_bind_param($stockStmt, "is", $outfitId, $sizeName);
+        mysqli_stmt_execute($stockStmt);
+        $stockResult = mysqli_stmt_get_result($stockStmt);
+        $stockRow = mysqli_fetch_assoc($stockResult);
+
+        if (!$stockRow) {
+            throw new Exception("Sản phẩm '{$outfit['name']}' không có size '$sizeName'!");
+        }
+
+        if ($stockRow['quantity'] < $quantity) {
+            throw new Exception("Sản phẩm '{$outfit['name']}' size $sizeName chỉ còn {$stockRow['quantity']} trong kho, nhưng bạn đặt $quantity!");
+        }
+
+        $totalAmount += $outfit['price'] * $quantity;
+        $validatedItems[] = [
+            'outfit_id' => $outfitId,
+            'name' => $outfit['name'],
+            'size_name' => $sizeName,
+            'quantity' => $quantity,
+            'price' => $outfit['price']
+        ];
     }
 
-    if (count($cartItems) == 0) {
-        throw new Exception("Giỏ hàng của bạn đang trống!");
-    }
-
-    // 2. Tạo hóa đơn chính (Bảng orders)
+    // ========================================
+    // BƯỚC 2: TẠO HÓA ĐƠN CHÍNH (Bảng orders)
+    // ========================================
     $orderSql = "INSERT INTO orders (user_id, fullname, phone, address, note, payment_method, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $orderStmt = mysqli_prepare($conn, $orderSql);
     mysqli_stmt_bind_param($orderStmt, "isssssi", $userId, $fullname, $phone, $address, $note, $payment_method, $totalAmount);
     mysqli_stmt_execute($orderStmt);
     
-    // Lấy mã hóa đơn vừa tạo thành công
-    $orderId = mysqli_insert_id($conn); 
+    $orderId = mysqli_insert_id($conn);
 
-    // 3. Sao chép đồ từ Giỏ hàng sang Chi tiết hóa đơn (Bảng order_details)
+    // ========================================
+    // BƯỚC 3: LƯU CHI TIẾT ĐƠN HÀNG + TRỪ TỒN KHO
+    // ========================================
     $detailSql = "INSERT INTO order_details (order_id, outfit_id, size_name, quantity, price) VALUES (?, ?, ?, ?, ?)";
     $detailStmt = mysqli_prepare($conn, $detailSql);
 
-    foreach ($cartItems as $item) {
+    $deductSql = "UPDATE outfit_sizes SET quantity = quantity - ? WHERE outfit_id = ? AND size_name = ?";
+    $deductStmt = mysqli_prepare($conn, $deductSql);
+
+    foreach ($validatedItems as $item) {
+        // 3a. Lưu chi tiết đơn hàng
         mysqli_stmt_bind_param($detailStmt, "iisii", $orderId, $item['outfit_id'], $item['size_name'], $item['quantity'], $item['price']);
         mysqli_stmt_execute($detailStmt);
+
+        // 3b. TRỪ TỒN KHO — Đây là bước quan trọng nhất!
+        mysqli_stmt_bind_param($deductStmt, "iis", $item['quantity'], $item['outfit_id'], $item['size_name']);
+        mysqli_stmt_execute($deductStmt);
+
+        // Kiểm tra xem UPDATE có thực sự ảnh hưởng dòng nào không
+        if (mysqli_stmt_affected_rows($deductStmt) === 0) {
+            throw new Exception("Không thể trừ kho cho '{$item['name']}' size {$item['size_name']}!");
+        }
     }
 
-    // 4. Xóa sạch giỏ hàng của User này sau khi mua xong
-    $clearCartSql = "DELETE FROM shopping_cart WHERE user_id = ?";
-    $clearStmt = mysqli_prepare($conn, $clearCartSql);
-    mysqli_stmt_bind_param($clearStmt, "i", $userId);
-    mysqli_stmt_execute($clearStmt);
-
-    // Chốt giao dịch, lưu vĩnh viễn vào Database
+    // ========================================
+    // BƯỚC 4: CHỐT GIAO DỊCH — TẤT CẢ THÀNH CÔNG
+    // ========================================
     mysqli_commit($conn);
     
-    echo json_encode(['status' => 'success', 'message' => 'Đặt hàng thành công!', 'order_id' => $orderId]);
+    echo json_encode([
+        'status' => 'success', 
+        'message' => 'Đặt hàng thành công! Mã đơn: #' . $orderId,
+        'order_id' => $orderId
+    ]);
 
 } catch (Exception $e) {
-    // Nếu có bất kỳ lỗi gì xảy ra, quay ngược thời gian (Hủy toàn bộ thao tác)
+    // ========================================
+    // ROLLBACK — HOÀN TÁC TẤT CẢ NẾU CÓ BẤT KỲ LỖI NÀO
+    // ========================================
     mysqli_rollback($conn); 
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
