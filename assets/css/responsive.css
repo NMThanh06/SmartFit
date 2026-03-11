@@ -1,0 +1,251 @@
+/* =======================================================
+   1. MOBILE & TABLET CHUNG (Dưới 1024px)
+   (Reset lại chiều cao hộp kính mờ cho cả Mobile & Tablet)
+======================================================= */
+@media (max-width: 1023px) {
+    .hero__info, .config-form {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .info__greeting {
+        line-height: 1.6; /* Giãn dòng ra 1.6 lần cho thoáng */
+        margin-bottom: 10px;
+    }
+
+    /* ĐÂY LÀ DÒNG TRỊ LỖI TRÀN NÚT: Bắt buộc hộp kính mờ tự giãn chiều cao */
+    .config-form__group {
+        height: auto; 
+        min-height: max-content;
+        padding-bottom: 15px; /* Tạo khoảng trống ở đáy hộp để ôm trọn nút */
+        display: block; /* Bỏ flex chiều dọc nếu có */
+    }
+
+    .config-form__group:nth-child(5) {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Trang chi tiết sản phẩm */
+    .detail-page {
+        margin-bottom: 50px;
+    }
+
+    #productDetailWrapper {
+        flex-direction: column;
+    }
+
+    .detail__image {
+        margin-bottom: 25px; /* Tạo khoảng trống giữa ảnh và chữ */
+    }
+    
+}
+
+/* =======================================================
+   2. TABLET CHUYÊN BIỆT (Từ 740px đến 1023px)
+   (Chia form thành 2 cột so le)
+======================================================= */
+@media (min-width: 740px) and (max-width: 1023px) {
+    .config-form {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .config-form__group {
+        width: calc(50% - 10px); /* Mỗi hộp chiếm 1 nửa màn hình */
+        margin-bottom: 20px;
+    }
+
+    /* Ô Ghi chú cuối cùng cho chiếm trọn 1 hàng (100%) */
+    .config-form__group:last-child {
+        width: 100%; 
+    }
+
+    /* Bảng kết quả (Result) */
+    .result {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: calc(100vh - 100px);
+        padding: auto;
+    }
+
+    .result__container {
+        width: 100%;
+        margin: auto;
+    }
+
+    .result__title {
+        line-height: 1.5;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Trang chi tiết sản phẩm */
+    #productDetailWrapper {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        flex-direction: column;
+        align-items: center; /* Trọng tâm: Tự động đưa mọi thứ bên trong ra giữa */
+    }
+
+    #productDetailWrapper > .col {
+        flex: 0 0 100% !important;
+        max-width: 650px !important; /* Bạn có thể tăng giảm số này nếu muốn to/nhỏ hơn */
+        padding: 0 !important; /* Bỏ khoảng cách thừa */
+    }
+
+    .detail__info {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr; /* 2 cột chia đôi màn hình */
+        gap: 20px 40px; /* Khoảng cách hàng dọc 20px, hàng ngang 40px */
+        
+        /* Bản đồ quy hoạch vị trí: Trái là Thông tin - Phải là Thao tác */
+        grid-template-areas: 
+            "name size"
+            "price qty"
+            "desc buy";
+    }
+
+    /* Gắn thẻ các phần tử vào đúng bản đồ quy hoạch ở trên */
+    .detail__name { grid-area: name; margin: 0; }
+    .detail__price { grid-area: price; margin: 0; }
+    .detail__desc { grid-area: desc; margin: 0; }
+    
+    .detail__size { grid-area: size; margin: 0; }
+    .detail__qty { grid-area: qty; margin: 0; align-self: center; }
+    .detail__buy-btn { 
+        grid-area: buy; 
+        align-self: end; /* Neo nút mua xuống đáy cột bên phải */
+        margin: 0; 
+        padding: 16px; 
+    }
+}
+
+/* =======================================================
+   3. MOBILE CHUYÊN BIỆT (Dưới 740px)
+   (Chuyển tất cả thành 1 cột dọc)
+======================================================= */
+@media (max-width: 739px) {
+    .info__greeting {
+        font-size: 2.2rem;
+        line-height: 1.6;
+    }
+    .info__weather__text, .info__desc {
+        font-size: 1.4rem;
+    }
+
+    /* 1. ÉP HỘP KÍNH MỜ TỰ GIÃN */
+    .config-form__group {
+        width: 100%;
+        height: auto; 
+        min-height: 10px; /* Xóa bỏ min-height cũ */
+        display: block;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+        overflow: visible; /* Cho phép nội dung bung ra nếu cần */
+    }
+    
+    .config-form__group:last-of-type {
+        width: 100%;
+    }
+
+    /* 2. CHẶN THỦ PHẠM: ÉP KHU VỰC CHỨA NÚT BẤM TỰ GIÃN */
+    .config-form__options {
+        display: flex;
+        flex-wrap: wrap;
+        height: auto; /* ĐÂY CHÍNH LÀ CHÌA KHÓA: Phá vỡ height cố định của PC */
+        justify-content: center;
+        gap: 12px;
+    }
+
+    /* 3. Nắn lại các nút bấm */
+    .config-form__label {
+        flex: 1 1 calc(50% - 12px);
+        text-align: center;
+        padding: 12px 5px;
+        margin: 0; 
+        font-size: 1.3rem;
+        height: auto; 
+    }
+
+    /* Trả lại hình tròn cho các nút chọn màu sắc */
+    .config-form__label--color {
+        flex: 0 0 auto;
+        width: 42px;
+        height: 42px;
+    }
+
+    /* Nút Phối đồ ngay */
+    .confirm__button {
+        width: calc(100% - 30px);
+        margin: 10px 15px 40px;
+    }
+
+    /* Trang kết quả */
+    .result__container {
+        flex-direction: column;
+    }
+
+    .result__visual {
+        flex-direction: column;
+    }
+
+    .result__title {
+        line-height: 1.5;
+        margin-top: 10px;
+        margin-bottom: 15px;
+    }
+
+    /* Footer trên mobile */
+    .footer {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .footer__author {
+        padding-top: 10px;
+    }
+
+    /* Trang wardrobe */
+    .wardrobe-page {
+        padding-top: 20px; 
+    }
+
+    /* Trang shop */
+    .shop-page {
+        padding-top: 20px; 
+    }
+
+    .shop__filters {
+        display: flex;
+        flex-wrap: wrap; /* Cho phép rớt xuống dòng nếu thiếu chỗ */
+        justify-content: center; /* Căn giữa các nút */
+        gap: 10px; /* Khoảng cách giữa các nút */
+        margin-top: 15px;
+    }
+
+    .filter-btn {
+        flex: 0 0 auto;
+        padding: 8px 16px;
+        font-size: 1.3rem;
+        margin: 0; /* Xóa margin cũ */
+    }
+
+    /* Trang chi tiết sản phảm */
+    .detail__image {
+        width: 100%;
+    }
+
+    /* Thu nhỏ chữ cho phù hợp với màn hình điện thoại */
+    .detail__name {
+        font-size: 2.6rem; 
+        text-align: center; /* Đưa tên sản phẩm ra giữa */
+    }
+
+    .detail__price {
+        font-size: 2.2rem;
+        text-align: center; /* Đưa giá tiền ra giữa */
+    }
+}

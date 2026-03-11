@@ -1,0 +1,68 @@
+version: '3.8'
+
+services:
+  # ========================================
+  # Service 1: PHP/Apache Web Server
+  # ========================================
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartfit-web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+    environment:
+      - DB_HOST=db
+      - DB_USER=smartfit_user
+      - DB_PASS=smartfit_pass
+      - DB_NAME=webtest_db
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ========================================
+  # Service 2: MariaDB Database
+  # (Dùng MariaDB 10.4 cho tương thích XAMPP)
+  # ========================================
+  db:
+    image: mariadb:10.4
+    container_name: smartfit-db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password_123
+      MYSQL_DATABASE: webtest_db
+      MYSQL_USER: smartfit_user
+      MYSQL_PASSWORD: smartfit_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/webtest_db.sql:/docker-entrypoint-initdb.d/webtest_db.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password_123"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # ========================================
+  # Service 3: phpMyAdmin
+  # ========================================
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: smartfit-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root_password_123
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db_data:

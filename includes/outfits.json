@@ -30,7 +30,7 @@
                 "L": 15,
                 "XL": 5
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 2,
@@ -63,7 +63,7 @@
                 "L": 10,
                 "XL": 2
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 3,
@@ -95,7 +95,7 @@
                 "M": 10,
                 "L": 5
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 4,
@@ -126,12 +126,12 @@
                 "M": 12,
                 "L": 8
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 5,
             "type": "shoes",
-            "name": "Sneaker trắng nam",
+            "name": "Sneaker",
             "gender": [
                 "male"
             ],
@@ -148,20 +148,20 @@
                 "hot",
                 "mild"
             ],
-            "image": "/SmartFit/assets/img/5.jpg",
-            "price": 350000,
+            "image": "/SmartFit/assets/img/1772901133_8504.png",
+            "price": 349000,
             "sizes": {
                 "39": 5,
                 "40": 10,
                 "41": 15,
                 "42": 8
             },
-            "conflicts": [
+            "pairings": [
                 "Quần tây nam âu phục"
             ]
         },
         {
-            "id": 1772550289,
+            "id": 6,
             "type": "top",
             "name": "Áo thun đen cổ tròn",
             "gender": [
@@ -189,7 +189,147 @@
             "sizes": {
                 "M": 1
             },
-            "conflicts": []
+            "pairings": []
+        },
+        {
+            "id": 7,
+            "type": "top",
+            "name": "Áo hoodie đen",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "dark",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1772836189_1435.jpg",
+            "price": 200000,
+            "sizes": {
+                "M": 15,
+                "XL": 20,
+                "XXL": 5
+            },
+            "pairings": []
+        },
+        {
+            "id": "8",
+            "type": "shoes",
+            "name": "Giày sneaker trắng",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "neutral",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1772898800_5543.jpg",
+            "price": 250000,
+            "sizes": {
+                "41": 10,
+                "42": 15,
+                "40": 20
+            },
+            "pairings": []
+        },
+        {
+            "id": "9",
+            "type": "shoes",
+            "name": "Giày nữ trắng",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "pastel",
+            "fit": [
+                "regular",
+                "oversized",
+                "slim"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1772900681_2634.png",
+            "price": 250000,
+            "sizes": {
+                "41": 15,
+                "42": 15,
+                "39": 20,
+                "40": 5
+            },
+            "pairings": []
+        },
+        {
+            "id": "10",
+            "type": "accessories",
+            "name": "Kính mát",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date"
+            ],
+            "style": [
+                "basic",
+                "street",
+                "vintage"
+            ],
+            "color": "dark",
+            "fit": [
+                "regular",
+                "oversized",
+                "slim"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1772900816_6167.png",
+            "price": 199000,
+            "sizes": {
+                "OVER": 10
+            },
+            "pairings": []
         }
     ]
 }
