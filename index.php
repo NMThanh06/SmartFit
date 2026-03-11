@@ -64,7 +64,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                 <span>Thông tin cá nhân</span>
                             </a>
 
-                            <a href="wardrobe.php" class="user-dropdown__item">
+                            <a href="pages/wardrobe.php" class="user-dropdown__item">
                                 <i class="fa-solid fa-clock-rotate-left"></i>
                                 <span>Bộ sưu tập</span>
                             </a>
@@ -88,12 +88,14 @@ unset($_SESSION['success'], $_SESSION['error']);
                         </div>
                     </div>
 
-                <?php else: ?>
+                <?php
+else: ?>
                     <div id="loginBtn">
                         <i class="fa-solid fa-circle-user"></i>
                         Đăng nhập
                     </div>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
 
         </nav>
@@ -270,7 +272,13 @@ unset($_SESSION['success'], $_SESSION['error']);
                             <i class="fa-solid fa-rotate-right"></i> Thử lại
                         </button>
 
-                        <button class="button actions__button" onclick="app.toggleSaveOutfit(this)">
+                        <button class="button actions__button" 
+                                onclick="app.toggleSaveOutfit(this)"
+                                data-top=""
+                                data-bottom=""
+                                data-shoes=""
+                                data-acc=""
+                                data-style="">
                             <i class="fa-regular fa-bookmark"></i> <span>Lưu set đồ</span>
                         </button>
                     </div>
@@ -367,9 +375,11 @@ unset($_SESSION['success'], $_SESSION['error']);
         window.onload = function() {
             <?php if ($success): ?>
                 showToast('<?php echo addslashes($success); ?>', 'success');
-            <?php elseif ($error): ?>
+            <?php
+elseif ($error): ?>
                 showToast('<?php echo addslashes($error); ?>', 'error');
-            <?php endif; ?>
+            <?php
+endif; ?>
         };
     </script>
 </body>

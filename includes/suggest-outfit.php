@@ -84,6 +84,12 @@ if ($gender === 'female') {
 echo json_encode([
     'success' => true,
     'data' => [
+        // lấy ID
+        'topId' => $top['id'] ?? null,
+        'bottomId' => $bottom['id'] ?? null,
+        'shoesId' => $shoes['id'] ?? null,
+        'accId' => $acc['id'] ?? null,
+        // trả về dao diện gợi ý
         'top' => $top['name'] ?? 'Chưa xác định',
         'topImage' => $top['image'] ?? $defaultTop,
         'bottom' => $bottom['name'] ?? 'Chưa xác định',

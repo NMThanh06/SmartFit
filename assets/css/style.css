@@ -39,6 +39,10 @@
     margin: 0 32px;
 
     z-index: 100;
+    /* cố định khi cuộn */
+    position: sticky; 
+    top: 0;
+    z-index: 1000; 
 }
 
 .navbar__logo {
@@ -90,6 +94,7 @@
     cursor: pointer;
 
     transition: all 0.3s ease;
+    
 }
 
 .navbar__cart:hover {
@@ -1169,12 +1174,42 @@
     border-bottom: 1px solid transparent;
     transition: all ease 0.3s;
     opacity: 0.7;
+    cursor: pointer;
 }
 
 .product-card:hover .product-card__buy {
     opacity: 1;
-    color: #6C63FF;
-    border-bottom: 1px solid #6C63FF;
+    font-weight: 700;
+}
+
+/* Hiệu ứng ảnh bay */
+.fly-item {
+    position: fixed;
+    z-index: 9999;
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Badge số lượng trên icon giỏ hàng */
+.navbar__cart {
+    position: relative;
+}
+
+.cart-badge {
+    position: absolute;
+    top: -8px;
+    right: -10px;
+    background-color: #ff4d4d;
+    color: white;
+    font-size: 1.2rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+    font-weight: bold;
+    display: none; /* Ẩn khi số lượng = 0 */
 }
 
 /* Trang chi tiết sản phẩm */

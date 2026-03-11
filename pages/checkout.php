@@ -1,3 +1,7 @@
+<?php include '../includes/toast.php'; ?>
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -165,55 +169,117 @@
         </div>
     </div>
 </div>
-
 <script>
-    // Hàm thay đổi giao diện khi chọn phương thức thanh toán
-    function showInstruction(method) {
-        const instructionBox = document.getElementById('payment-instruction');
-        const submitBtn = document.querySelector('.btn-submit');
-        
-        instructionBox.style.display = 'block';
+    // KHÔNG CẦN định nghĩa showToast ở đây nữa vì đã có trong toast.php rồi!
 
-        if (method === 'cod') {
-            instructionBox.style.display = 'none';
-            submitBtn.innerText = 'ĐẶT HÀNG: 550.000 VNĐ';
-            submitBtn.style.backgroundColor = 'var(--primary-color)';
-        } else if (method === 'momo') {
-            instructionBox.innerHTML = '<strong>Chuyển hướng an toàn:</strong> Bạn sẽ được chuyển sang ứng dụng MoMo để quét mã QR thanh toán.';
-            submitBtn.innerText = 'THANH TOÁN QUA MOMO';
-            submitBtn.style.backgroundColor = '#a50064'; // Màu MoMo
-        } else if (method === 'vnpay') {
-            instructionBox.innerHTML = '<strong>Chuyển hướng an toàn:</strong> Cổng thanh toán VNPAY hỗ trợ quét mã QR bằng App Ngân hàng hoặc thẻ ATM nội địa.';
-            submitBtn.innerText = 'THANH TOÁN QUA VNPAY';
-            submitBtn.style.backgroundColor = '#005baa'; // Màu VNPAY
+    // 1. Hàm định dạng tiền tệ
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    }
+
+    // 2. Tải giỏ hàng từ Database
+    async function loadCheckoutCart() {
+        try {
+            // 1. Thêm ?t=... để chống Cache giống hệt trang Shop
+            const response = await fetch('../includes/fetch_cart.php?t=' + new Date().getTime(), {
+                cache: 'no-store'
+            }); 
+            const data = await response.json();
+            
+            const cartItemsContainer = document.querySelector('.cart-items');
+            let total = 0;
+
+            // 2. NẾU GIỎ RỖNG -> ÉP GIÁ TIỀN VỀ 0
+            if (!data.items || data.items.length === 0) {
+                cartItemsContainer.innerHTML = '<p>Giỏ hàng trống.</p>';
+                document.querySelector('.btn-submit').disabled = true;
+                
+                const zeroPrice = formatPrice(0);
+                document.querySelectorAll('.summary-row')[0].lastElementChild.innerText = zeroPrice;
+                document.querySelector('.total-row').lastElementChild.innerText = zeroPrice;
+                document.querySelector('.btn-submit').innerText = `ĐẶT HÀNG: ${zeroPrice}`;
+                return;
+            }
+
+            // 3. NẾU CÓ HÀNG -> TÍNH TOÁN LẠI TỪ ĐẦU
+            let html = '';
+            data.items.forEach(item => {
+                total += item.price * item.quantity;
+                html += `
+                <div class="cart-item">
+                    <div>
+                        <p class="item-name">${item.name}</p>
+                        <p class="item-price">Size: ${item.size_name || 'M'} | SL: ${item.quantity}</p>
+                    </div>
+                    <p class="item-price">${formatPrice(item.price * item.quantity)}</p>
+                </div>`;
+            });
+
+            cartItemsContainer.innerHTML = html;
+            
+            // Cập nhật tổng tiền chuẩn xác
+            const formattedTotal = formatPrice(total);
+            document.querySelectorAll('.summary-row')[0].lastElementChild.innerText = formattedTotal;
+            document.querySelector('.total-row').lastElementChild.innerText = formattedTotal;
+            document.querySelector('.btn-submit').innerText = `ĐẶT HÀNG: ${formattedTotal}`;
+            
+        } catch (err) {
+            console.error("Lỗi tải giỏ hàng:", err);
+        }
+    }
+    // 3. Đổi giao diện chọn thanh toán
+    function showInstruction(method) {
+        // ... (Giữ nguyên code đổi phương thức thanh toán) ...
+    }
+
+    // 4. Xử lý Đặt hàng (Gọi thẳng hàm showToast từ file kia)
+    async function processCheckout(event) {
+        event.preventDefault(); 
+        
+        const submitBtn = document.querySelector('.btn-submit');
+        submitBtn.innerText = 'Đang xử lý...';
+        submitBtn.style.opacity = '0.7';
+        submitBtn.disabled = true;
+
+        const orderData = {
+            fullname: document.getElementById('fullname').value,
+            phone: document.getElementById('phone').value,
+            address: document.getElementById('address').value,
+            note: document.getElementById('note').value,
+            payment_method: document.querySelector('input[name="payment_method"]:checked').value
+        };
+
+        try {
+            const response = await fetch('../includes/process_checkout.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                // GỌI HÀM SHOWTOAST TỪ FILE TOAST.PHP BẠN VỪA NHÚNG
+                showToast(result.message, 'success');
+                
+                // Đợi 2 giây để người dùng đọc Toast rồi mới chuyển sang lịch sử đơn hàng
+                setTimeout(() => {
+                    window.location.href = "order_history.php"; 
+                }, 2000);
+            } else {
+                showToast(result.message, 'error');
+                submitBtn.innerText = 'THỬ LẠI';
+                submitBtn.style.opacity = '1';
+                submitBtn.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Lỗi hệ thống, vui lòng thử lại sau.", 'error');
+            submitBtn.style.opacity = '1';
+            submitBtn.disabled = false;
         }
     }
 
-    // Hàm giả lập hành động submit Form (Mock Backend)
-    function processCheckout(event) {
-        event.preventDefault(); // Chặn việc reload trang mặc định của form HTML
-        
-        // Lấy phương thức thanh toán người dùng đang chọn
-        const selectedMethod = document.querySelector('input[name="payment_method"]:checked').value;
-        const submitBtn = document.querySelector('.btn-submit');
-        
-        // Hiệu ứng loading
-        submitBtn.innerText = 'Đang xử lý...';
-        submitBtn.style.opacity = '0.7';
-
-        // Giả lập độ trễ của mạng bằng setTimeout (2 giây)
-        setTimeout(() => {
-            if (selectedMethod === 'cod') {
-                alert("✅ Đặt hàng thành công! Chúng tôi sẽ giao hàng sớm nhất.");
-                window.location.href = "index.php"; // Quay về trang chủ (thay đổi link tùy ý)
-            } else {
-                alert("🔄 Chuyển hướng... (Trong thực tế, Backend PHP sẽ gọi API và redirect sang trang của " + selectedMethod.toUpperCase() + ")");
-                // Khôi phục nút
-                showInstruction(selectedMethod);
-                submitBtn.style.opacity = '1';
-            }
-        }, 2000);
-    }
+    window.onload = loadCheckoutCart;
 </script>
 
 </body>

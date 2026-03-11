@@ -1,5 +1,5 @@
 window.app = {
-     // --- 1. CẤU HÌNH (CONFIG) ---
+    // --- 1. CẤU HÌNH (CONFIG) ---
     config: {
         apiKey: '2cb97f62395b42556d493874d4486859', // Key của bạn
         apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
@@ -35,9 +35,9 @@ window.app = {
         }
     },
 
-    startClock: function() {
+    startClock: function () {
         const greetingElement = document.querySelector('.info__greeting');
-        
+
         const updateTime = () => {
             if (!greetingElement) return;
 
@@ -68,7 +68,7 @@ window.app = {
     getWeatherByPosition: function (position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-        console.log(`📍 Tìm thấy tọa độ: ${lat}, ${lon}`); 
+        console.log(`📍 Tìm thấy tọa độ: ${lat}, ${lon}`);
         const url = `${this.config.apiUrl}?lat=${lat}&lon=${lon}&appid=${this.config.apiKey}&units=metric&lang=vi`;
 
         fetch(url)
@@ -77,7 +77,7 @@ window.app = {
                 return response.json();
             })
             .then(data => {
-                console.log("🌤 Dữ liệu thời tiết:", data); 
+                console.log("🌤 Dữ liệu thời tiết:", data);
                 this.updateUI(data);
             })
             .catch(error => {
@@ -101,8 +101,8 @@ window.app = {
     },
 
     updateUI: function (data) {
-        if(!data.main) return;
-        
+        if (!data.main) return;
+
         const temp = Math.round(data.main.temp);
         const condition = data.weather ? data.weather[0].main : 'Clouds';
         const locationName = data.name || "Nơi này";
@@ -140,7 +140,7 @@ window.app = {
             else if (temp < 18) descMsg += " trời đang lạnh rồi đấy 🥶, nhớ mặc gì đó ấm nhé!";
             else if (condition === 'Clear') descMsg += " trời đang đẹp đấy ☀️, đi chơi thôi!";
             else descMsg += "✨ Thời tiết ổn, lên đồ thôi!";
-            
+
             descElement.innerHTML = descMsg;
         }
 
@@ -149,7 +149,7 @@ window.app = {
         if (videoElement) {
             const videoSrc = this.config.videos[condition] || this.config.videos.Default;
             if (videoElement.src && !videoElement.src.includes(videoSrc.substring(2))) {
-                 videoElement.src = videoSrc;
+                videoElement.src = videoSrc;
             }
         }
     },
@@ -218,15 +218,15 @@ window.app = {
     },
 
     // Submenu User
-    initUserMenu: function() {
+    initUserMenu: function () {
         const userInfo = document.getElementById('userInfoToggle');
         const userDropdown = document.getElementById('userDropdown');
 
         if (userInfo && userDropdown) {
             userInfo.onclick = (e) => {
-                e.stopPropagation(); 
+                e.stopPropagation();
                 userDropdown.classList.toggle('show');
-                userInfo.classList.toggle('active');  
+                userInfo.classList.toggle('active');
             };
 
             document.addEventListener('click', (e) => {
@@ -238,30 +238,30 @@ window.app = {
         }
     },
 
-    initFormEvent: function() {
+    initFormEvent: function () {
         const configForm = document.querySelector('.config-form');
         const resultSection = document.getElementById('result');
 
         if (configForm) {
             configForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
+
                 if (resultSection) {
                     resultSection.style.display = 'flex';
-                    
-                    resultSection.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
+
+                    resultSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
                     });
                 }
             });
         }
     },
 
-    resetForm: function() {
+    resetForm: function () {
         const resultSection = document.getElementById('result');
         const configForm = document.querySelector('.config-form');
-        
+
         if (resultSection) resultSection.style.display = 'none';
         if (configForm) {
             configForm.reset();
@@ -270,7 +270,7 @@ window.app = {
     },
 
     // Xử lý nút bấm 
-    initFormEvent: function() {
+    initFormEvent: function () {
         const submitBtn = document.querySelector('.confirm__button');
         const configForm = document.getElementById('configForm');
 
@@ -281,7 +281,7 @@ window.app = {
 
         const self = this;
 
-        submitBtn.addEventListener('click', async function(e) {
+        submitBtn.addEventListener('click', async function (e) {
             e.preventDefault();
             console.log("👆 Đã bấm nút 'Phối đồ ngay'!");
 
@@ -301,101 +301,82 @@ window.app = {
             }
 
             //Gọi API thật
-        //     try {
-        //         const controller = new AbortController();
-        //         const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
-        //         const response = await fetch('includes/suggest-outfit.php', {
-        //             method: 'POST',
-        //             headers: { 'Content-Type': 'application/json' },
-        //             body: JSON.stringify(formData),
-        //             signal: controller.signal
-        //         });
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
+                const response = await fetch('includes/suggest-outfit.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData),
+                    signal: controller.signal
+                });
 
-        //         clearTimeout(timeoutId);
+                clearTimeout(timeoutId);
 
-        //         const textResponse = await response.text();
-        //         let data;
-        //         try {
-        //             data = JSON.parse(textResponse);
-        //         } catch (err) {
-        //             throw new Error("Lỗi Server trả về không phải JSON");
-        //         }
-
-        //         console.log("✅ Kết quả trả về:", data);
-                
-        //         if (loadingProgress) loadingProgress.style.display = 'none';
-
-        //         if (data.success) {
-        //             self.displayResult(data.data);
-        //             self.showNotification('Đã phối đồ xong!', 'success');
-        //         } else {
-        //             console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error); 
-        //             self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
-        //         }
-
-        //         if (loadingProgress) loadingProgress.style.display = 'none';
-
-        //         if (data.success) {
-        //             if (resultContainer) resultContainer.style.display = 'flex'; 
-                    
-        //             self.displayResult(data.data);
-        //             self.showNotification('Đã phối đồ xong!', 'success');
-                    
-        //             if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        //         }
-
-        //     } catch (error) {
-        //         console.error("❌ Lỗi:", error);
-        //         if (loadingProgress) loadingProgress.style.display = 'none';
-        //         self.showNotification(error.message, 'error');
-        //     }
-
-            //Dữ liệu giả
-            // --- BẮT ĐẦU: DÙNG DATA GIẢ (MOCK DATA) ---
-            
-            // 1. Tạo cục dữ liệu giả
-            const mockData = {
-                success: true,
-                data: {
-                    style: "Streetwear Năng Động (Test Data)",
-                    explanation: "Dựa trên thời tiết 24°C và dịp Đi chơi, mình chọn cho bạn một set đồ thoải mái, vừa đủ ấm nhưng vẫn cực kỳ cool ngầu. (Đây là data giả nhé!)",
-                    // Lấy tạm 2 cái link ảnh trên mạng để test UI
-                    topImage: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=400&auto=format&fit=crop", 
-                    bottomImage: "https://images.unsplash.com/photo-1542272604-787c3835535d?q=80&w=400&auto=format&fit=crop",
-                    top: "Áo thun đen form rộng",
-                    bottom: "Quần Jeans xanh ống suông",
-                    shoes: "Sneaker Nike Air Force 1",
-                    accessories: "Mũ lưỡi trai Balenciaga"
+                const textResponse = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(textResponse);
+                } catch (err) {
+                    throw new Error("Lỗi Server trả về không phải JSON");
                 }
-            };
 
-            // 2. Giả lập thời gian chờ AI suy nghĩ (Ví dụ: 2 giây)
-            setTimeout(() => {
-                // Tắt vòng xoay loading
+                console.log("✅ Kết quả trả về:", data);
+
                 if (loadingProgress) loadingProgress.style.display = 'none';
 
-                // Bật thẻ kết quả lên
-                if (resultContainer) resultContainer.style.display = 'flex'; 
-                
-                // Đổ data giả vào giao diện
-                self.displayResult(mockData.data);
-                self.showNotification('Đã phối đồ xong (Data giả)!', 'success');
-                
-            }, 2000); // 2000 = 2 giây
+                if (data.success) {
+                    self.displayResult(data.data);
+                    self.showNotification('Đã phối đồ xong!', 'success');
+                } else {
+                    console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error);
+                    self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
+                }
 
-            // --- KẾT THÚC: DÙNG DATA GIẢ ---
-            
+                if (loadingProgress) loadingProgress.style.display = 'none';
+
+                if (data.success) {
+                    if (resultContainer) resultContainer.style.display = 'flex';
+
+                    self.displayResult(data.data);
+                    self.showNotification('Đã phối đồ xong!', 'success');
+
+                    if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                    //================ save ofits
+                    const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+                    if (btnSave && data.data) {
+                        btnSave.setAttribute('data-top', data.data.topId);
+                        btnSave.setAttribute('data-bottom', data.data.bottomId);
+                        btnSave.setAttribute('data-shoes', data.data.shoesId);
+                        btnSave.setAttribute('data-acc', data.data.accId || 'null');
+                        btnSave.setAttribute('data-style', data.data.style);
+
+                        // Reset icon về rỗng
+                        const icon = btnSave.querySelector('i');
+                        icon.classList.remove('fa-solid');
+                        icon.classList.add('fa-regular');
+                        btnSave.querySelector('span').innerText = 'Lưu set đồ';
+                    }
+                }
+
+            } catch (error) {
+                console.error("❌ Lỗi:", error);
+                if (loadingProgress) loadingProgress.style.display = 'none';
+                self.showNotification(error.message, 'error');
+            }
+
         });
     },
 
     // Chuyển đổi giá trị 
-    displayResult: function(data) {
+    displayResult: function (data) {
         // 1. Cập nhật Tiêu đề và Mô tả (Caption từ AI)
         const styleEl = document.getElementById('outfitStyle');
         const descEl = document.getElementById('outfitDesc');
-        
-        if (styleEl) styleEl.innerText = data.style; 
-        if (descEl) descEl.innerHTML = data.explanation; 
+
+        if (styleEl) styleEl.innerText = data.style;
+        if (descEl) descEl.innerHTML = data.explanation;
 
         // 2. Cập nhật Hình ảnh (Chỉ Áo và Quần)
         const setImg = (id, src) => {
@@ -424,7 +405,7 @@ window.app = {
     },
 
     // Lấy thông tin 
-    collectFormData: function() {
+    collectFormData: function () {
         const occasion = document.querySelector('input[name="occasion"]:checked')?.value;
         const gender = document.querySelector('input[name="gender"]:checked')?.value;
         const style = document.querySelector('input[name="style"]:checked')?.value;
@@ -437,7 +418,7 @@ window.app = {
             return null;
         }
 
-        const tempText = document.querySelector('.info__weather__temp')?.innerText || '25'; 
+        const tempText = document.querySelector('.info__weather__temp')?.innerText || '25';
         return {
             occasion, gender, style, color, fit, note,
             weather: { temp: parseInt(tempText), condition: 'cloudy' },
@@ -445,7 +426,7 @@ window.app = {
         };
     },
 
-    resetForm: function() {
+    resetForm: function () {
         const configForm = document.getElementById('configForm');
         const resultSection = document.getElementById('result');
         if (configForm) configForm.reset();
@@ -453,45 +434,140 @@ window.app = {
         document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
     },
 
-    showNotification: function(msg, type) {
+    showNotification: function (msg, type) {
         if (window.showToast) window.showToast(msg, type);
         else alert(msg);
     },
 
-    //Nút lưu set đồ
-    toggleSaveOutfit: function(btnElement) {
-        btnElement.classList.toggle('is-saved');
-        
-        const icon = btnElement.querySelector('i');
-        const text = btnElement.querySelector('span');
-
-        if (btnElement.classList.contains('is-saved')) {
-            icon.classList.remove('fa-regular');
-            icon.classList.add('fa-solid');
-            text.innerText = " Đã lưu";
-            
-            this.showNotification("Đã lưu vào bộ sưu tập!", "success");
-        } else {
-            icon.classList.remove('fa-solid');
-            icon.classList.add('fa-regular');
-            text.innerText = " Lưu set đồ";
-        }
-    },
-
     // Mở / đóng giỏ hàng
-    openCart: function() {
+    openCart: function () {
         document.getElementById('cartOverlay').classList.add('show');
         document.getElementById('cartDrawer').classList.add('open');
-        
-        document.body.style.overflow = 'hidden'; 
+
+        document.body.style.overflow = 'hidden';
     },
 
-    closeCart: function() {
+    closeCart: function () {
         document.getElementById('cartOverlay').classList.remove('show');
         document.getElementById('cartDrawer').classList.remove('open');
-        
-        document.body.style.overflow = ''; 
+
+        document.body.style.overflow = '';
     },
+
+    // lưu trang phục
+    toggleSaveOutfit: function (btnElement) {
+        const self = this;
+        const isAlreadySaved = btnElement.classList.contains('is-saved');
+
+        // 1. CHỈ ĐỌC dữ liệu từ các thuộc tính data-* của nút bấm
+        const topId = btnElement.getAttribute('data-top');
+        const bottomId = btnElement.getAttribute('data-bottom');
+        const shoesId = btnElement.getAttribute('data-shoes');
+        const accId = btnElement.getAttribute('data-acc');
+        const styleName = btnElement.getAttribute('data-style');
+
+        // Chuyển đổi giữa save và unsave dựa trên trạng thái nút
+        const url = isAlreadySaved ? 'includes/unsave_outfit.php' : 'includes/save_outfit.php';
+
+        // 2. Gom dữ liệu gửi đi 
+        const dataToSend = {
+            top_id: topId,
+            bottom_id: bottomId,
+            shoes_id: shoesId,
+            acc_id: (accId && accId !== 'null' && accId !== '') ? accId : null,
+            style_name: styleName || "Phong cách gợi ý"
+        };
+
+        // 3. Gửi xuống PHP
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToSend)
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const icon = btnElement.querySelector('i');
+                    const span = btnElement.querySelector('span');
+
+                    if (isAlreadySaved) {
+                        // Logic giống phần xóa: đưa về trạng thái chưa lưu
+                        btnElement.classList.remove('is-saved');
+                        icon.classList.replace('fa-solid', 'fa-regular');
+                        span.innerText = 'Lưu set đồ';
+                        self.showNotification('Đã bỏ lưu set đồ!', 'success');
+                    } else {
+                        // Logic lưu thành công
+                        btnElement.classList.add('is-saved');
+                        icon.classList.replace('fa-regular', 'fa-solid');
+                        span.innerText = 'Đã lưu';
+                        self.showNotification('Lưu thành công!', 'success');
+                    }
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Có lỗi mạng xảy ra khi lưu.');
+            });
+    },
+
+    deleteSavedOutfit: function (id, btnElement) {
+        // if (!confirm('Bạn có chắc chắn muốn xóa không?')) return;
+
+        fetch('../includes/delete_saved_outfit.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: id })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const cardItem = btnElement.closest('.col');
+                    if (cardItem) cardItem.remove();
+                    if (window.showToast) showToast('Đã xóa thành công!', 'success');
+                } else {
+                    alert('Lỗi: ' + data.message);
+                }
+            });
+    },
+
+    // Hàm tạo hiệu ứng bay
+    flyToCart: function (imgElement, cartIconElement) {
+        if (!imgElement || !cartIconElement) return;
+
+        // Tạo bản sao của ảnh
+        const flyImg = imgElement.cloneNode();
+        const imgRect = imgElement.getBoundingClientRect();
+        const cartRect = cartIconElement.getBoundingClientRect();
+
+        // Thêm class css cho hiệu ứng
+        flyImg.classList.add('fly-item');
+
+        // Vị trí bắt đầu (Tại vị trí ảnh gốc)
+        flyImg.style.top = `${imgRect.top}px`;
+        flyImg.style.left = `${imgRect.left}px`;
+        flyImg.style.width = `${imgRect.width}px`;
+        flyImg.style.height = `${imgRect.height}px`;
+
+        document.body.appendChild(flyImg);
+
+        // Vị trí kết thúc (Bay tới icon giỏ hàng)
+        setTimeout(() => {
+            flyImg.style.top = `${cartRect.top + 10}px`;
+            flyImg.style.left = `${cartRect.left + 10}px`;
+            flyImg.style.width = '20px';
+            flyImg.style.height = '20px';
+            flyImg.style.opacity = '0';
+        }, 10);
+
+        // Xóa ảnh sau khi bay xong (0.8 giây)
+        setTimeout(() => flyImg.remove(), 800);
+    },
+
 };
 
 document.addEventListener('DOMContentLoaded', () => {

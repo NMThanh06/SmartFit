@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setcookie('remember_token', $token, $expiry, '/', '', false, true);
         }
 
-        $_SESSION['success'] = 'Đăng nhập thành công!';
+        // $_SESSION['success'] = 'Đăng nhập thành công!';
         header('Location: ../index.php');
         exit;
     } else {
