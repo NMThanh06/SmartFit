@@ -372,7 +372,7 @@
     width: 100%;
     max-width: 300px;
 
-    background-image: linear-gradient(45deg, #6C63FF, #FF6584);
+    background-color: var(--button-bg);
 
     box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
 
@@ -535,7 +535,7 @@
 }
 
 .result__actions button:first-child {
-    background-image: linear-gradient(45deg, #6C63FF, #FF6584);
+    background-color: var(--button-bg);
 
     box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
 }
@@ -1101,7 +1101,7 @@
 
 .filter-btn:hover,
 .filter-btn.active {
-    background-image: linear-gradient(45deg, #6C63FF, #FF6584);
+    background-color: var(--button-bg);
 
     box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
 }
