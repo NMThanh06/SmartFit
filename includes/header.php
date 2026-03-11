@@ -58,6 +58,7 @@ require_once __DIR__ . '/config.php';
             <div class="navbar__shop">
                 <div class="navbar__cart" onclick="app.openCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
                 </div>
 
                 <div class="navbar__auth">

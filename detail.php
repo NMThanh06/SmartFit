@@ -131,12 +131,7 @@ endforeach; ?>
     // Bản đồ tồn kho theo size (dùng để kiểm tra giới hạn trong giỏ hàng)
     const sizeStockMap = <?php echo json_encode(array_column($sizeList, 'quantity', 'size_name')); ?>;
 
-    // 1. Hàm định dạng tiền tệ
-    function formatPrice(price) {
-        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-    }
-
-    // 2. HÀM CHỌN SIZE
+    // 1. HÀM CHỌN SIZE
     function selectSize(btnElement) {
         const size = btnElement.getAttribute('data-size');
         const sizeQuantity = parseInt(btnElement.getAttribute('data-quantity')) || 0;
@@ -160,7 +155,7 @@ endforeach; ?>
         document.getElementById('stockInfo').innerText = maxStock + ' sản phẩm';
     }
 
-    // 3. HÀM THAY ĐỔI SỐ LƯỢNG (Giới hạn bởi maxStock)
+    // 2. HÀM THAY ĐỔI SỐ LƯỢNG (Giới hạn bởi maxStock)
     function changeQty(amount) {
         if (!selectedSize) {
             showToast('Vui lòng chọn kích cỡ trước!', 'error');
@@ -176,7 +171,7 @@ endforeach; ?>
         document.getElementById('qtyDisplay').value = currentQty;
     }
 
-    // 4. HÀM THÊM VÀO GIỎ TỪ TRANG CHI TIẾT
+    // 3. HÀM THÊM VÀO GIỎ TỪ TRANG CHI TIẾT
     function addToCartFromDetail() {
         if (!selectedSize) {
             showToast('Vui lòng chọn kích cỡ trước khi mua!', 'error');
@@ -184,7 +179,6 @@ endforeach; ?>
         }
 
         // --- KIỂM TRA TỒN KHO TRƯỚC KHI THÊM (CHẶN CỘNG DỒN) ---
-        let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
         const existingItem = cart.find(item => item.id === currentProduct.id && item.size === selectedSize);
         const qtyInCart = existingItem ? existingItem.quantity : 0;
         const totalExpected = qtyInCart + currentQty;
@@ -231,113 +225,30 @@ endforeach; ?>
         }
         // --- Kết thúc hiệu ứng ---
 
-        const cartItem = {
-            id: currentProduct.id,
-            name: currentProduct.name,
-            image: currentProduct.image,
-            price: currentProduct.price,
-            size: selectedSize,
-            quantity: currentQty
-        };
-
-        const existingItemIndex = cart.findIndex(item => item.id === cartItem.id && item.size === cartItem.size);
+        // Push vào mảng cart toàn cục (đã khai báo ở footer.php)
+        const existingItemIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize);
 
         if (existingItemIndex !== -1) {
             cart[existingItemIndex].quantity += currentQty;
         } else {
-            cart.push(cartItem);
+            cart.push({
+                id: currentProduct.id,
+                name: currentProduct.name,
+                image: currentProduct.image,
+                price: currentProduct.price,
+                size: selectedSize,
+                quantity: currentQty
+            });
         }
 
-        localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+        // GỌI HÀM DÙNG CHUNG: lưu localStorage + render lại
+        saveCart();
 
-        // showToast('Đã thêm ' + currentProduct.name + ' vào giỏ!', 'success');
-        
-        // Cập nhật giỏ hàng và tự động mở thanh trượt
-        renderCart();
+        // Tự động mở thanh trượt giỏ hàng
         if (typeof app !== 'undefined' && app.openCart) {
             app.openCart();
         }
     }
-
-    // 5. CÁC HÀM CỦA GIỎ HÀNG TRƯỢT (Kế thừa từ shop.php)
-    function renderCart() {
-        let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
-        const cartEmpty = document.getElementById('cartEmpty');
-        const cartItems = document.getElementById('cartItems');
-        const cartFooter = document.getElementById('cartFooter');
-
-        if (cart.length === 0) {
-            cartEmpty.style.display = 'flex';
-            cartItems.style.display = 'none';
-            cartFooter.style.display = 'none';
-            return;
-        }
-
-        cartEmpty.style.display = 'none';
-        cartItems.style.display = 'block';
-        cartFooter.style.display = 'block';
-
-        let html = '';
-        let totalAmount = 0;
-
-        cart.forEach((item, index) => {
-            totalAmount += item.price * item.quantity;
-            const sizeLabel = item.size ? ` | Size: ${item.size}` : '';
-
-            html += `
-            <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='./assets/img/default-placeholder.jpg'" class="cart-item__img">
-                <div class="cart-item__info">
-                    <h4 class="cart-item__name">${item.name}</h4>
-                    <div class="cart-item__price">${formatPrice(item.price)} <span style="font-size:1.2rem;color:#ccc;font-weight:normal">${sizeLabel}</span></div>
-                    
-                    <div class="cart-item__qty">
-                        <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity - 1})">-</button>
-                        <input type="text" value="${item.quantity}" readonly>
-                        <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity + 1})">+</button>
-                    </div>
-                </div>
-                <button class="cart-item__remove" title="Xóa" onclick="removeItem(${index})">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-            </div>
-        `;
-        });
-
-        cartItems.innerHTML = html;
-        document.querySelector('.total-price').innerText = formatPrice(totalAmount);
-    }
-
-    function updateCartQty(index, newQty) {
-        let cart = JSON.parse(localStorage.getItem('smartfit_cart'));
-        if (newQty < 1) newQty = 1;
-
-        // Kiểm tra giới hạn tồn kho nếu item thuộc sản phẩm hiện tại
-        const item = cart[index];
-        if (item.id === currentProduct.id && sizeStockMap[item.size] !== undefined) {
-            const stockLimit = parseInt(sizeStockMap[item.size]) || 0;
-            if (newQty > stockLimit) {
-                showToast('Size ' + item.size + ' chỉ còn ' + stockLimit + ' sản phẩm trong kho!', 'error');
-                return;
-            }
-        }
-
-        cart[index].quantity = newQty;
-        localStorage.setItem('smartfit_cart', JSON.stringify(cart));
-        renderCart();
-    }
-
-    function removeItem(index) {
-        let cart = JSON.parse(localStorage.getItem('smartfit_cart'));
-        cart.splice(index, 1);
-        localStorage.setItem('smartfit_cart', JSON.stringify(cart));
-        renderCart();
-    }
-
-    // 6. CHẠY KHI VỪA MỞ TRANG
-    window.onload = function() {
-        renderCart();
-    };
 </script>
 
 </body>

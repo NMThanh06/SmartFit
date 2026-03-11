@@ -104,3 +104,114 @@
         </div>
 
     </div>
+
+    <!-- ========== SHARED CART JS (Single Source of Truth: localStorage) ========== -->
+    <script>
+    // --- BIẾN TOÀN CỤC: Giỏ hàng từ localStorage ---
+    let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+
+    // --- Hàm format tiền VNĐ (dùng chung) ---
+    function formatPrice(price) {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+    }
+
+    // --- Lưu giỏ hàng xuống localStorage + render lại UI ---
+    function saveCart() {
+        localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+        renderCart();
+        updateCartIconQty();
+    }
+
+    // --- Cập nhật badge số lượng trên icon giỏ hàng ---
+    function updateCartIconQty() {
+        const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+        // Hỗ trợ cả cart-badge class và id
+        document.querySelectorAll('.cart-badge, #cartBadge').forEach(badge => {
+            badge.innerText = totalQty;
+            badge.style.display = totalQty > 0 ? 'block' : 'none';
+        });
+    }
+
+    // --- Vẽ lại drawer giỏ hàng từ mảng cart toàn cục ---
+    function renderCart() {
+        const cartEmpty = document.getElementById('cartEmpty');
+        const cartItems = document.getElementById('cartItems');
+        const cartFooter = document.getElementById('cartFooter');
+
+        if (!cartEmpty || !cartItems || !cartFooter) return;
+
+        if (cart.length === 0) {
+            cartEmpty.style.display = 'flex';
+            cartItems.style.display = 'none';
+            cartFooter.style.display = 'none';
+            const totalEl = document.querySelector('.total-price');
+            if (totalEl) totalEl.innerText = formatPrice(0);
+            updateCartIconQty();
+            return;
+        }
+
+        cartEmpty.style.display = 'none';
+        cartItems.style.display = 'block';
+        cartFooter.style.display = 'block';
+
+        let html = '';
+        let totalAmount = 0;
+
+        cart.forEach((item, index) => {
+            totalAmount += item.price * item.quantity;
+            const sizeLabel = item.size ? ` | Size: ${item.size}` : '';
+
+            html += `
+            <div class="cart-item">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='./assets/img/default-placeholder.jpg'" class="cart-item__img">
+                <div class="cart-item__info">
+                    <h4 class="cart-item__name">${item.name}</h4>
+                    <div class="cart-item__price">${formatPrice(item.price)} <span style="font-size:1.2rem;color:#ccc;font-weight:normal">${sizeLabel}</span></div>
+                    
+                    <div class="cart-item__qty">
+                        <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity - 1})">-</button>
+                        <input type="text" value="${item.quantity}" readonly>
+                        <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity + 1})">+</button>
+                    </div>
+                </div>
+                <button class="cart-item__remove" title="Xóa" onclick="removeItem(${index})">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        `;
+        });
+
+        cartItems.innerHTML = html;
+        document.querySelector('.total-price').innerText = formatPrice(totalAmount);
+        updateCartIconQty();
+    }
+
+    // --- Tăng/giảm số lượng item trong giỏ ---
+    function updateCartQty(index, newQty) {
+        if (newQty < 1) {
+            removeItem(index);
+            return;
+        }
+        cart[index].quantity = newQty;
+        saveCart();
+    }
+
+    // --- Xóa 1 item khỏi giỏ ---
+    function removeItem(index) {
+        cart.splice(index, 1);
+        saveCart();
+    }
+
+    // --- Xóa toàn bộ giỏ hàng ---
+    function clearEntireCart() {
+        if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng?")) return;
+        cart = [];
+        saveCart();
+    }
+
+    // --- Khởi tạo khi trang vừa load ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCart();
+        updateCartIconQty();
+    });
+    </script>

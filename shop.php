@@ -234,19 +234,110 @@ unset($_SESSION['success'], $_SESSION['error']);
 
     <!-- Backend cho trang cửa hàng -->
     <script>
-        // 1. Định dạng tiền tệ
+        // ========================================
+        // BIẾN TOÀN CỤC: Giỏ hàng từ localStorage (Single Source of Truth)
+        // ========================================
+        let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+
+        // --- Hàm format tiền VNĐ ---
         function formatPrice(price) {
             return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
         }
 
-        // 2. Cập nhật con số màu đỏ (Badge)
-        function updateCartUI(count) {
-            const badge = document.getElementById('cartBadge') || document.querySelector('.cart-badge');
-            if (badge) {
-                badge.innerText = count;
-                badge.style.display = count > 0 ? 'block' : 'none';
-            }
+        // --- Lưu giỏ hàng xuống localStorage + render lại UI ---
+        function saveCart() {
+            localStorage.setItem('smartfit_cart', JSON.stringify(cart));
+            renderCart();
+            updateCartIconQty();
         }
+
+        // --- Cập nhật badge số lượng trên icon giỏ hàng ---
+        function updateCartIconQty() {
+            const totalQty = cart.reduce((sum, item) => sum + item.quantity, 0);
+            document.querySelectorAll('.cart-badge, #cartBadge').forEach(badge => {
+                badge.innerText = totalQty;
+                badge.style.display = totalQty > 0 ? 'block' : 'none';
+            });
+        }
+
+        // --- Vẽ lại drawer giỏ hàng từ mảng cart toàn cục ---
+        function renderCart() {
+            const cartEmpty = document.getElementById('cartEmpty');
+            const cartItems = document.getElementById('cartItems');
+            const cartFooter = document.getElementById('cartFooter');
+
+            if (!cartEmpty || !cartItems || !cartFooter) return;
+
+            if (cart.length === 0) {
+                cartEmpty.style.display = 'flex';
+                cartItems.style.display = 'none';
+                cartFooter.style.display = 'none';
+                const totalEl = document.querySelector('.total-price');
+                if (totalEl) totalEl.innerText = formatPrice(0);
+                updateCartIconQty();
+                return;
+            }
+
+            cartEmpty.style.display = 'none';
+            cartItems.style.display = 'block';
+            cartFooter.style.display = 'block';
+
+            let html = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                total += item.price * item.quantity;
+                const sizeLabel = item.size ? ` | Size: ${item.size}` : '';
+
+                html += `
+                <div class="cart-item">
+                    <img src="${item.image}" class="cart-item__img" onerror="this.src='./assets/img/default-placeholder.jpg'">
+                    <div class="cart-item__info">
+                        <h4 class="cart-item__name">${item.name}</h4>
+                        <div class="cart-item__price">${formatPrice(item.price)} <span style="font-size:0.9rem;color:#999;">${sizeLabel}</span></div>
+                        <div class="cart-item__qty">
+                            <button onclick="updateCartQty(${index}, ${item.quantity - 1})">-</button>
+                            <input type="text" value="${item.quantity}" readonly>
+                            <button onclick="updateCartQty(${index}, ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <button class="cart-item__remove" onclick="removeItem(${index})">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>`;
+            });
+
+            cartItems.innerHTML = html;
+            document.querySelector('.total-price').innerText = formatPrice(total);
+            updateCartIconQty();
+        }
+
+        // --- Tăng/giảm số lượng item trong giỏ ---
+        function updateCartQty(index, newQty) {
+            if (newQty < 1) {
+                removeItem(index);
+                return;
+            }
+            cart[index].quantity = newQty;
+            saveCart();
+        }
+
+        // --- Xóa 1 item khỏi giỏ ---
+        function removeItem(index) {
+            cart.splice(index, 1);
+            saveCart();
+        }
+
+        // --- Xóa toàn bộ giỏ hàng ---
+        function clearCart() {
+            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng?")) return;
+            cart = [];
+            saveCart();
+        }
+
+        // ========================================
+        // SHOP-SPECIFIC FUNCTIONS
+        // ========================================
 
         // 1. Hàm tự động chọn bộ Size dựa vào Loại sản phẩm (Type)
         function getSizeOptions(item) {
@@ -302,7 +393,7 @@ unset($_SESSION['success'], $_SESSION['error']);
                                     </select>
                                 </div>
 
-                                <div class="product-card__buy" onclick="addToCart(event, ${item.id}, '${item.image}')">
+                                <div class="product-card__buy" onclick="addToCart(event, ${item.id}, '${item.name}', '${item.image}', ${item.price})">
                                     <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ
                                 </div>
                             </div>
@@ -312,17 +403,15 @@ unset($_SESSION['success'], $_SESSION['error']);
             } catch (error) { console.error("Lỗi tải sản phẩm:", error); }
         }
 
-        // 3. Thêm vào giỏ hàng
-        async function addToCart(event, id, imageSrc) {
-            const btn = event.currentTarget; // Lấy đúng nút vừa bấm
+        // 3. Thêm vào giỏ hàng (localStorage — KHÔNG gọi server)
+        function addToCart(event, id, name, imageSrc, price) {
+            const btn = event.currentTarget;
 
             // 1. Lấy size đã chọn từ Dropdown
             const sizeSelect = document.getElementById(`size-select-${id}`);
             const selectedSize = sizeSelect ? sizeSelect.value : 'M'; 
-            
-            console.log("Đang thêm món đồ:", id, "Ảnh:", imageSrc, "Size:", selectedSize);
 
-            // 2. HIỆU ỨNG BAY (Dùng DOM element để xác định vị trí)
+            // 2. HIỆU ỨNG BAY (GIỮ NGUYÊN)
             const cartIcon = document.querySelector('.navbar__cart');
             const productCard = btn.closest('.product-card');
             const imgToFly = productCard ? productCard.querySelector('img') : null;
@@ -351,150 +440,31 @@ unset($_SESSION['success'], $_SESSION['error']);
                 setTimeout(() => flyImg.remove(), 800);
             }
 
-            // 3. Gửi dữ liệu lên Server
-            try {
-                const response = await fetch('includes/add_to_cart.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        outfit_id: id, 
-                        size: selectedSize, 
-                        quantity: 1 
-                    })
+            // 3. Push vào mảng cart toàn cục (localStorage)
+            const existingIndex = cart.findIndex(item => item.id === id && item.size === selectedSize);
+
+            if (existingIndex !== -1) {
+                cart[existingIndex].quantity += 1;
+            } else {
+                cart.push({
+                    id: id,
+                    name: name,
+                    image: imageSrc,
+                    price: price,
+                    size: selectedSize,
+                    quantity: 1
                 });
-                const data = await response.json();
-
-                if (data.status === 'success') {
-                    // if (typeof showToast === 'function') showToast('Đã thêm vào giỏ!', 'success');
-                    updateCartUI(data.cart_count); 
-                    renderCart(); 
-                } else {
-                    if (typeof showToast === 'function') showToast(data.message, 'error');
-                }
-            } catch (err) { 
-                console.error("Lỗi kết nối:", err); 
             }
-        }
-        // 5. Vẽ lại giỏ hàng (Đồng bộ với detail.php)
-        async function renderCart() {
-            try {
-                const response = await fetch('includes/fetch_cart.php?t=' + new Date().getTime(), { cache: 'no-store' });
-                const data = await response.json();
-                
-                const cartEmpty = document.getElementById('cartEmpty');
-                const cartItems = document.getElementById('cartItems');
-                const cartFooter = document.getElementById('cartFooter');
-                // Ẩn/Hiện nút xóa tất cả tùy trạng thái giỏ
-                const clearBtn = document.querySelector('.cart-clear-btn');
 
-                if (!data.items || data.items.length === 0) {
-                    cartEmpty.style.display = 'flex';
-                    cartItems.style.display = 'none';
-                    cartFooter.style.display = 'none';
-                    if(clearBtn) clearBtn.style.display = 'none';
-                    
-                    updateCartUI(0);
-                    document.querySelector('.total-price').innerText = formatPrice(0);
-                    return;
-                }
-
-                cartEmpty.style.display = 'none';
-                cartItems.style.display = 'block';
-                cartFooter.style.display = 'block';
-                if(clearBtn) clearBtn.style.display = 'inline-block';
-
-                let html = '';
-                let total = 0;
-
-                data.items.forEach(item => {
-                    total += item.price * item.quantity;
-                    html += `
-                    <div class="cart-item">
-                        <img src="${item.image}" class="cart-item__img" onerror="this.src='./assets/img/default-placeholder.jpg'">
-                        <div class="cart-item__info">
-                            <h4 class="cart-item__name">${item.name}</h4>
-                                <div class="cart-item__price">${formatPrice(item.price)} <span style="font-size:0.9rem;color:#999;">| Size: ${item.size || item.size_name || 'Freesize'}</span></div>                            <div class="cart-item__qty">
-                                <button onclick="updateCartQty(${item.id}, ${item.quantity - 1})">-</button>
-                                <input type="text" value="${item.quantity}" readonly>
-                                <button onclick="updateCartQty(${item.id}, ${item.quantity + 1})">+</button>
-                            </div>
-                        </div>
-                        <button class="cart-item__remove" onclick="removeCartItem(${item.id})">
-                            <i class="fa-solid fa-trash"></i>
-                        </button>
-                    </div>`;
-                });
-
-                cartItems.innerHTML = html;
-                document.querySelector('.total-price').innerText = formatPrice(total);
-                updateCartUI(data.total_quantity);
-            } catch (err) { console.log("Lỗi render giỏ hàng:", err); }
-        }
-
-        // 6. Tăng/Giảm số lượng
-        async function updateCartQty(cartId, newQty) {
-            if (newQty < 1) {
-                if (confirm("Bạn có chắc muốn xóa món hàng này?")) {
-                    removeCartItem(cartId);
-                }
-                return;
-            }
-            try {
-                const response = await fetch('includes/update_cart_qty.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cart_id: cartId, quantity: newQty })
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    updateCartUI(data.cart_count);
-                    renderCart();
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        // 7. Xóa 1 món hàng
-        async function removeCartItem(cartId) {
-            try {
-                const response = await fetch('includes/remove_from_cart.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cart_id: cartId })
-                });
-                const data = await response.json();
-                if (data.status === 'success') {
-                    updateCartUI(data.cart_count);
-                    renderCart();
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        // 8. HÀM MỚI: XÓA TOÀN BỘ GIỎ HÀNG
-        async function clearCart() {
-            if (!confirm("Bạn có chắc chắn muốn xóa toàn bộ sản phẩm trong giỏ hàng?")) {
-                return;
-            }
-            try {
-                const response = await fetch('includes/clear_cart.php', { method: 'POST' });
-                const data = await response.json();
-                
-                if (data.status === 'success') {
-                    // showToast("Đã dọn sạch giỏ hàng!", "success");
-                    updateCartUI(0);
-                    renderCart();
-                } else {
-                    showToast(data.message, "error");
-                }
-            } catch (err) {
-                console.error("Lỗi xóa toàn bộ giỏ:", err);
-                showToast("Lỗi hệ thống, vui lòng thử lại!", "error");
-            }
+            // 4. Lưu + render lại
+            saveCart();
         }
 
         // Khởi động khi tải trang xong
         window.addEventListener('DOMContentLoaded', () => {
             loadProducts();
             renderCart();
+            updateCartIconQty();
         });
     </script>
 

@@ -20,9 +20,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fit = $_POST['fit'] ?? [];
     $color = $_POST['color'] ?? 'neutral';
 
-    $conflicts = [];
-    if (!empty($_POST['conflicts'])) {
-        $conflicts = array_filter(array_map('trim', explode(',', $_POST['conflicts'])));
+    $pairings = [];
+    if (!empty($_POST['pairings'])) {
+        $pairings = array_filter(array_map('trim', explode(',', $_POST['pairings'])));
     }
 
     $sizes = [];
@@ -96,11 +96,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            if (!empty($conflicts)) {
-                mysqli_query($conn, "DELETE FROM outfit_conflicts WHERE outfit_id = $outfit_id");
-                foreach ($conflicts as $conflict_name) {
-                    $c_name_esc = mysqli_real_escape_string($conn, $conflict_name);
-                    mysqli_query($conn, "INSERT INTO outfit_conflicts (outfit_id, conflict_name) VALUES ($outfit_id, '$c_name_esc')");
+            if (!empty($pairings)) {
+                mysqli_query($conn, "DELETE FROM outfit_pairings WHERE outfit_id = $outfit_id");
+                foreach ($pairings as $pairing_name) {
+                    $p_name_esc = mysqli_real_escape_string($conn, $pairing_name);
+                    mysqli_query($conn, "INSERT INTO outfit_pairings (outfit_id, pairing_name) VALUES ($outfit_id, '$p_name_esc')");
                 }
             }
 
@@ -126,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            if (!empty($conflicts)) {
-                $currentData['items'][$existsIndex]['conflicts'] = array_values($conflicts);
+            if (!empty($pairings)) {
+                $currentData['items'][$existsIndex]['pairings'] = array_values($pairings);
             }
 
             $message = "<div class='alert success'>✅ Đã cập nhật & cộng dồn số lượng cho: <strong>$name</strong></div>";
@@ -166,10 +166,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     mysqli_query($conn, "INSERT INTO outfit_sizes (outfit_id, size_name, quantity) VALUES ($outfit_id, '$sName_esc', $qty)");
                 }
                 
-                // Lưu bảng conflicts
-                foreach ($conflicts as $conflict_name) {
-                    $c_name_esc = mysqli_real_escape_string($conn, $conflict_name);
-                    mysqli_query($conn, "INSERT INTO outfit_conflicts (outfit_id, conflict_name) VALUES ($outfit_id, '$c_name_esc')");
+                // Lưu bảng pairings
+                foreach ($pairings as $pairing_name) {
+                    $p_name_esc = mysqli_real_escape_string($conn, $pairing_name);
+                    mysqli_query($conn, "INSERT INTO outfit_pairings (outfit_id, pairing_name) VALUES ($outfit_id, '$p_name_esc')");
                 }
 
                 // 4. TIẾN HÀNH THÊM VÀO MẢNG JSON VỚI ID CỦA MYSQL
@@ -186,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'image' => $imagePath, 
                     'price' => $price,
                     'sizes' => $sizes,
-                    'conflicts' => array_values($conflicts)
+                    'pairings' => array_values($pairings)
                 ];
                 $currentData['items'][] = $newItem;
                 $message = "<div class='alert success'>✨ Đã thêm mới sản phẩm: <strong>$name</strong> (Mã ID: $outfit_id)</div>";
@@ -443,9 +443,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="form-group">
-            <label class="main-label">Các món xung khắc (Không phối chung)</label>
-            <input type="text" name="conflicts" placeholder="VD: Quần jean xanh, Áo thun đỏ...">
-            <small class="help-text">Ngăn cách các tên bằng dấu phẩy (,). Bỏ trống nếu không có.</small>
+            <label class="main-label">Món gợi ý phối cùng</label>
+            <input type="text" name="pairings" placeholder="VD: Quần jean xanh, Áo thun trắng...">
+            <small class="help-text">Nhập tên các món nên phối chung, ngăn cách bằng dấu phẩy (,). Bỏ trống nếu không có.</small>
         </div>
 
         <div class="form-group size-box">
