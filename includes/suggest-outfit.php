@@ -17,17 +17,24 @@ $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-
     $wardrobeBrief = "";
     foreach ($wardrobeData as $item) {
         if (in_array($input['gender'], $item['gender'])) {
-            $wardrobeBrief .= "- ID: {$item['id']} | Loại: {$item['type']} | Tên: {$item['name']}\n";
+            $pairingsStr = !empty($item['pairings']) ? implode(', ', $item['pairings']) : 'Không có';
+            $wardrobeBrief .= "- ID: {$item['id']} | Loại: {$item['type']} | Tên: {$item['name']} | Gợi ý phối cùng: {$pairingsStr}\n";
         }
     }
 
-    $prompt = "Bạn là Stylist. Phối đồ: Giới tính " . $input['gender'] . ", Dịp " . ($input['occasion'] ?? 'đi học') . ", " . ($input['weather']['temp'] ?? 25) . "°C. Ghi chú: '" . ($input['note'] ?? '') . "'.
-    Kho đồ (chỉ chọn ID từ đây):
-    $wardrobeBrief
-    YÊU CẦU:
-    - Chọn 1 áo (top), 1 quần (bottom), 1 giày (shoes), 1 phụ kiện (acc - nếu có, không thì null).
-    - Giải thích: CHỈ VIẾT ĐÚNG 2 CÂU NGẮN GỌN lý do chọn set đồ này. (Rất quan trọng).
-    TRẢ VỀ JSON: {\"styleName\": \"Tên style\", \"caption\": \"2 câu giải thích\", \"ids\": {\"top\": ID, \"bottom\": ID, \"shoes\": ID, \"acc\": ID}}";
+    $prompt = "Bạn là một chuyên gia thời trang (Stylist). Dựa vào danh sách sản phẩm và các món được gợi ý phối chung (pairings) mà tôi cung cấp, hãy tạo ra một bộ trang phục hoàn hảo.
+
+Thông tin khách hàng: Giới tính " . $input['gender'] . ", Dịp " . ($input['occasion'] ?? 'đi học') . ", Nhiệt độ " . ($input['weather']['temp'] ?? 25) . "°C. Ghi chú: '" . ($input['note'] ?? '') . "'.
+
+Kho đồ (chỉ chọn ID từ đây):
+$wardrobeBrief
+YÊU CẦU BẮT BUỘC:
+
+Chọn 1 áo (top), 1 quần (bottom), 1 giày (shoes), 1 phụ kiện (acc - nếu có, không thì null).
+
+Giải thích: CHỈ VIẾT ĐÚNG 2 CÂU NGẮN GỌN lý do chọn set đồ này. (Rất quan trọng).
+TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI THÍCH:
+{\"styleName\": \"Tên style\", \"caption\": \"2 câu giải thích\", \"ids\": {\"top\": ID, \"bottom\": ID, \"shoes\": ID, \"acc\": ID}}";
 
     $data = ["contents" => [["parts" => [["text" => $prompt]]]]];
 

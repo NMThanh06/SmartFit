@@ -30,7 +30,7 @@
                 "L": 15,
                 "XL": 5
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 2,
@@ -63,7 +63,7 @@
                 "L": 10,
                 "XL": 2
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 3,
@@ -95,7 +95,7 @@
                 "M": 10,
                 "L": 5
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 4,
@@ -126,7 +126,7 @@
                 "M": 12,
                 "L": 8
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 5,
@@ -156,7 +156,7 @@
                 "41": 15,
                 "42": 8
             },
-            "conflicts": [
+            "pairings": [
                 "Quần tây nam âu phục"
             ]
         },
@@ -189,7 +189,7 @@
             "sizes": {
                 "M": 1
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": 7,
@@ -223,7 +223,7 @@
                 "XL": 20,
                 "XXL": 5
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": "8",
@@ -257,7 +257,7 @@
                 "42": 15,
                 "40": 20
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": "9",
@@ -293,7 +293,7 @@
                 "39": 20,
                 "40": 5
             },
-            "conflicts": []
+            "pairings": []
         },
         {
             "id": "10",
@@ -329,7 +329,7 @@
             "sizes": {
                 "OVER": 10
             },
-            "conflicts": []
+            "pairings": []
         }
     ]
 }

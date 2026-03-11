@@ -90,6 +90,7 @@
 
 <div class="container">
     <div class="left-col section">
+        <a href="../shop.php" style="display: inline-block; margin-bottom: 15px; text-decoration: none; color: #555; font-size: 1.2rem; font-weight: bold;">&#8592;</a>
         <h2>Thông tin giao hàng</h2>
         <form id="checkoutForm" onsubmit="processCheckout(event)">
             <div class="form-group">
@@ -177,55 +178,46 @@
         return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
     }
 
-    // 2. Tải giỏ hàng từ Database
-    async function loadCheckoutCart() {
-        try {
-            // 1. Thêm ?t=... để chống Cache giống hệt trang Shop
-            const response = await fetch('../includes/fetch_cart.php?t=' + new Date().getTime(), {
-                cache: 'no-store'
-            }); 
-            const data = await response.json();
-            
-            const cartItemsContainer = document.querySelector('.cart-items');
-            let total = 0;
+    // 2. Tải giỏ hàng từ localStorage (Single Source of Truth)
+    function loadCheckoutCart() {
+        const cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+        
+        const cartItemsContainer = document.querySelector('.cart-items');
+        let total = 0;
 
-            // 2. NẾU GIỎ RỖNG -> ÉP GIÁ TIỀN VỀ 0
-            if (!data.items || data.items.length === 0) {
-                cartItemsContainer.innerHTML = '<p>Giỏ hàng trống.</p>';
-                document.querySelector('.btn-submit').disabled = true;
-                
-                const zeroPrice = formatPrice(0);
-                document.querySelectorAll('.summary-row')[0].lastElementChild.innerText = zeroPrice;
-                document.querySelector('.total-row').lastElementChild.innerText = zeroPrice;
-                document.querySelector('.btn-submit').innerText = `ĐẶT HÀNG: ${zeroPrice}`;
-                return;
-            }
-
-            // 3. NẾU CÓ HÀNG -> TÍNH TOÁN LẠI TỪ ĐẦU
-            let html = '';
-            data.items.forEach(item => {
-                total += item.price * item.quantity;
-                html += `
-                <div class="cart-item">
-                    <div>
-                        <p class="item-name">${item.name}</p>
-                        <p class="item-price">Size: ${item.size_name || 'M'} | SL: ${item.quantity}</p>
-                    </div>
-                    <p class="item-price">${formatPrice(item.price * item.quantity)}</p>
-                </div>`;
-            });
-
-            cartItemsContainer.innerHTML = html;
+        // NẾU GIỎ RỖNG -> ÉP GIÁ TIỀN VỀ 0
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p>Giỏ hàng trống.</p>';
+            document.querySelector('.btn-submit').disabled = true;
             
-            // Cập nhật tổng tiền chuẩn xác
-            const formattedTotal = formatPrice(total);
-            document.querySelectorAll('.summary-row')[0].lastElementChild.innerText = formattedTotal;
-            document.querySelector('.total-row').lastElementChild.innerText = formattedTotal;
-            document.querySelector('.btn-submit').innerText = `ĐẶT HÀNG: ${formattedTotal}`;
-            
-        } catch (err) {
-            console.error("Lỗi tải giỏ hàng:", err);
+            const zeroPrice = formatPrice(0);
+            document.querySelectorAll('.summary-row')[0].lastElementChild.innerText = zeroPrice;
+            document.querySelector('.total-row').lastElementChild.innerText = zeroPrice;
+            document.querySelector('.btn-submit').innerText = `ĐẶT HÀNG: ${zeroPrice}`;
+            return;
         }
+
+        // NẾU CÓ HÀNG -> TÍNH TOÁN LẠI TỪ ĐẦU
+        let html = '';
+        cart.forEach(item => {
+            total += item.price * item.quantity;
+            html += `
+            <div class="cart-item">
+                <div>
+                    <p class="item-name">${item.name}</p>
+                    <p class="item-price">Size: ${item.size || 'M'} | SL: ${item.quantity}</p>
+                </div>
+                <p class="item-price">${formatPrice(item.price * item.quantity)}</p>
+            </div>`;
+        });
+
+        cartItemsContainer.innerHTML = html;
+        
+        // Cập nhật tổng tiền chuẩn xác
+        const formattedTotal = formatPrice(total);
+        document.querySelectorAll('.summary-row')[0].lastElementChild.innerText = formattedTotal;
+        document.querySelector('.total-row').lastElementChild.innerText = formattedTotal;
+        document.querySelector('.btn-submit').innerText = `ĐẶT HÀNG: ${formattedTotal}`;
     }
     // 3. Đổi giao diện chọn thanh toán
     function showInstruction(method) {
@@ -241,12 +233,24 @@
         submitBtn.style.opacity = '0.7';
         submitBtn.disabled = true;
 
+        // Lấy giỏ hàng từ localStorage
+        const cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
+
+        if (cart.length === 0) {
+            showToast('Giỏ hàng trống, không thể đặt hàng!', 'error');
+            submitBtn.innerText = 'THỬ LẠI';
+            submitBtn.style.opacity = '1';
+            submitBtn.disabled = false;
+            return;
+        }
+
         const orderData = {
             fullname: document.getElementById('fullname').value,
             phone: document.getElementById('phone').value,
             address: document.getElementById('address').value,
             note: document.getElementById('note').value,
-            payment_method: document.querySelector('input[name="payment_method"]:checked').value
+            payment_method: document.querySelector('input[name="payment_method"]:checked').value,
+            cart_items: cart // Gửi giỏ hàng từ localStorage lên server
         };
 
         try {
@@ -258,8 +262,10 @@
             const result = await response.json();
 
             if (result.status === 'success') {
-                // GỌI HÀM SHOWTOAST TỪ FILE TOAST.PHP BẠN VỪA NHÚNG
                 showToast(result.message, 'success');
+                
+                // XÓA GIỎ HÀNG TRÊN LOCALSTORAGE SAU KHI ĐẶT HÀNG THÀNH CÔNG
+                localStorage.removeItem('smartfit_cart');
                 
                 // Đợi 2 giây để người dùng đọc Toast rồi mới chuyển sang lịch sử đơn hàng
                 setTimeout(() => {
