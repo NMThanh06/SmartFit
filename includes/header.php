@@ -47,6 +47,10 @@ require_once __DIR__ . '/config.php';
     <link rel="stylesheet" href="<?php echo $root; ?>assets/css/style.css?v=<?php echo time(); ?>">
     <link rel="stylesheet" href="<?php echo $root; ?>assets/css/responsive.css">
 
+    <!-- Leaflet.js -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
     <!-- Javascript -->
     <script src="<?php echo $root; ?>script.js?v=<?php echo time(); ?>" defer></script>
 
