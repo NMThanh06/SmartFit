@@ -9,6 +9,15 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Tính toán root path động
+$current_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+$project_root = str_replace('\\', '/', realpath(__DIR__ . '/..'));
+$public_path = str_replace('\\', '/', $_SERVER['DOCUMENT_ROOT']);
+
+// Tìm số cấp thư mục so với root
+$relative_path = str_replace($public_path, '', $project_root);
+$root = rtrim($relative_path, '/') . '/';
+
 // Kết nối Database
 require_once __DIR__ . '/config.php';
 ?>
@@ -33,13 +42,13 @@ require_once __DIR__ . '/config.php';
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 
     <!-- My Library -->
-    <link rel="stylesheet" href="./assets/css/grid.css">
-    <link rel="stylesheet" href="./assets/css/base.css">
-    <link rel="stylesheet" href="./assets/css/style.css?=v1">
-    <link rel="stylesheet" href="./assets/css/responsive.css">
+    <link rel="stylesheet" href="<?php echo $root; ?>assets/css/grid.css">
+    <link rel="stylesheet" href="<?php echo $root; ?>assets/css/base.css">
+    <link rel="stylesheet" href="<?php echo $root; ?>assets/css/style.css?v=<?php echo time(); ?>">
+    <link rel="stylesheet" href="<?php echo $root; ?>assets/css/responsive.css">
 
     <!-- Javascript -->
-    <script src="script.js?v=1<?php echo time(); ?>" defer></script>
+    <script src="<?php echo $root; ?>script.js?v=<?php echo time(); ?>" defer></script>
 
 
     <style>
@@ -48,12 +57,14 @@ require_once __DIR__ . '/config.php';
 </head>
 
 <body>
-    <div class="web__background--overlay"></div>
-
+    <?php if (isset($page_extra_body)) echo $page_extra_body; ?>
+    
     <main class="web__container ">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="index.php" class="navbar__logo">SmartFit</a>
+            <a href="<?php echo $root; ?>index.php" class="navbar__logo">
+                <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="Logo">
+            </a>
 
             <div class="navbar__shop">
                 <div class="navbar__cart" onclick="app.openCart()">
@@ -70,34 +81,39 @@ require_once __DIR__ . '/config.php';
                             </div>
 
                             <div id="userDropdown" class="user-dropdown">
-                                <a href="./includes/" class="user-dropdown__item">
+                                <a href="<?php echo $root; ?>pages/personal_info.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-id-card"></i>
                                     <span>Thông tin cá nhân</span>
                                 </a>
 
-                                <a href="wardrobe.php" class="user-dropdown__item">
+                                <a href="<?php echo $root; ?>index.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <span>Phối đồ</span>
+                                </a>
+
+                                <a href="<?php echo $root; ?>pages/wardrobe.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-clock-rotate-left"></i>
                                     <span>Bộ sưu tập</span>
                                 </a>
 
-                                <a href="shop.php" class="user-dropdown__item">
+                                <a href="<?php echo $root; ?>shop.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-store"></i>
                                     <span>Cửa hàng</span>
                                 </a>
 
-                                <a href="pages/order_history.php" class="user-dropdown__item">
+                                <a href="<?php echo $root; ?>pages/order_history.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-receipt"></i>
                                     <span>Lịch sử đơn hàng</span>
                                 </a>
 
-                                <a href="pages/add-outfit.php" class="user-dropdown__item">
+                                <a href="<?php echo $root; ?>pages/add-outfit.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-plus"></i>
                                     <span>Thêm trang phục</span>
                                 </a>
 
                                 <div class="user-dropdown__divider"></div>
 
-                                <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                                <a href="<?php echo $root; ?>includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
                                     <i class="fa-solid fa-right-from-bracket"></i>
                                     <span>Đăng xuất</span>
                                 </a>

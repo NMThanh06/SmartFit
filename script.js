@@ -399,7 +399,7 @@ window.app = {
         // 4. Hiển thị Section kết quả
         const resultSection = document.getElementById('result');
         if (resultSection) {
-            resultSection.style.display = 'block';
+            resultSection.style.display = 'flex';
             resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     },
@@ -567,6 +567,7 @@ window.app = {
         // Xóa ảnh sau khi bay xong (0.8 giây)
         setTimeout(() => flyImg.remove(), 800);
     },
+
 
 };
 

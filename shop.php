@@ -46,7 +46,9 @@ unset($_SESSION['success'], $_SESSION['error']);
     <main class="web__container ">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="index.php" class="navbar__logo">SmartFit</a>
+            <a href="index.php" class="navbar__logo">
+                <img src="./assets/img/logo_smartfit.jpg" alt="Logo">
+            </a>
 
             <div class="navbar__shop">
                 

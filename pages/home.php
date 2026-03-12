@@ -1,41 +1,8 @@
 <?php
 session_start();
-require_once '../includes/config.php';
-
 $success = $_SESSION['success'] ?? '';
 $error = $_SESSION['error'] ?? '';
 unset($_SESSION['success'], $_SESSION['error']);
-
-// Xử lý lấy danh sách trang phục đã lưu của User hiện tại
-$saved_outfits = [];
-if (isset($_SESSION['user_id'])) {
-    $userId = $_SESSION['user_id'];
-    
-    // SQL lấy thông tin từ bảng
-    $sql = "SELECT so.id as saved_id, so.style_name,
-                   t.name as top_name, t.image as top_img,
-                   b.name as bottom_name, b.image as bottom_img,
-                   s.name as shoes_name, s.image as shoes_img,
-                   a.name as acc_name, a.image as acc_img
-            FROM saved_outfits so
-            JOIN outfits t ON so.top_id = t.id
-            JOIN outfits b ON so.bottom_id = b.id
-            JOIN outfits s ON so.shoes_id = s.id
-            LEFT JOIN outfits a ON so.acc_id = a.id
-            WHERE so.user_id = ?
-            ORDER BY so.created_at DESC";
-            
-    $stmt = mysqli_prepare($conn, $sql);
-    if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "i", $userId);
-        mysqli_stmt_execute($stmt);
-        $result = mysqli_stmt_get_result($stmt);
-        while ($row = mysqli_fetch_assoc($result)) {
-            $saved_outfits[] = $row;
-        }
-        mysqli_stmt_close($stmt);
-    }
-}
 ?>
 <?php include '../includes/toast.php'; ?>
 
@@ -45,28 +12,34 @@ if (isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bộ sưu tập - SmartFit</title>
+    <title>SmartFit</title>
 
+    <!-- Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
 
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
 
+    <!-- My Library -->
     <link rel="stylesheet" href="../assets/css/grid.css">
     <link rel="stylesheet" href="../assets/css/base.css">
     <link rel="stylesheet" href="../assets/css/style.css?=v1">
     <link rel="stylesheet" href="../assets/css/responsive.css">
 
+    <!-- Javascript -->
     <script src="../script.js?v=1<?php echo time(); ?>" defer></script>
+
 </head>
 
 <body>
-    <div class="web__background--overlay"></div>
-
     <main class="web__container">
+        <!-- Navigation -->
         <nav class="navbar">
-            <a href="../index.php" class="navbar__logo">
+            <a href="" class="navbar__logo">
                 <img src="../assets/img/logo_smartfit.jpg" alt="Logo">
             </a>
 
@@ -108,84 +81,126 @@ if (isset($_SESSION['user_id'])) {
                         </div>
                     </div>
 
-                <?php else: ?>
+                <?php
+else: ?>
                     <div id="loginBtn">
                         <i class="fa-solid fa-circle-user"></i>
                         Đăng nhập
                     </div>
-                <?php endif; ?>
+                <?php
+endif; ?>
             </div>
 
         </nav>
 
-        <section class="wardrobe-page">
-            <div class="grid wide">
-                <div class="row">
-                    <div class="col l-12 m-12 c-12">
-                        <div class="wardrobe__header">
-                            <h1 class="wardrobe__title">Bộ sưu tập</h1>
-                        </div>
+        <!-- Hero Section -->
+        <section class="hero">
+            <h1 class="hero__title">Mặc gì hôm nay? Để AI lo!</h1>
+            <p class="hero__subtitle">Giải pháp quản lý tủ đồ thông minh và gợi ý trang phục cá nhân hóa dựa trên thời tiết và phong cách của riêng bạn.</p>
+            <a href="../index.php" class="button hero__btn">Trải nghiệm phối đồ ngay</a>
+        </section>
+
+        <!-- Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Features Section -->
+        <section class="features">
+            <h2 class="section-title">Tính năng nổi bật</h2>
+            <div class="row">
+                <div class="col l-4 m-6 c-12">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-robot feature-card__icon"></i>
+                        <h3 class="feature-card__title">Trợ lý phối đồ AI</h3>
+                        <p class="feature-card__desc">Tự động đề xuất các bộ cánh thời thượng dựa trên nhiệt độ, thời tiết thực tế tại vị trí của bạn và mục đích sử dụng (đi học, đi chơi, hẹn hò).</p>
                     </div>
                 </div>
-
-                <div class="row">
-                    <?php if (empty($saved_outfits)): ?>
-                        <div class="col l-12" style="text-align: center; padding: 40px 0;">
-                            <p>Bạn chưa lưu bộ trang phục nào.</p>
-                            <a href="../index.php" class="button" style="margin-top: 10px; display: inline-block;">Phối đồ ngay</a>
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($saved_outfits as $outfit): ?>
-                            <div class="col l-3 m-4 c-12">
-                                <div class="wardrobe-card">
-                                    <div class="wardrobe-card__images">
-                                        <img src="../assets/img/<?php echo basename($outfit['top_img']); ?>" alt="Áo">
-                                        
-                                        <img src="../assets/img/<?php echo basename($outfit['bottom_img']); ?>" alt="Quần">
-                                        
-                                        <!-- phần hiển thị 2 món còn lại niếu cần *(chưa css/js) -->
-                                        <!-- <img src="../assets/img/<?php echo basename($outfit['shoes_img']); ?>" alt="Giày">
-                                        
-                                        <?php if ($outfit['acc_img']): ?>
-                                            <img src="../assets/img/<?php echo basename($outfit['acc_img']); ?>" alt="Phụ kiện">
-                                        <?php endif; ?> -->
-
-                                    </div>
-
-                                    <div class="wardrobe-card__info">
-                                        <div class="wardrobe-card__header">
-                                            <h3 class="wardrobe-card__title"><?php echo htmlspecialchars($outfit['style_name'] ?: 'Style của tôi'); ?></h3>
-                                            <button class="wardrobe-card__delete" 
-                                                    title="Xóa" 
-                                                    onclick="app.deleteSavedOutfit(<?php echo $outfit['saved_id']; ?>, this)">
-                                                <i class="fa-solid fa-trash-can"></i>
-                                            </button>
-                                            
-                                        </div>
-
-                                        <ul class="wardrobe-card__items">
-                                            <li>
-                                            <p><?php echo htmlspecialchars($outfit['top_name']); ?></p>
-                                            </li>
-                                            <li>
-                                                <p><?php echo htmlspecialchars($outfit['bottom_name']); ?></p>
-                                            </li>
-                                            <li>
-                                                <p><?php echo htmlspecialchars($outfit['shoes_name']); ?></p>
-                                            </li>
-                                            <li>
-                                                <p><?php echo $outfit['acc_name'] ? htmlspecialchars($outfit['acc_name']) : 'Không có'; ?></p>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                <div class="col l-4 m-6 c-12">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-shirt feature-card__icon"></i>
+                        <h3 class="feature-card__title">Tủ đồ thông minh</h3>
+                        <p class="feature-card__desc">Lưu trữ và quản lý những set đồ bạn yêu thích. Không còn mất thời gian lục tìm hay quên mất mình có những món đồ nào.</p>
+                    </div>
+                </div>
+                <div class="col l-4 m-12 c-12">
+                    <div class="feature-card">
+                        <i class="fa-solid fa-store feature-card__icon"></i>
+                        <h3 class="feature-card__title">Cửa hàng thời trang</h3>
+                        <p class="feature-card__desc">Khám phá và sở hữu ngay những item mới nhất để bổ sung vào bộ sưu tập cá nhân với trải nghiệm mua sắm mượt mà.</p>
+                    </div>
                 </div>
             </div>
         </section>
 
+        <!-- How it works Section -->
+        <section class="how-it-works">
+            <h2 class="section-title">Cách thức hoạt động</h2>
+            <div class="how-it-works__container">
+                <!-- Wavy Line Background -->
+                <svg class="how-it-works__line" viewBox="-300 0 1600 200" preserveAspectRatio="none">
+                    <path d="M -300,100 C -50,250 250,-50 500,100 C 750,250 1050,-50 1300,100" 
+                        fill="transparent" 
+                        stroke="#6C63FF" 
+                        stroke-width="4" 
+                        stroke-dasharray="10, 10"></path>
+                </svg>
+
+                <i class="fa fa-paper-plane how-it-works__icon"></i>
+
+                <div class="row how-it-works__steps">
+                    <div class="col l-4 m-4 c-12">
+                        <div class="step-card">
+                            <div class="step-card__number">1</div>
+                            <h3 class="step-card__title">Cung cấp thông tin</h3>
+                            <p class="step-card__desc">Chọn dịp bạn mặc, phong cách và tông màu bạn thích.</p>
+                        </div>
+                    </div>
+                    <div class="col l-4 m-4 c-12">
+                        <div class="step-card step-card--middle">
+                            <div class="step-card__number">2</div>
+                            <h3 class="step-card__title">AI Phân tích</h3>
+                            <p class="step-card__desc">Hệ thống kết hợp sở thích của bạn với dữ liệu thời tiết thực tế.</p>
+                        </div>
+                    </div>
+                    <div class="col l-4 m-4 c-12">
+                        <div class="step-card">
+                            <div class="step-card__number">3</div>
+                            <h3 class="step-card__title">Nhận kết quả</h3>
+                            <p class="step-card__desc">Nhận ngay gợi ý phối đồ hoàn hảo kèm hình ảnh trực quan.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Choose Us Section -->
+        <section class="why-choose-us">
+            <h2 class="section-title">Tại sao chọn SmartFit?</h2>
+            <div class="row">
+                <div class="col l-4 m-4 c-12">
+                    <div class="reason-card">
+                        <i class="fa-solid fa-clock reason-card__icon"></i>
+                        <h3 class="reason-card__title">Tiết kiệm thời gian</h3>
+                        <p class="reason-card__desc">Chỉ mất 5 giây để có một bộ đồ đẹp thay vì đứng 30 phút trước gương.</p>
+                    </div>
+                </div>
+                <div class="col l-4 m-4 c-12">
+                    <div class="reason-card">
+                        <i class="fa-solid fa-cloud-sun reason-card__icon"></i>
+                        <h3 class="reason-card__title">Luôn phù hợp thời tiết</h3>
+                        <p class="reason-card__desc">Không còn tình trạng "thời trang phang thời tiết" nhờ dữ liệu Real-time.</p>
+                    </div>
+                </div>
+                <div class="col l-4 m-4 c-12">
+                    <div class="reason-card">
+                        <i class="fa-solid fa-box-open reason-card__icon"></i>
+                        <h3 class="reason-card__title">Tối ưu tủ đồ</h3>
+                        <p class="reason-card__desc">Tận dụng tối đa những gì bạn đang có và chỉ mua những thứ thực sự cần thiết.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+         
+        <!-- Footer -->
         <footer class="footer">
             <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
 
@@ -211,13 +226,14 @@ if (isset($_SESSION['user_id'])) {
         </footer>
     </main>
 
+    <!-- Auth Form -->
     <section id="authOverlay" class="auth-overlay">
         <div class="auth-card">
             <i id="closeAuth" class="fa-solid fa-xmark auth-card__close"></i>
 
             <div id="loginForm">
                 <div class="auth-card__title">Đăng nhập</div>
-                <form action="../includes/login.php" method="post" class="auth-card__form">
+                <form action="includes/login.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Email :</h4>
                         <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
@@ -233,7 +249,7 @@ if (isset($_SESSION['user_id'])) {
 
             <div id="registerForm" style="display: none;">
                 <div class="auth-card__title">Đăng ký</div>
-                <form action="../includes/signup-form.php" method="post" class="auth-card__form">
+                <form action="includes/signup-form.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Tên :</h4>
                         <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
@@ -257,6 +273,7 @@ if (isset($_SESSION['user_id'])) {
         </div>
     </section>
     <script>
+        // Hàm hiển thị toast
         function showToast(message, type) {
             const toast = document.createElement('div');
             toast.className = 'toast';
@@ -271,11 +288,15 @@ if (isset($_SESSION['user_id'])) {
         window.onload = function() {
             <?php if ($success): ?>
                 showToast('<?php echo addslashes($success); ?>', 'success');
-            <?php elseif ($error): ?>
+            <?php
+elseif ($error): ?>
                 showToast('<?php echo addslashes($error); ?>', 'error');
-            <?php endif; ?>
+            <?php
+endif; ?>
         };
     </script>
+
+    <script src="../script.js"></script>
 </body>
 
 </html>

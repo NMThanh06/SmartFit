@@ -1,5 +1,8 @@
 <?php
-require_once 'includes/header.php';
+$page_extra_body = '
+    <div class="web__background--overlay"></div>
+';
+include 'includes/header.php';
 
 $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($productId <= 0) {

@@ -31,7 +31,7 @@
 
             <div id="loginForm">
                 <div class="auth-card__title">Đăng nhập</div>
-                <form action="includes/login.php" method="post" class="auth-card__form">
+                <form action="<?php echo $root; ?>includes/login.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Email :</h4>
                         <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
@@ -47,7 +47,7 @@
 
             <div id="registerForm" style="display: none;">
                 <div class="auth-card__title">Đăng ký</div>
-                <form action="includes/signup-form.php" method="post" class="auth-card__form">
+                <form action="<?php echo $root; ?>includes/signup-form.php" method="post" class="auth-card__form">
                     <div class="auth-card__group">
                         <h4 class="auth-card__heading">Tên :</h4>
                         <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
@@ -100,7 +100,7 @@
                 <span>Tổng cộng:</span>
                 <span class="total-price"></span>
             </div>
-            <button class="btn-checkout" onclick="window.location.href='pages/checkout.php'">Thanh toán ngay</button>
+            <button class="btn-checkout" onclick="window.location.href='<?php echo $root; ?>pages/checkout.php'">Thanh toán ngay</button>
         </div>
 
     </div>
@@ -163,7 +163,7 @@
 
             html += `
             <div class="cart-item">
-                <img src="${item.image}" alt="${item.name}" onerror="this.src='./assets/img/default-placeholder.jpg'" class="cart-item__img">
+                <img src="${item.image}" alt="${item.name}" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'" class="cart-item__img">
                 <div class="cart-item__info">
                     <h4 class="cart-item__name">${item.name}</h4>
                     <div class="cart-item__price">${formatPrice(item.price)} <span style="font-size:1.2rem;color:#ccc;font-weight:normal">${sizeLabel}</span></div>
