@@ -62,7 +62,7 @@ require_once __DIR__ . '/config.php';
     <main class="web__container ">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="<?php echo $root; ?>index.php" class="navbar__logo">
+            <a href="<?php echo $root; ?>./pages/home.php" class="navbar__logo">
                 <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="Logo">
             </a>
 
@@ -87,7 +87,7 @@ require_once __DIR__ . '/config.php';
                                 </a>
 
                                 <a href="<?php echo $root; ?>index.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
+                                    <i class="fa-solid fa-shirt"></i>
                                     <span>Phối đồ</span>
                                 </a>
 
