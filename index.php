@@ -1,104 +1,10 @@
 <?php
-session_start();
-$success = $_SESSION['success'] ?? '';
-$error = $_SESSION['error'] ?? '';
-unset($_SESSION['success'], $_SESSION['error']);
-?>
-<?php include 'includes/toast.php'; ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartFit</title>
-
-    <!-- Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-
-    <!-- My Library -->
-    <link rel="stylesheet" href="./assets/css/grid.css">
-    <link rel="stylesheet" href="./assets/css/base.css">
-    <link rel="stylesheet" href="./assets/css/style.css?=v1">
-    <link rel="stylesheet" href="./assets/css/responsive.css">
-
-    <!-- Javascript -->
-    <script src="script.js?v=1<?php echo time(); ?>" defer></script>
-
-
-    <style>
-
-    </style>
-</head>
-
-<body>
-
+$page_extra_body = '
     <video src="./assets/video/cloudy.mp4" autoplay muted loop class="web__background"></video>
-
     <div class="web__background--overlay"></div>
-
-    <main class="web__container">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <a href="" class="navbar__logo">SmartFit</a>
-
-            <div class="navbar__auth">
-                <?php if (isset($_SESSION['user_name'])): ?>
-                    <div id="userInfoToggle" class="user-info">
-                        <div class="user-info__trigger">
-                            <span class="user-info__name"> Xin chào, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b></span>
-                            <i class="fa-solid fa-caret-down user-info__arrow"></i>
-                        </div>
-
-                        <div id="userDropdown" class="user-dropdown">
-                            <a href="./includes/" class="user-dropdown__item">
-                                <i class="fa-solid fa-id-card"></i>
-                                <span>Thông tin cá nhân</span>
-                            </a>
-
-                            <a href="pages/wardrobe.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
-                                <span>Bộ sưu tập</span>
-                            </a>
-
-                            <a href="shop.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-store"></i>
-                                <span>Cửa hàng</span>
-                            </a>
-
-                            <a href="pages/add-outfit.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>Thêm trang phục</span>
-                            </a>
-
-                            <div class="user-dropdown__divider"></div>
-
-                            <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                                <span>Đăng xuất</span>
-                            </a>
-                        </div>
-                    </div>
-
-                <?php
-else: ?>
-                    <div id="loginBtn">
-                        <i class="fa-solid fa-circle-user"></i>
-                        Đăng nhập
-                    </div>
-                <?php
-endif; ?>
-            </div>
-
-        </nav>
+';
+include 'includes/header.php';
+?>
 
         <!-- Hero Section -->
         <section class="hero" id="hero">
@@ -111,6 +17,17 @@ endif; ?>
                     <div class="info__weather__temp"></div> <!-- Nhiệt độ -->
                 </div>
                 <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
+            </div>
+
+            <!-- Nút Chọn vị trí + Dropdown dự báo -->
+            <div class="hero__location-row">
+                <button id="btnChooseLocation" class="btn-choose-location">
+                    <i class="fa-solid fa-location-dot"></i> Chọn vị trí
+                </button>
+
+                <select id="forecastDropdown" class="forecast-dropdown">
+                    <option value="">-- Dự báo 7 ngày --</option>
+                </select>
             </div>
 
             <form id="configForm" class="config-form" action="">
@@ -139,6 +56,13 @@ endif; ?>
 
                         <input class="config-form__input" type="radio" id="female" name="gender" value="female">
                         <label class="config-form__label" for="female">Nữ</label>
+                    </div>
+                </div>
+
+                <div class="config-form__group">
+                    <h3 class="config-form__heading">Độ tuổi của bạn ?</h3>
+                    <div class="config-form__options">
+                        <input class="config-form__input--age" type="number" id="age" name="age" min="1" max="100" placeholder="Số tuổi">
                     </div>
                 </div>
 
@@ -210,6 +134,24 @@ endif; ?>
                 Phối đồ ngay ⭐
             </button>
         </section>
+
+        <!-- ====== Modal Bản đồ ====== -->
+        <div id="mapModal" class="map-modal">
+            <div class="map-modal__overlay"></div>
+            <div class="map-modal__content">
+                <div class="map-modal__header">
+                    <h3 class="map-modal__title"><i class="fa-solid fa-map-location-dot"></i> Chọn vị trí trên bản đồ</h3>
+                    <button class="map-modal__close" id="btnCloseMap">&times;</button>
+                </div>
+                <div id="map" class="map-modal__map"></div>
+                <div class="map-modal__footer">
+                    <span class="map-modal__coords" id="mapCoordsDisplay">Chưa chọn vị trí</span>
+                    <button id="btnConfirmLocation" class="map-modal__confirm">
+                        <i class="fa-solid fa-check"></i> Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Result Section -->
         <section class="result" id="result">
@@ -287,101 +229,256 @@ endif; ?>
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
+<!-- ====== CSS + JS cho Bản đồ ====== -->
+<style>
+    /* --- Nút Chọn vị trí --- */
+    .btn-choose-location {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        margin: 12px 0;
+        border: none;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn-choose-location:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.55);
+    }
+    .btn-choose-location:active {
+        transform: scale(0.97);
+    }
 
-            <div class="footer__contact">
-                <a href="https://github.com/NMThanh06/SmartFit" class="footer__contact__github">
-                    <i class="fa-brands fa-square-github"></i>
-                </a>
+    /* --- Hàng chứa nút + dropdown --- */
+    .hero__location-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+    }
 
-                <div class="footer__contact__team">
-                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>trungcuong.2006tn@gmail.com</span>
-                        <div class="copy-tooltip">Copied!</div>
-                    </div>
+    /* --- Dropdown dự báo 7 ngày --- */
+    .forecast-dropdown {
+        padding: 10px 18px;
+        border: 2px solid rgba(102, 126, 234, 0.5);
+        border-radius: 30px;
+        background: rgba(26, 26, 46, 0.85);
+        color: #fff;
+        font-size: 1.4rem;
+        font-weight: 500;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        min-width: 280px;
+    }
+    .forecast-dropdown:hover,
+    .forecast-dropdown:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 12px rgba(102, 126, 234, 0.35);
+    }
+    .forecast-dropdown option {
+        background: #1a1a2e;
+        color: #e2e8f0;
+        padding: 8px;
+    }
 
-                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>nguyenminhthanh043216@gmail.com</span>
-                        <div class="copy-tooltip">Copied!</div>
-                    </div>
-                </div>
-            </div>
-        </footer>
-    </main>
+    /* --- Modal --- */
+    .map-modal {
+        display: none;                /* ẩn mặc định */
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+    .map-modal.active {
+        display: flex;
+    }
 
-    <!-- Auth Form -->
-    <section id="authOverlay" class="auth-overlay">
-        <div class="auth-card">
-            <i id="closeAuth" class="fa-solid fa-xmark auth-card__close"></i>
+    .map-modal__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(4px);
+    }
 
-            <div id="loginForm">
-                <div class="auth-card__title">Đăng nhập</div>
-                <form action="includes/login.php" method="post" class="auth-card__form">
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Email :</h4>
-                        <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
-                    </div>
-                    <button type="submit" class="auth-card__button button">Đăng nhập</button>
-                </form>
-                <p class="auth-card__switch">Bạn chưa có tài khoản? <a href="#" id="toRegister">Đăng ký ngay</a></p>
-            </div>
+    .map-modal__content {
+        position: relative;
+        width: 90%;
+        max-width: 750px;
+        background: #1a1a2e;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        animation: mapModalIn 0.35s ease;
+    }
+    @keyframes mapModalIn {
+        from { opacity: 0; transform: scale(0.9) translateY(30px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
 
-            <div id="registerForm" style="display: none;">
-                <div class="auth-card__title">Đăng ký</div>
-                <form action="includes/signup-form.php" method="post" class="auth-card__form">
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tên :</h4>
-                        <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Email :</h4>
-                        <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input" name="psw-repeat" required>
-                    </div>
-                    <button type="submit" class="auth-card__button button">Đăng ký</button>
-                </form>
-                <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>
-            </div>
-        </div>
-    </section>
-    <script>
-        // Hàm hiển thị toast
-        function showToast(message, type) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
-            toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
+    .map-modal__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .map-modal__title {
+        color: #fff;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .map-modal__close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: #fff;
+        font-size: 2.2rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        line-height: 1;
+    }
+    .map-modal__close:hover { background: rgba(255,255,255,0.35); }
+
+    /* Bản đồ */
+    .map-modal__map {
+        width: 100%;
+        height: 420px;
+    }
+
+    /* Footer modal */
+    .map-modal__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        background: #16213e;
+    }
+    .map-modal__coords {
+        color: #a0aec0;
+        font-size: 1.35rem;
+    }
+    .map-modal__confirm {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .map-modal__confirm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(56, 178, 172, 0.45);
+    }
+    .map-modal__confirm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+</style>
+
+<script>
+(function () {
+    // ===== Biến lưu tọa độ tạm =====
+    let selectedLat = null;
+    let selectedLng = null;
+
+    // ===== Tham chiếu DOM =====
+    const btnOpen    = document.getElementById('btnChooseLocation');
+    const btnConfirm = document.getElementById('btnConfirmLocation');
+    const btnClose   = document.getElementById('btnCloseMap');
+    const modal      = document.getElementById('mapModal');
+    const overlay    = modal.querySelector('.map-modal__overlay');
+    const coordsText = document.getElementById('mapCoordsDisplay');
+
+    let map    = null;   // instance Leaflet
+    let marker = null;   // marker hiện tại
+
+    // ===== Mở Modal & khởi tạo bản đồ =====
+    btnOpen.addEventListener('click', function () {
+        modal.classList.add('active');
+        btnConfirm.disabled = true;
+
+        // Chỉ khởi tạo bản đồ 1 lần
+        if (!map) {
+            map = L.map('map').setView([10.7769, 106.7009], 13); // TP.HCM
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Sự kiện click lên bản đồ
+            map.on('click', function (e) {
+                selectedLat = e.latlng.lat;
+                selectedLng = e.latlng.lng;
+
+                // Xóa marker cũ nếu có
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+
+                // Tạo marker mới
+                marker = L.marker([selectedLat, selectedLng]).addTo(map);
+
+                // Cập nhật text tọa độ
+                coordsText.textContent = selectedLat.toFixed(5) + ', ' + selectedLng.toFixed(5);
+                coordsText.style.color = '#4fd1c5';
+
+                // Bật nút Xác nhận
+                btnConfirm.disabled = false;
+            });
         }
 
-        window.onload = function() {
-            <?php if ($success): ?>
-                showToast('<?php echo addslashes($success); ?>', 'success');
-            <?php
-elseif ($error): ?>
-                showToast('<?php echo addslashes($error); ?>', 'error');
-            <?php
-endif; ?>
-        };
-    </script>
+        // Fix bản đồ bị render lỗi khi modal vừa mở
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 300);
+    });
+
+    // ===== Đóng Modal =====
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+    btnClose.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    // ===== Xác nhận vị trí =====
+    btnConfirm.addEventListener('click', function () {
+        if (selectedLat !== null && selectedLng !== null) {
+            console.log('Tọa độ đã chọn: ', selectedLat, selectedLng);
+            // Gọi hàm cập nhật thời tiết với tọa độ mới từ bản đồ
+            window.app.updateCurrentWeather(selectedLat, selectedLng);
+            closeModal();
+        }
+    });
+})();
+</script>
+
+<?php include 'includes/footer.php'; ?>
+</body>
+
+</html>
 </body>
 
 </html>
