@@ -1,24 +1,61 @@
         <!-- Footer -->
         <footer class="footer">
-            <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
-
-            <div class="footer__contact">
-                <a href="https://github.com/NMThanh06/SmartFit" class="footer__contact__github">
-                    <i class="fa-brands fa-square-github"></i>
-                </a>
-
-                <div class="footer__contact__team">
-                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>trungcuong.2006tn@gmail.com</span>
-                        <div class="copy-tooltip">Copied!</div>
+            <div class="grid wide">
+                <div class="row footer__content">
+                    <!-- Brand Column -->
+                    <div class="col l-4 m-12 c-12">
+                        <div class="footer__brand">
+                            <div class="footer__logo">
+                                <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="SmartFit Logo" class="footer__logo-img">
+                                <span>SmartFit</span>
+                            </div>
+                            <p class="footer__slogan">Nâng tầm phong cách cá nhân cùng trí tuệ nhân tạo.</p>
+                            <div class="footer__socials">
+                                <a href="https://github.com/NMThanh06/SmartFit" class="footer__social-item" target="_blank" title="GitHub Repository">
+                                    <i class="fa-brands fa-github"></i>
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>nguyenminhthanh043216@gmail.com</span>
-                        <div class="copy-tooltip">Copied!</div>
+                    <!-- Product Column -->
+                    <div class="col l-4 m-6 c-12">
+                        <div class="footer__section">
+                            <h3 class="footer__heading">Tính năng</h3>
+                            <ul class="footer__list">
+                                <li class="footer__item">
+                                    <a href="#" class="footer__link">Phối đồ AI: <span>Gợi ý trang phục thông minh theo thời tiết.</span></a>
+                                </li>
+                                <li class="footer__item">
+                                    <a href="#" class="footer__link">Tủ đồ ảo: <span>Quản lý và lưu trữ bộ sưu tập cá nhân.</span></a>
+                                </li>
+                                <li class="footer__item">
+                                    <a href="<?php echo $root; ?>shop.php" class="footer__link">Cửa hàng: <span>Khám phá những món đồ thời trang mới nhất.</span></a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+
+                    <!-- Legal Column -->
+                    <div class="col l-4 m-6 c-12">
+                        <div class="footer__section">
+                            <h3 class="footer__heading">Chính sách</h3>
+                            <ul class="footer__list">
+                                <li class="footer__item">
+                                    <a href="#" class="footer__link">Chính sách bảo mật: <span>Bảo vệ thông tin người dùng.</span></a>
+                                </li>
+                                <li class="footer__item">
+                                    <a href="#" class="footer__link">Điều khoản dịch vụ: <span>Quy định sử dụng trang web.</span></a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Copyright Row -->
+                <div class="footer__bottom">
+                    <div class="footer__copyright">© 2026 SmartFit Inc. All rights reserved.</div>
+                    <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
                 </div>
             </div>
         </footer>

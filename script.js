@@ -3,16 +3,6 @@ window.app = {
     config: {
         apiKey: '2cb97f62395b42556d493874d4486859', // Key của bạn
         apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
-
-        videos: {
-            Clear: './assets/video/sunny.mp4',
-            Clouds: './assets/video/cloudy.mp4',
-            Rain: './assets/video/rainy.mp4',
-            Drizzle: './assets/video/rainy.mp4',
-            Thunderstorm: './assets/video/rainy.mp4',
-            Snow: './assets/video/snowy.mp4',
-            Default: './assets/video/cloudy.mp4'
-        }
     },
 
     // --- 2. CÁC HÀM XỬ LÝ ---
@@ -144,34 +134,6 @@ window.app = {
 
             descElement.innerHTML = descMsg;
         }
-
-        // 5. Thay đổi Video nền
-        const videoElement = document.querySelector('.web__background');
-        if (videoElement) {
-            const videoSrc = this.config.videos[condition] || this.config.videos.Default;
-            if (videoElement.src && !videoElement.src.includes(videoSrc.substring(2))) {
-                videoElement.src = videoSrc;
-            }
-        }
-    },
-
-    // Copy mail
-    copyToClipboard: function (element) {
-        const emailText = element.querySelector('span').innerText;
-        const tooltip = element.querySelector('.copy-tooltip');
-
-        navigator.clipboard.writeText(emailText)
-            .then(() => {
-                tooltip.classList.add("show");
-
-                setTimeout(() => {
-                    tooltip.classList.remove("show");
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Lỗi khi copy: ', err);
-                alert("Không thể copy email này!");
-            });
     },
 
     //Auth
