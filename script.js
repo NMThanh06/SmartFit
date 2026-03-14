@@ -239,11 +239,14 @@ window.app = {
             const resultContainer = document.querySelector('.result__container');
 
             // Ẩn kết quả cũ, hiện loading
-            if (resultSection) resultSection.style.display = 'flex';
+            if (resultSection) {
+                resultSection.style.display = 'flex';
+                resultSection.classList.add('is-loading');
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
             if (resultContainer) resultContainer.style.display = 'none';
             if (loadingProgress) {
                 loadingProgress.style.display = 'flex';
-                loadingProgress.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
             //Gọi API thật
@@ -270,6 +273,7 @@ window.app = {
                 console.log("✅ Kết quả trả về:", data);
 
                 if (loadingProgress) loadingProgress.style.display = 'none';
+                if (resultSection) resultSection.classList.remove('is-loading');
 
                 if (data.success) {
                     self.displayResult(data.data);
@@ -309,6 +313,7 @@ window.app = {
             } catch (error) {
                 console.error("❌ Lỗi:", error);
                 if (loadingProgress) loadingProgress.style.display = 'none';
+                if (resultSection) resultSection.classList.remove('is-loading');
                 self.showNotification(error.message, 'error');
             }
 

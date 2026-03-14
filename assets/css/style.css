@@ -257,12 +257,16 @@
 
 .hero--index {
     width: 100%;
-    min-height: calc(100vh - var(--navbar-height) - var(--footer-height));
-    padding: unset;
+    min-height: 100vh;
+    padding: 0 20px 80px; /* Reduced top padding, added bottom padding to shift content up */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background-color: var(--background-color);
 }
 
 .hero__info {
-    margin: 50px;
+    margin: 0 50px 25px 50px; /* Top margin removed to push everything up */
 }
 
 .info__greeting {
@@ -280,13 +284,13 @@
     font-size: 2.5rem;
     font-weight: 500;
 
-    margin: 25px 0 10px 0;
+    margin: 20px 0 5px 0;
 }
 
 .info__desc {
     color: var(--text-sub-grey);
     font-size: 2rem;
-    margin: 15px 0 10px 0;
+    margin: 10px 0 5px 0;
 }
 
 .config-form {
@@ -294,7 +298,7 @@
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 15px; /* Slightly tighter gap */
 
     color: var(--text-main);
 
@@ -461,7 +465,8 @@
 
 /* Result Section */
 .result {
-    min-height: calc(100vh - 70px);
+    min-height: 100vh;
+    padding-top: var(--navbar-height); /* Ensure content isn't under the navbar */
     position: relative;
 
     /* Dùng flex để dễ dàng căn giữa theo cả dọc và ngang */
@@ -469,10 +474,13 @@
     align-items: center;
     justify-content: center;
 
-    padding: 20px;
+    padding: 0 0 100px; /* Shift content up by adding bottom padding */
     box-sizing: border-box;
-
     animation: slideUpFade 0.8s ease-out forwards;
+}
+
+.result.is-loading {
+    overflow: hidden;
 }
 
 /* Class được add bằng JS (hoặc sửa JS để đổi sang flex thay vì block) */
@@ -564,10 +572,13 @@
 
 .result__title {
     font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin: 10px 0 20px;
     background: linear-gradient(45deg, #fff, #E0E0E0);
     background-clip: text;
     -webkit-text-fill-color: transparent;
-    padding: 20px;
+    padding: 5px 0;
 }
 
 .result__desc {
@@ -640,7 +651,9 @@
 /* Result Loading */
 #loadingProgress {
     width: 100%;
-    height: calc(100vh - 70px);
+    height: 100vh;
+    margin-top: calc(var(--navbar-height) * -1); /* Offset the navbar height to center in viewport */
+    min-height: 500px; /* Đảm bảo không quá nhỏ trên màn hình thấp */
 
     display: flex;
     justify-content: center;
@@ -652,11 +665,14 @@
 }
 
 .result-loading__box {
-    background-color: #f9f9f9;
-    padding: 40px 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    max-width: 500px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid var(--glass-border);
+    padding: 60px 40px;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    max-width: 550px;
     width: 90%;
     text-align: center;
 }
@@ -664,18 +680,19 @@
 .result-loading__spinner {
     width: 60px;
     height: 60px;
-    border: 6px solid #e0e0e0;
-    border-top: 6px solid #3498db;
+    border: 6px solid rgba(255, 255, 255, 0.1);
+    border-top: 6px solid #6C63FF;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 0 auto 20px auto;
+    margin: 0 auto 30px auto;
 }
 
 .result-loading__text {
-    font-size: 16px;
-    color: #555;
-    font-weight: 600;
+    font-size: 1.8rem;
+    color: var(--text-main);
+    font-weight: 500;
     margin: 0;
+    line-height: 1.4;
     animation: pulse 1.5s infinite ease-in-out;
 }
 
@@ -1988,4 +2005,232 @@ section.hero--home {
     opacity: 0;
     visibility: hidden;
     pointer-events: none;
+}
+
+/* Orders Page - Monochrome Light Style */
+.orders-page {
+    background-color: var(--background-color);
+    padding: 50px 0 80px; /* Giảm từ 120px xuống 80px để đưa nội dung lên cao hơn */
+    min-height: 100vh;
+}
+
+.orders-page__header {
+    margin-bottom: 60px; /* Tăng từ 40px để tạo khoảng cách thoáng hơn với danh sách */
+}
+
+.orders-page__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #666;
+    font-size: 1.4rem;
+    font-weight: 500;
+    text-decoration: none;
+    margin-bottom: 20px;
+    transition: color 0.3s;
+}
+
+.orders-page__back:hover {
+    color: #000;
+}
+
+.orders-page__title {
+    font-size: 3.5rem; /* Tăng nhẹ kích thước */
+    font-weight: 800;
+    color: #1d1d1f;
+    margin-bottom: 12px; /* Tăng khoảng cách với subtitle */
+    line-height: 1.2;
+}
+
+.orders-page__subtitle {
+    font-size: 1.6rem;
+    color: #86868b;
+}
+
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.order-card {
+    background: #fff;
+    border: 1px solid #e1e1e1;
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.order-card:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+}
+
+.order-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 20px;
+}
+
+.order-card__id {
+    display: block;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #1d1d1f;
+    margin-bottom: 4px;
+}
+
+.order-card__date {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 1.4rem;
+    color: #86868b;
+}
+
+.status-badge {
+    padding: 6px 14px;
+    border-radius: 50px;
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Monochrome Status Styles */
+.status-badge--pending { background: #f2f2f2; color: #666; }
+.status-badge--processing { background: #e8e8ed; color: #1d1d1f; border: 1px solid #d2d2d7; }
+.status-badge--shipped { background: #000; color: #fff; }
+.status-badge--completed { background: #f5f5f7; color: #1d1d1f; border: 1px solid #1d1d1f; }
+.status-badge--cancelled { background: #fff; color: #86868b; border: 1px solid #d2d2d7; text-decoration: line-through; }
+
+.order-card__items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.order-item {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 10px 0;
+}
+
+.order-item__img-wrapper {
+    width: 80px;
+    height: 80px;
+    background: #fbfbfd;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+}
+
+.order-item__img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.order-item__info {
+    flex: 1;
+}
+
+.order-item__name {
+    font-size: 1.7rem;
+    font-weight: 600;
+    color: #1d1d1f;
+    margin-bottom: 10px; /* Tăng khoảng cách với meta info */
+    line-height: 1.4; /* Tăng line-height cho thoáng */
+}
+
+.order-item__meta {
+    font-size: 1.4rem;
+    color: #86868b;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.order-item__separator {
+    opacity: 0.3;
+}
+
+.order-item__price {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1d1d1f;
+}
+
+.order-card__footer {
+    margin-top: 25px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.order-card__total {
+    text-align: right;
+}
+
+.order-card__total-label {
+    font-size: 1.6rem;
+    color: #86868b;
+    margin-right: 10px;
+}
+
+.order-card__total-value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #000;
+}
+
+.orders-empty {
+    text-align: center;
+    padding: 100px 0;
+    background: #fff;
+    border-radius: 24px;
+    border: 1px solid #e1e1e1;
+}
+
+.orders-empty__icon {
+    font-size: 6rem;
+    color: #d2d2d7;
+    margin-bottom: 20px;
+}
+
+.orders-empty__text {
+    font-size: 1.8rem;
+    color: #86868b;
+    margin-bottom: 30px;
+}
+
+.orders-empty__btn {
+    min-width: 200px;
+    background: #000;
+    color: #fff;
+    border-radius: 50px;
+}
+
+@media (max-width: 768px) {
+    .order-card {
+        padding: 20px;
+    }
+    .order-card__header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .order-item {
+        gap: 15px;
+    }
+    .order-item__img-wrapper {
+        width: 60px;
+        height: 60px;
+    }
+    .order-item__price {
+        font-size: 1.4rem;
+    }
 }
