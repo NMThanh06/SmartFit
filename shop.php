@@ -6,23 +6,69 @@ include 'includes/header.php';
         <!-- Shop Section -->
         <section class="shop-page">
             <div class="grid wide">
-
-                <div class="row">
-                    <div class="col l-12 m-12 c-12">
-                        <div class="shop__header">
-                            <h1 class="shop__title">Cửa hàng SmartFit</h1>
-                            <div class="shop__filters">
-                                <button class="button filter-btn active">Tất cả</button>
-                                <button class="button filter-btn">Áo</button>
-                                <button class="button filter-btn">Quần</button>
-                                <button class="button filter-btn">Giày & Phụ kiện</button>
-                            </div>
-                        </div>
-                    </div>
+                <div class="shop-page__header">
+                    <h1 class="shop-page__title">Cửa hàng SmartFit</h1>
+                    <p class="shop-page__subtitle">Khám phá phong cách thời trang dẫn đầu xu hướng</p>
                 </div>
 
-                <div id="productGrid" class="row shop__products">
+                <div class="shop-page__content">
+                    <aside class="shop-sidebar">
+                        <div class="shop-filter">
+                            <h3 class="shop-filter__title">Danh mục</h3>
+                            <ul class="shop-filter__list">
+                                <li class="shop-filter__item active" data-type="all">Tất cả sản phẩm</li>
+                                <li class="shop-filter__item" data-type="top">Áo</li>
+                                <li class="shop-filter__item" data-type="bottom">Quần</li>
+                                <li class="shop-filter__item" data-type="accessory">Giày & Phụ kiện</li>
+                            </ul>
+                        </div>
 
+                        <div class="shop-filter">
+                            <h3 class="shop-filter__title">Kích cỡ</h3>
+                            <div class="shop-filter__sizes">
+                                <span class="shop-filter__size">S</span>
+                                <span class="shop-filter__size">M</span>
+                                <span class="shop-filter__size">L</span>
+                                <span class="shop-filter__size">XL</span>
+                                <span class="shop-filter__size">Oversize</span>
+                            </div>
+                        </div>
+
+                        <div class="shop-filter">
+                            <h3 class="shop-filter__title">Khoảng giá</h3>
+                            <div class="shop-filter__price">
+                                <label class="shop-filter__checkbox">
+                                    <input type="checkbox"> 0đ - 200.000đ
+                                </label>
+                                <label class="shop-filter__checkbox">
+                                    <input type="checkbox"> 200.000đ - 500.000đ
+                                </label>
+                                <label class="shop-filter__checkbox">
+                                    <input type="checkbox"> Trên 500.000đ
+                                </label>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <div class="shop-main">
+                        <div class="shop-toolbar">
+                            <div class="shop-search">
+                                <i class="fa-solid fa-magnifying-glass shop-search__icon"></i>
+                                <input type="text" class="shop-search__input" placeholder="Tìm kiếm sản phẩm...">
+                            </div>
+                            <div class="shop-sort">
+                                <select class="shop-sort__select">
+                                    <option value="newest">Mới nhất</option>
+                                    <option value="price-asc">Giá tăng dần</option>
+                                    <option value="price-desc">Giá giảm dần</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="productGrid" class="row shop__products shop-grid">
+                            <!-- Products will be loaded here -->
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>

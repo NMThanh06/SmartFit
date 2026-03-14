@@ -1,21 +1,46 @@
 :root {
-    --text-main: #fff;
+    /* Brand Colors - Màu thương hiệu */
+    --primary-blue: #2176ff;
+    --primary-blue-dark: #1a5bcc;
+    --primary-purple: #6C63FF;
+    --primary-pink: #FF6584;
+    --brand-magenta: #ff0080;
+
+    /* Text Colors - Màu chữ */
+    --text-main: #ffffff;
     --text-sub: #E0E0E0;
     --text-muted: #A0A0A0;
+    --text-main-grey: #333333;
+    --text-sub-grey: #666666;
+    
+    /* Apple/Premium Monochrome Style */
+    --apple-black: #1d1d1f;
+    --apple-grey: #86868b;
+    --apple-bg: #f5f5f7;
 
-    --text-main-grey: #333;
-    --text-sub-grey: #666;
+    /* Semantic Colors - Màu chức năng */
+    --success: #12b76a;
+    --warning: #f79009;
+    --error: #ff4d4d;
+    --price-color: #FF6584;
 
+    /* Backgrounds & Borders */
     --background-color: #f5f5f7;
+    --card-bg: #ffffff;
+    --border-color: #e1e1e1;
+    --border-focus: #6C63FF;
 
+    /* Glassmorphism & Transparencies */
     --glass-bg: rgba(20, 20, 20, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
+    --white-05: rgba(255, 255, 255, 0.05);
+    --white-10: rgba(255, 255, 255, 0.1);
+    --white-20: rgba(255, 255, 255, 0.2);
+    --purple-05: rgba(108, 99, 255, 0.05);
+    --purple-30: rgba(108, 99, 255, 0.3);
 
+    /* UI Components */
     --button-bg: #94B4C1;
-
-    --success: #00E676;
-    --loading: #FFEA00;
-
     --navbar-height: 80px;
     --footer-height: 70px;
 }
