@@ -23,6 +23,7 @@ window.app = {
         this.initUserMenu();
         this.startClock();
         this.initFormEvent();
+        this.initScrollBtn();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -238,25 +239,6 @@ window.app = {
         }
     },
 
-    initFormEvent: function () {
-        const configForm = document.querySelector('.config-form');
-        const resultSection = document.getElementById('result');
-
-        if (configForm) {
-            configForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                if (resultSection) {
-                    resultSection.style.display = 'flex';
-
-                    resultSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        }
-    },
 
     resetForm: function () {
         const resultSection = document.getElementById('result');
@@ -269,13 +251,15 @@ window.app = {
         }
     },
 
-    // Xử lý nút bấm 
     initFormEvent: function () {
         const submitBtn = document.querySelector('.confirm__button');
         const configForm = document.getElementById('configForm');
 
         if (!submitBtn || !configForm) {
-            console.error("❌ Không tìm thấy Form hoặc Nút bấm");
+            // Chỉ log nếu đang ở trang có form (index.php)
+            if (window.location.pathname.includes('index.php')) {
+                console.warn("⚠️ Không tìm thấy Form hoặc Nút bấm cấu hình.");
+            }
             return;
         }
 
@@ -535,7 +519,7 @@ window.app = {
             });
     },
 
-    // Hàm tạo hiệu ứng bay
+    // Hiệu ứng bay tới giỏ hàng (giả lập)
     flyToCart: function (imgElement, cartIconElement) {
         if (!imgElement || !cartIconElement) return;
 
@@ -567,6 +551,61 @@ window.app = {
         // Xóa ảnh sau khi bay xong (0.8 giây)
         setTimeout(() => flyImg.remove(), 800);
     },
+
+    // ---------------------------------------------------------
+    // Nút cuộn trang (Scroll Button)
+    // ---------------------------------------------------------
+    initScrollBtn: function () {
+        const scrollBtn = document.getElementById('scrollBtn');
+        const heroSection = document.getElementById('hero');
+        const featuresSection = document.querySelector('.features');
+
+        if (!scrollBtn) return;
+
+        console.log("🖱️ Khởi tạo Nút cuộn trang...");
+
+        // Xử lý xoay mũi tên: Xoay lên khi ra khỏi Hero
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Nếu Hero KHÔNG còn thấy được (đã cuộn xuống qua khỏi nó)
+                if (!entry.isIntersecting) {
+                    scrollBtn.classList.add('up');
+                } else {
+                    // Nếu đang ở Hero
+                    scrollBtn.classList.remove('up');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '-80px 0px 0px 0px' // Bỏ qua phần navbar sticky
+        });
+
+        observer.observe(heroSection);
+
+        // Xử lý sự kiện click
+        scrollBtn.addEventListener('click', () => {
+            if (scrollBtn.classList.contains('up')) {
+                // Quay lên đầu trang
+                heroSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            } else {
+                // Cuộn xuống
+                if (featuresSection) {
+                    featuresSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    window.scrollBy({
+                        top: window.innerHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+        });
+    }
 
 
 };

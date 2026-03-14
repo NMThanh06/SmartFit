@@ -1,13 +1,9 @@
 <?php
-$page_extra_body = '
-    <video src="./assets/video/cloudy.mp4" autoplay muted loop class="web__background"></video>
-    <div class="web__background--overlay"></div>
-';
 include 'includes/header.php';
 ?>
 
         <!-- Hero Section -->
-        <section class="hero" id="hero">
+        <section class="hero hero--index" id="hero">
             <div class="hero__info">
                 <div class="info__greeting"></div> <!--Câu chào-->
                 <div class="info__weather">

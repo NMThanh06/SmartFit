@@ -2,7 +2,9 @@
     --text-main: #fff;
     --text-sub: #E0E0E0;
     --text-muted: #A0A0A0;
+
     --text-main-grey: #333;
+    --text-sub-grey: #666;
 
     --glass-bg: rgba(20, 20, 20, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
@@ -11,6 +13,9 @@
 
     --success: #00E676;
     --loading: #FFEA00;
+
+    --navbar-height: 80px;
+    --footer-height: 70px;
 }
 
 * {

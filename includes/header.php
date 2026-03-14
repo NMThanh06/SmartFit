@@ -66,6 +66,23 @@ require_once __DIR__ . '/config.php';
                 <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="Logo">
             </a>
 
+            <div class="navbar__menu">
+                <a href="<?php echo $root; ?>index.php" class="navbar__menu-item">
+                    <i class="fa-solid fa-shirt"></i>
+                    <span>Phối đồ</span>
+                </a>
+
+                <a href="<?php echo $root; ?>pages/wardrobe.php" class="navbar__menu-item">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Bộ sưu tập</span>
+                </a>
+
+                <a href="<?php echo $root; ?>shop.php" class="navbar__menu-item">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Cửa hàng</span>
+                </a>
+            </div>
+
             <div class="navbar__shop">
                 <div class="navbar__cart" onclick="app.openCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
@@ -84,21 +101,6 @@ require_once __DIR__ . '/config.php';
                                 <a href="<?php echo $root; ?>pages/personal_info.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-id-card"></i>
                                     <span>Thông tin cá nhân</span>
-                                </a>
-
-                                <a href="<?php echo $root; ?>index.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-shirt"></i>
-                                    <span>Phối đồ</span>
-                                </a>
-
-                                <a href="<?php echo $root; ?>pages/wardrobe.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
-                                    <span>Bộ sưu tập</span>
-                                </a>
-
-                                <a href="<?php echo $root; ?>shop.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-store"></i>
-                                    <span>Cửa hàng</span>
                                 </a>
 
                                 <a href="<?php echo $root; ?>pages/order_history.php" class="user-dropdown__item">
