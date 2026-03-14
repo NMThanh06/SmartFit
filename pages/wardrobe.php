@@ -41,66 +41,51 @@ if (isset($_SESSION['user_id'])) {
 include '../includes/header.php';
 ?>
 
-<div class="web__background--overlay"></div>
-
 <section class="wardrobe-page">
     <div class="grid wide">
-        <div class="row">
-            <div class="col l-12 m-12 c-12">
-                <div class="wardrobe__header">
-                    <h1 class="wardrobe__title">Bộ sưu tập</h1>
-                </div>
-            </div>
+        <div class="wardrobe__header">
+            <h1 class="wardrobe__title">Bộ sưu tập của tôi</h1>
+            <p class="wardrobe__subtitle">Lưu trữ những phong cách phối đồ yêu thích của bạn</p>
         </div>
 
         <div class="row">
             <?php if (empty($saved_outfits)): ?>
-                <div class="col l-12" style="text-align: center; padding: 40px 0;">
-                    <p>Bạn chưa lưu bộ trang phục nào.</p>
-                    <a href="../index.php" class="button" style="margin-top: 10px; display: inline-block;">Phối đồ ngay</a>
+                <div class="col l-12">
+                    <div class="wardrobe-empty">
+                        <i class="fa-solid fa-shirt"></i>
+                        <p>Bạn chưa lưu bộ trang phục nào.</p>
+                        <a href="../index.php" class="btn-primary">Phối đồ ngay</a>
+                    </div>
                 </div>
             <?php else: ?>
                 <?php foreach ($saved_outfits as $outfit): ?>
-                    <div class="col l-3 m-4 c-12">
+                    <div class="col l-3 m-6 c-12">
                         <div class="wardrobe-card">
-                            <div class="wardrobe-card__images">
-                                        <img src="../assets/img/<?php echo basename($outfit['top_img']); ?>" alt="Áo">
-                                        
-                                        <img src="../assets/img/<?php echo basename($outfit['bottom_img']); ?>" alt="Quần">
-                                        
-                                        <!-- phần hiển thị 2 món còn lại niếu cần *(chưa css/js) -->
-                                        <!-- <img src="../assets/img/<?php echo basename($outfit['shoes_img']); ?>" alt="Giày">
-                                        
-                                        <?php if ($outfit['acc_img']): ?>
-                                            <img src="../assets/img/<?php echo basename($outfit['acc_img']); ?>" alt="Phụ kiện">
-                                        <?php endif; ?> -->
-
+                            <div class="wardrobe-card__gallery">
+                                <div class="wardrobe-card__img">
+                                    <img src="../assets/img/<?php echo basename($outfit['top_img']); ?>" alt="Áo">
+                                </div>
+                                <div class="wardrobe-card__img">
+                                    <img src="../assets/img/<?php echo basename($outfit['bottom_img']); ?>" alt="Quần">
+                                </div>
                             </div>
 
-                            <div class="wardrobe-card__info">
-                                <div class="wardrobe-card__header">
-                                    <h3 class="wardrobe-card__title"><?php echo htmlspecialchars($outfit['style_name'] ?: 'Style của tôi'); ?></h3>
-                                    <button class="wardrobe-card__delete" 
-                                            title="Xóa" 
-                                            onclick="app.deleteSavedOutfit(<?php echo $outfit['saved_id']; ?>, this)">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
+                            <div class="wardrobe-card__body">
+                                <div class="wardrobe-card__main">
+                                    <h3 class="wardrobe-card__name">
+                                        <?php echo htmlspecialchars($outfit['style_name'] ?: 'Style của tôi'); ?>
+                                    </h3>
+                                    <div class="wardrobe-card__desc">
+                                        <p><span>Áo:</span> <?php echo htmlspecialchars($outfit['top_name']); ?></p>
+                                        <p><span>Quần:</span> <?php echo htmlspecialchars($outfit['bottom_name']); ?></p>
+                                    </div>
+                                    <span class="wardrobe-card__date">Đã phối sản phẩm</span>
                                 </div>
-
-                                <ul class="wardrobe-card__items">
-                                            <li>
-                                            <p><?php echo htmlspecialchars($outfit['top_name']); ?></p>
-                                            </li>
-                                            <li>
-                                                <p><?php echo htmlspecialchars($outfit['bottom_name']); ?></p>
-                                            </li>
-                                            <li>
-                                                <p><?php echo htmlspecialchars($outfit['shoes_name']); ?></p>
-                                            </li>
-                                            <li>
-                                                <p><?php echo $outfit['acc_name'] ? htmlspecialchars($outfit['acc_name']) : 'Không có'; ?></p>
-                                            </li>
-                                </ul>
+                                <button class="wardrobe-card__btn-delete" 
+                                        onclick="app.deleteSavedOutfit(<?php echo $outfit['saved_id']; ?>, this)"
+                                        title="Xóa bộ đồ này">
+                                    <i class="fa-solid fa-trash-can"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
