@@ -1,7 +1,4 @@
 <?php
-$page_extra_body = '
-    <div class="web__background--overlay"></div>
-';
 include 'includes/header.php';
 
 $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -55,63 +52,101 @@ function translateFitData($data)
 $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ kiện' : translateFitData($product['type']);
 ?>
 
-        <!-- Detail product -->
-        <section class="detail-page">
-            <div class="grid wide">
-                <a href="shop.php" class="detail__back-btn" style="display: inline-block; color: white; margin-bottom: 20px; text-decoration: none; font-size: 1.6rem;"><i class="fa-solid fa-arrow-left"></i> Quay lại cửa hàng</a>
-
-                <div class="row" id="productDetailWrapper">
-    <div class="col l-6 m-6 c-12">
-        <div class="detail__image">
-            <img src="<?php echo htmlspecialchars($product['image']); ?>" id="mainProductImg" style="width: 100%; border-radius: 8px;" onerror="this.src='./assets/img/default-placeholder.jpg'">
+<section class="detail-page">
+    <div class="grid wide">
+        <div class="detail-back">
+            <a href="shop.php" class="detail-back__link">
+                <i class="fa-solid fa-arrow-left"></i>
+                Quay lại cửa hàng
+            </a>
         </div>
-    </div>
 
-    <div class="col l-6 m-6 c-12">
-        <div class="detail__info" style="color: white;">
-            <h1 class="detail__name" style="font-size: 3.2rem; margin-bottom: 10px;"><?php echo htmlspecialchars($product['name']); ?></h1>
-            <div class="detail__price" style="color: #ff4d4f; font-size: 2.6rem; font-weight: bold; margin-bottom: 25px;">
-                <?php echo number_format($product['price'], 0, ',', '.'); ?> đ
-            </div>
+        <div class="product-detail">
+            <div class="row">
+                <!-- Cột trái: Ảnh sản phẩm -->
+                <div class="col l-6 m-12 c-12">
+                    <div class="product-detail__gallery">
+                        <div class="product-detail__image">
+                            <img src="<?php echo htmlspecialchars($product['image']); ?>" id="mainProductImg" 
+                                 alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                 onerror="this.src='./assets/img/default-placeholder.jpg'">
+                        </div>
+                    </div>
+                </div>
 
-            <div class="detail__desc" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; font-size: 1.5rem; line-height: 2;">
-                <div><strong>Loại:</strong> <?php echo $displayType; ?></div>
-                <div><strong>Phong cách:</strong> <?php echo translateFitData($product['style']); ?></div>
-                <div><strong>Phù hợp:</strong> <?php echo translateFitData($product['occasion']); ?></div>
-                <div><strong>Độ rộng:</strong> <?php echo translateFitData($product['fit'] ?? ''); ?></div>
-                <div style="color: #ffcc00;"><strong>Kho còn:</strong> <span id="stockInfo">Vui lòng chọn size</span></div>
-            </div>
+                <!-- Cột phải: Thông tin sản phẩm -->
+                <div class="col l-6 m-12 c-12">
+                    <div class="product-detail__content">
+                        <h1 class="product-detail__title"><?php echo htmlspecialchars($product['name']); ?></h1>
+                        
+                        <div class="product-detail__price">
+                            <?php echo number_format($product['price'], 0, ',', '.'); ?> đ
+                        </div>
 
-            <div class="detail__size" style="margin-bottom: 25px;">
-                <p style="margin-bottom: 12px; font-size: 1.6rem;">Chọn Kích Cỡ:</p>
-                <div class="detail__size-options" style="display: flex; gap: 12px;">
-                    <?php foreach ($sizeList as $size): ?>
-                        <button class="size-btn-item" onclick="selectSize(this)" data-size="<?php echo htmlspecialchars($size['size_name']); ?>" data-quantity="<?php echo intval($size['quantity']); ?>"
-                            style="min-width: 60px; height: 45px; border: 1px solid #888; background: transparent; color: white; cursor: pointer; border-radius: 4px; font-weight: bold;">
-                            <?php echo htmlspecialchars($size['size_name']); ?>
-                        </button>
-                    <?php
-endforeach; ?>
+                        <div class="product-detail__meta">
+                            <div class="product-detail__meta-item">
+                                <span class="label">Loại:</span>
+                                <span class="value"><?php echo $displayType; ?></span>
+                            </div>
+                            <div class="product-detail__meta-item">
+                                <span class="label">Phong cách:</span>
+                                <span class="value"><?php echo translateFitData($product['style']); ?></span>
+                            </div>
+                            <div class="product-detail__meta-item">
+                                <span class="label">Cân nặng:</span>
+                                <span class="value"><?php echo translateFitData($product['fit'] ?? ''); ?></span>
+                            </div>
+                            <div class="product-detail__meta-item">
+                                <span class="label">Tình trạng:</span>
+                                <span class="value status" id="stockInfo">Vui lòng chọn size</span>
+                            </div>
+                        </div>
+
+                        <div class="product-detail__separator"></div>
+
+                        <!-- Chọn Size -->
+                        <div class="product-detail__option">
+                            <h3 class="product-detail__label">Kích thước</h3>
+                            <div class="product-detail__sizes">
+                                <?php foreach ($sizeList as $size): ?>
+                                    <button class="size-btn-item" onclick="selectSize(this)" 
+                                            data-size="<?php echo htmlspecialchars($size['size_name']); ?>" 
+                                            data-quantity="<?php echo intval($size['quantity']); ?>">
+                                        <?php echo htmlspecialchars($size['size_name']); ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- Chọn Số lượng -->
+                        <div class="product-detail__option">
+                            <h3 class="product-detail__label">Số lượng</h3>
+                            <div class="product-detail__qty">
+                                <div class="qty-control">
+                                    <button class="qty-btn" onclick="changeQty(-1)">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <input type="text" id="qtyDisplay" value="1" readonly class="qty-input">
+                                    <button class="qty-btn" onclick="changeQty(1)">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="product-detail__actions">
+                            <button onclick="addToCartFromDetail()" class="btn-add-cart">
+                                <i class="fa-solid fa-cart-plus"></i>
+                                Thêm vào giỏ hàng
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="detail__qty" style="margin-bottom: 35px; display: flex; align-items: center; gap: 20px;">
-                <span style="font-size: 1.6rem;">Số Lượng:</span>
-                <div style="display: flex; align-items: center; background: #444; border-radius: 4px;">
-                    <button class="qty-btn" onclick="changeQty(-1)" style="width: 35px; height: 35px; border: none; background: none; color: white; cursor: pointer;">-</button>
-                    <input type="text" id="qtyDisplay" value="1" readonly style="width: 45px; text-align: center; border: none; background: none; color: white; font-weight: bold;">
-                    <button class="qty-btn" onclick="changeQty(1)" style="width: 35px; height: 35px; border: none; background: none; color: white; cursor: pointer;">+</button>
-                </div>
-            </div>
-
-            <button onclick="addToCartFromDetail()" class="button" style="width: 100%; padding: 18px; background: #ff4d4f; color: white; border: none; font-size: 1.6rem; font-weight: bold; cursor: pointer; border-radius: 6px;">
-                <i class="fa-solid fa-cart-shopping"></i> THÊM VÀO GIỎ HÀNG
-            </button>
         </div>
     </div>
-</div>
-            </div>
-        </section>
+</section>
 
 
 <?php require_once 'includes/footer.php'; ?>
@@ -146,16 +181,23 @@ endforeach; ?>
             currentQty = 1;
         }
 
-        // Highlight nút được chọn
+        // Highlight nút được chọn bằng class 'selected'
         document.querySelectorAll('.size-btn-item').forEach(btn => {
-            btn.style.background = 'transparent';
-            btn.style.color = 'white';
+            btn.classList.remove('selected');
         });
-        btnElement.style.background = 'white';
-        btnElement.style.color = 'black';
+        btnElement.classList.add('selected');
 
         document.getElementById('qtyDisplay').value = currentQty;
-        document.getElementById('stockInfo').innerText = maxStock + ' sản phẩm';
+        
+        // Hiển thị tồn kho chuyên nghiệp
+        const stockEl = document.getElementById('stockInfo');
+        if (maxStock > 0) {
+            stockEl.innerText = `Còn ${maxStock} sản phẩm`;
+            stockEl.style.color = 'var(--success)';
+        } else {
+            stockEl.innerText = 'Hết hàng';
+            stockEl.style.color = 'var(--error)';
+        }
     }
 
     // 2. HÀM THAY ĐỔI SỐ LƯỢNG (Giới hạn bởi maxStock)
@@ -229,20 +271,20 @@ endforeach; ?>
         // --- Kết thúc hiệu ứng ---
 
         // Push vào mảng cart toàn cục (đã khai báo ở footer.php)
-        const existingItemIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize);
+            const existingItemIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize);
 
-        if (existingItemIndex !== -1) {
-            cart[existingItemIndex].quantity += currentQty;
-        } else {
-            cart.push({
-                id: currentProduct.id,
-                name: currentProduct.name,
-                image: currentProduct.image,
-                price: currentProduct.price,
-                size: selectedSize,
-                quantity: currentQty
-            });
-        }
+            if (existingItemIndex !== -1) {
+                cart[existingItemIndex].quantity += currentQty;
+            } else {
+                cart.push({
+                    id: currentProduct.id,
+                    name: currentProduct.name,
+                    image: currentProduct.image,
+                    price: currentProduct.price,
+                    size: selectedSize,
+                    quantity: currentQty
+                });
+            }
 
         // GỌI HÀM DÙNG CHUNG: lưu localStorage + render lại
         saveCart();
