@@ -42,7 +42,7 @@
                             <h3 class="footer__heading">Chính sách</h3>
                             <ul class="footer__list">
                                 <li class="footer__item">
-                                    <a href="#" class="footer__link">Chính sách bảo mật<span>Bảo vệ thông tin người dùng.</span></a>
+                                    <a href="<?php echo $root; ?>pages/privacy.php" class="footer__link">Chính sách bảo mật<span>Bảo vệ thông tin người dùng.</span></a>
                                 </li>
                                 <li class="footer__item">
                                     <a href="#" class="footer__link">Điều khoản dịch vụ<span>Quy định sử dụng trang web.</span></a>
