@@ -20,10 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $fit = $_POST['fit'] ?? [];
     $color = $_POST['color'] ?? 'neutral';
 
-    $pairings = [];
-    if (!empty($_POST['pairings'])) {
-        $pairings = array_filter(array_map('trim', explode(',', $_POST['pairings'])));
-    }
+    $seller_note = trim($_POST['seller_note'] ?? '');
+    $age = trim($_POST['age'] ?? 'All');
 
     $sizes = [];
     if (!empty($_POST['size_name']) && !empty($_POST['size_qty'])) {
@@ -96,13 +94,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            if (!empty($pairings)) {
-                mysqli_query($conn, "DELETE FROM outfit_pairings WHERE outfit_id = $outfit_id");
-                foreach ($pairings as $pairing_name) {
-                    $p_name_esc = mysqli_real_escape_string($conn, $pairing_name);
-                    mysqli_query($conn, "INSERT INTO outfit_pairings (outfit_id, pairing_name) VALUES ($outfit_id, '$p_name_esc')");
-                }
-            }
+            // Update seller_note in DB (assuming the column exists now)
+            // If the column name differs or doesn't exist yet, this ensures we don't crash, or we should just omit DB parts that might fail.
+            // Bỏ qua update outfit_pairings vì DB đã dời sang outfits.seller_note
+            $age_esc = mysqli_real_escape_string($conn, $age);
+            $seller_note_esc = mysqli_real_escape_string($conn, $seller_note);
+            mysqli_query($conn, "UPDATE outfits SET age = '$age_esc', seller_note = '$seller_note_esc' WHERE id = $outfit_id");
 
             // ==========================================
             // CẬP NHẬT FILE JSON 
@@ -126,9 +123,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
             
-            if (!empty($pairings)) {
-                $currentData['items'][$existsIndex]['pairings'] = array_values($pairings);
-            }
+            $currentData['items'][$existsIndex]['age'] = $age;
+            $currentData['items'][$existsIndex]['seller_note'] = $seller_note;
 
             $message = "<div class='alert success'>✅ Đã cập nhật & cộng dồn số lượng cho: <strong>$name</strong></div>";
             
@@ -151,9 +147,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $fit_esc = mysqli_real_escape_string($conn, json_encode($fit, JSON_UNESCAPED_UNICODE));
             $weather_esc = mysqli_real_escape_string($conn, json_encode(['hot', 'mild', 'cold'], JSON_UNESCAPED_UNICODE));
 
+            $age_esc = mysqli_real_escape_string($conn, $age);
+            $seller_note_esc = mysqli_real_escape_string($conn, $seller_note);
+
             // 2. Chèn vào MySQL ĐẦU TIÊN
-            $sql_insert = "INSERT INTO outfits (name, type, color, price, image, style, occasion, weather, fit, gender) 
-                           VALUES ('$name_esc', '$type_esc', '$color_esc', $price, '$image_esc', '$style_esc', '$occasion_esc', '$weather_esc', '$fit_esc', '$gender_esc')";
+            $sql_insert = "INSERT INTO outfits (name, type, color, price, image, style, occasion, weather, fit, gender, age, seller_note) 
+                           VALUES ('$name_esc', '$type_esc', '$color_esc', $price, '$image_esc', '$style_esc', '$occasion_esc', '$weather_esc', '$fit_esc', '$gender_esc', '$age_esc', '$seller_note_esc')";
             
             if (mysqli_query($conn, $sql_insert)) {
                 
@@ -167,10 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 
                 // Lưu bảng pairings
-                foreach ($pairings as $pairing_name) {
-                    $p_name_esc = mysqli_real_escape_string($conn, $pairing_name);
-                    mysqli_query($conn, "INSERT INTO outfit_pairings (outfit_id, pairing_name) VALUES ($outfit_id, '$p_name_esc')");
-                }
+                // Đã bỏ vì không dùng bảng pairings nữa
 
                 // 4. TIẾN HÀNH THÊM VÀO MẢNG JSON VỚI ID CỦA MYSQL
                 $newItem = [
@@ -186,7 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'image' => $imagePath, 
                     'price' => $price,
                     'sizes' => $sizes,
-                    'pairings' => array_values($pairings)
+                    'age' => $age,
+                    'seller_note' => $seller_note
                 ];
                 $currentData['items'][] = $newItem;
                 $message = "<div class='alert success'>✨ Đã thêm mới sản phẩm: <strong>$name</strong> (Mã ID: $outfit_id)</div>";
@@ -443,9 +440,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="form-group">
-            <label class="main-label">Món gợi ý phối cùng</label>
-            <input type="text" name="pairings" placeholder="VD: Quần jean xanh, Áo thun trắng...">
-            <small class="help-text">Nhập tên các món nên phối chung, ngăn cách bằng dấu phẩy (,). Bỏ trống nếu không có.</small>
+            <label class="main-label">Độ tuổi phù hợp (Age)</label>
+            <input type="text" name="age" placeholder="VD: All, 15-20, 21-30..." value="All">
+            <small class="help-text">Nhập 'All' nếu hợp mọi lứa tuổi, hoặc khoảng tuổi (VD: 15-20).</small>
+        </div>
+
+        <div class="form-group">
+            <label class="main-label">Lời khuyên của Seller (Seller Note)</label>
+            <input type="text" name="seller_note" placeholder="VD: Áo thun basic, hợp đi dạo, chất cotton thoáng mát">
+            <small class="help-text">Nhập mô tả, ý tưởng phối đồ, chất liệu, tính ứng dụng của món đồ.</small>
         </div>
 
         <div class="form-group size-box">

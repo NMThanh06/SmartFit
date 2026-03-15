@@ -30,7 +30,8 @@
                 "L": 15,
                 "XL": 5
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": 2,
@@ -63,7 +64,8 @@
                 "L": 10,
                 "XL": 2
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": 3,
@@ -95,7 +97,8 @@
                 "M": 10,
                 "L": 5
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": 4,
@@ -126,7 +129,8 @@
                 "M": 12,
                 "L": 8
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": 5,
@@ -156,9 +160,8 @@
                 "41": 15,
                 "42": 8
             },
-            "pairings": [
-                "Quần tây nam âu phục"
-            ]
+            "seller_note": "Quần tây nam âu phục",
+            "age": "All"
         },
         {
             "id": 6,
@@ -189,7 +192,8 @@
             "sizes": {
                 "M": 1
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": 7,
@@ -223,7 +227,8 @@
                 "XL": 20,
                 "XXL": 5
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": "8",
@@ -257,7 +262,8 @@
                 "42": 15,
                 "40": 20
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": "9",
@@ -293,7 +299,8 @@
                 "39": 20,
                 "40": 5
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         },
         {
             "id": "10",
@@ -329,7 +336,8 @@
             "sizes": {
                 "OVER": 10
             },
-            "pairings": []
+            "seller_note": "",
+            "age": "All"
         }
     ]
 }

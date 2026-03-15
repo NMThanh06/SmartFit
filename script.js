@@ -441,16 +441,27 @@ window.app = {
         const color = document.querySelector('input[name="color"]:checked')?.value;
         const fit = document.querySelector('input[name="fit"]:checked')?.value;
         const note = document.querySelector('.config-form__textarea')?.value || '';
+        const age = document.getElementById('age')?.value || 'All';
 
-        if (!occasion || !gender || !style || !color || !fit) {
+        if (!occasion || !gender || !style || !color || !fit || !age) {
             this.showNotification('Vui lòng chọn đầy đủ thông tin!', 'error');
             return null;
         }
 
         const tempText = document.querySelector('.info__weather__temp')?.innerText || '25';
+        const weatherText = document.querySelector('.info__weather__text')?.innerText || 'Trời quang';
+        
+        let descText = document.querySelector('.info__desc')?.innerHTML || 'HCM —';
+        // Extract Location from <b>LocationName</b> —
+        let location = 'Hồ Chí Minh';
+        const locationMatch = descText.match(/<b>(.*?)<\/b>/);
+        if (locationMatch && locationMatch[1]) {
+            location = locationMatch[1].trim();
+        }
+
         return {
-            occasion, gender, style, color, fit, note,
-            weather: { temp: parseInt(tempText), condition: 'cloudy' },
+            occasion, gender, style, color, fit, note, age, location,
+            weather: { temp: parseInt(tempText), condition: weatherText.trim() },
             timeOfDay: 'day'
         };
     },
