@@ -73,8 +73,8 @@ require_once __DIR__ . '/config.php';
                 </a>
 
                 <a href="<?php echo $root; ?>pages/wardrobe.php" class="navbar__menu-item">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                    <span>Bộ sưu tập</span>
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Tủ đồ</span>
                 </a>
 
                 <a href="<?php echo $root; ?>shop.php" class="navbar__menu-item">

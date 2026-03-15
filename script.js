@@ -14,6 +14,10 @@ window.app = {
         this.startClock();
         this.initFormEvent();
         this.initScrollBtn();
+        this.initAuthFormSubmit();
+        
+        // Khôi phục kết quả phối đồ nếu có
+        this.restoreOutfit();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -180,6 +184,108 @@ window.app = {
         };
     },
 
+    // Xử lý gửi form Đăng nhập/Đăng ký qua AJAX
+    initAuthFormSubmit: function () {
+        const loginForm = document.querySelector('#loginForm form');
+        const registerForm = document.querySelector('#registerForm form');
+        const self = this;
+
+        const handleAuthSubmit = async (e, formType) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const action = form.getAttribute('action');
+
+            try {
+                const response = await fetch(action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    self.showNotification(data.message, 'success');
+                    document.getElementById('authOverlay').style.display = 'none';
+                    form.reset();
+
+                    if (formType === 'login') {
+                        // Cập nhật Navbar sau khi đăng nhập thành công
+                        self.updateNavbarAfterLogin(data.user_name);
+                    }
+                } else {
+                    self.showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Auth Error:', error);
+                self.showNotification('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+            }
+        };
+
+        if (loginForm) loginForm.addEventListener('submit', (e) => handleAuthSubmit(e, 'login'));
+        if (registerForm) registerForm.addEventListener('submit', (e) => handleAuthSubmit(e, 'register'));
+    },
+
+    // Cập nhật Navbar dynamic mà không reload trang
+    updateNavbarAfterLogin: function (userName) {
+        const authContainer = document.querySelector('.navbar__auth');
+        if (!authContainer) return;
+
+        // Nội dung HTML mới cho phần User (thay thế nút Đăng nhập)
+        // Lưu ý: Root path ở đây là tương đối, nên dùng window.location.origin hoặc tương đương nếu phức tạp hơn
+        // Tuy nhiên dựa trên header.php, chúng ta sẽ xây dựng cấu trúc tương tự.
+        const userHtml = `
+            <div id="userInfoToggle" class="user-info">
+                <div class="user-info__trigger">
+                    <span class="user-info__name"> Xin chào, <b>${userName}</b></span>
+                    <i class="fa-solid fa-caret-down user-info__arrow"></i>
+                </div>
+                <div id="userDropdown" class="user-dropdown">
+                    <a href="pages/personal_info.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Thông tin cá nhân</span>
+                    </a>
+                    <a href="pages/order_history.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Lịch sử đơn hàng</span>
+                    </a>
+                    <a href="pages/add-outfit.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Thêm trang phục</span>
+                    </a>
+                    <div class="user-dropdown__divider"></div>
+                    <a href="includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        authContainer.innerHTML = userHtml;
+
+        // Khởi tạo lại sự kiện cho menu user mới tạo
+        this.initUserMenu();
+        
+        // Tự động khôi phục dữ liệu lên nút "Lưu set đồ" nếu đang có kết quả
+        const savedData = localStorage.getItem('smartfit_last_outfit');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+            if (btnSave) {
+                btnSave.setAttribute('data-top', data.topId);
+                btnSave.setAttribute('data-bottom', data.bottomId);
+                btnSave.setAttribute('data-shoes', data.shoesId);
+                btnSave.setAttribute('data-acc', data.accId || 'null');
+                btnSave.setAttribute('data-style', data.style);
+            }
+        }
+    },
+
     // Submenu User
     initUserMenu: function () {
         const userInfo = document.getElementById('userInfoToggle');
@@ -211,6 +317,8 @@ window.app = {
             configForm.reset();
             configForm.scrollIntoView({ behavior: 'smooth' });
         }
+        // Xóa kết quả lưu trữ
+        localStorage.removeItem('smartfit_last_outfit');
     },
 
     initFormEvent: function () {
@@ -351,7 +459,41 @@ window.app = {
         const resultSection = document.getElementById('result');
         if (resultSection) {
             resultSection.style.display = 'flex';
-            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Chỉ scroll nếu không phải đang khôi phục từ localStorage
+            if (!data.isRestored) {
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 5. Lưu vào localStorage
+        if (!data.isRestored) {
+            localStorage.setItem('smartfit_last_outfit', JSON.stringify(data));
+        }
+    },
+
+    // Khôi phục kết quả từ localStorage
+    restoreOutfit: function () {
+        const savedData = localStorage.getItem('smartfit_last_outfit');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                console.log("🔄 Đang khôi phục kết quả phối đồ từ localStorage...");
+                data.isRestored = true;
+                this.displayResult(data);
+                
+                // Cập nhật dữ liệu cho nút lưu (quan trọng nếu người dùng đăng nhập sau khi khôi phục)
+                const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+                if (btnSave) {
+                    btnSave.setAttribute('data-top', data.topId);
+                    btnSave.setAttribute('data-bottom', data.bottomId);
+                    btnSave.setAttribute('data-shoes', data.shoesId);
+                    btnSave.setAttribute('data-acc', data.accId || 'null');
+                    btnSave.setAttribute('data-style', data.style);
+                }
+            } catch (e) {
+                console.error("Lỗi khi khôi phục outfit:", e);
+                localStorage.removeItem('smartfit_last_outfit');
+            }
         }
     },
 

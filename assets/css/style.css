@@ -473,6 +473,8 @@
     /* Ensure content isn't under the navbar */
     position: relative;
 
+    background-color: var(--background-color);
+
     /* Dùng flex để dễ dàng căn giữa theo cả dọc và ngang */
     display: none;
     /* Ẩn mặc định */

@@ -2,14 +2,33 @@
 session_start();
 require_once 'config.php';
 
+// Kiểm tra xem có phải yêu cầu AJAX (Fetch API) không
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' 
+          || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
+function sendResponse($success, $message, $data = []) {
+    global $isAjax;
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $data));
+        exit;
+    } else {
+        if ($success) {
+            $_SESSION['success'] = $message;
+        } else {
+            $_SESSION['error'] = $message;
+        }
+        header('Location: ../index.php');
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['psw'] ?? '';
 
     if (empty($email) || empty($password)) {
-        $_SESSION['error'] = 'Vui lòng nhập email và mật khẩu';
-        header('Location: ../index.php');
-        exit;
+        sendResponse(false, 'Vui lòng nhập email và mật khẩu');
     }
 
     $stmt = mysqli_prepare($conn, "SELECT id, name, email, password FROM users WHERE email = ?");
@@ -33,15 +52,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setcookie('remember_token', $token, $expiry, '/', '', false, true);
         }
 
-        $_SESSION['success'] = 'Đăng nhập thành công!';
-        header('Location: ../index.php');
-        exit;
+        sendResponse(true, 'Đăng nhập thành công!', ['user_name' => $user['name']]);
     } else {
-        $_SESSION['error'] = 'Email hoặc mật khẩu không đúng';
-        header('Location: ../index.php');
-        exit;
+        sendResponse(false, 'Email hoặc mật khẩu không đúng');
     }
 }
 
-header('Location:../index.php');
+header('Location: ../index.php');
 exit;

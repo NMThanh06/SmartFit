@@ -24,13 +24,13 @@
                             <h3 class="footer__heading">Tính năng</h3>
                             <ul class="footer__list">
                                 <li class="footer__item">
-                                    <a href="#" class="footer__link">Phối đồ AI: <span>Gợi ý trang phục thông minh theo thời tiết.</span></a>
+                                    <a href="<?php echo $root; ?>index.php" class="footer__link">Phối đồ AI<span>Gợi ý trang phục thông minh theo thời tiết.</span></a>
                                 </li>
                                 <li class="footer__item">
-                                    <a href="#" class="footer__link">Tủ đồ ảo: <span>Quản lý và lưu trữ bộ sưu tập cá nhân.</span></a>
+                                    <a href="<?php echo $root; ?>pages/wardrobe.php" class="footer__link">Tủ đồ<span>Quản lý và lưu trữ bộ sưu tập cá nhân.</span></a>
                                 </li>
                                 <li class="footer__item">
-                                    <a href="<?php echo $root; ?>shop.php" class="footer__link">Cửa hàng: <span>Khám phá những món đồ thời trang mới nhất.</span></a>
+                                    <a href="<?php echo $root; ?>shop.php" class="footer__link">Cửa hàng<span>Khám phá những món đồ thời trang mới nhất.</span></a>
                                 </li>
                             </ul>
                         </div>
@@ -42,10 +42,10 @@
                             <h3 class="footer__heading">Chính sách</h3>
                             <ul class="footer__list">
                                 <li class="footer__item">
-                                    <a href="#" class="footer__link">Chính sách bảo mật: <span>Bảo vệ thông tin người dùng.</span></a>
+                                    <a href="#" class="footer__link">Chính sách bảo mật<span>Bảo vệ thông tin người dùng.</span></a>
                                 </li>
                                 <li class="footer__item">
-                                    <a href="#" class="footer__link">Điều khoản dịch vụ: <span>Quy định sử dụng trang web.</span></a>
+                                    <a href="#" class="footer__link">Điều khoản dịch vụ<span>Quy định sử dụng trang web.</span></a>
                                 </li>
                             </ul>
                         </div>

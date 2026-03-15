@@ -44,7 +44,7 @@ include '../includes/header.php';
 <section class="wardrobe-page">
     <div class="grid wide">
         <div class="wardrobe__header">
-            <h1 class="wardrobe__title">Bộ sưu tập của tôi</h1>
+            <h1 class="wardrobe__title">Tủ đồ của tôi</h1>
             <p class="wardrobe__subtitle">Lưu trữ những phong cách phối đồ yêu thích của bạn</p>
         </div>
 
