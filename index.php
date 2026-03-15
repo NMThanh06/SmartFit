@@ -236,17 +236,18 @@ include 'includes/header.php';
         margin: 12px 0;
         border: none;
         border-radius: 30px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: var(--primary-blue);
         color: #fff;
         font-size: 1.5rem;
         font-weight: 600;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 12px rgba(33, 118, 255, 0.2);
     }
     .btn-choose-location:hover {
+        background: var(--primary-blue-dark);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.55);
+        box-shadow: 0 6px 20px rgba(33, 118, 255, 0.35);
     }
     .btn-choose-location:active {
         transform: scale(0.97);
@@ -258,7 +259,6 @@ include 'includes/header.php';
         align-items: center;
         gap: 12px;
         flex-wrap: wrap;
-        margin: 12px 0;
     }
 
     /* --- Dropdown dự báo 7 ngày --- */
@@ -302,22 +302,23 @@ include 'includes/header.php';
     .map-modal__overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.55);
-        backdrop-filter: blur(4px);
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(8px);
     }
 
     .map-modal__content {
         position: relative;
         width: 90%;
-        max-width: 750px;
-        background: #1a1a2e;
-        border-radius: 16px;
+        max-width: 850px;
+        background: #ffffff;
+        border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
-        animation: mapModalIn 0.35s ease;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        animation: mapModalIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        border: 1px solid rgba(0, 0, 0, 0.05);
     }
     @keyframes mapModalIn {
-        from { opacity: 0; transform: scale(0.9) translateY(30px); }
+        from { opacity: 0; transform: scale(0.95) translateY(20px); }
         to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
@@ -325,36 +326,40 @@ include 'includes/header.php';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 20px;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 20px 25px;
+        background: var(--primary-blue);
     }
     .map-modal__title {
         color: #fff;
-        font-size: 1.6rem;
+        font-size: 1.8rem;
         font-weight: 700;
         margin: 0;
     }
     .map-modal__close {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.15);
         border: none;
         color: #fff;
-        font-size: 2.2rem;
-        width: 36px;
-        height: 36px;
+        font-size: 2.4rem;
+        width: 32px;
+        height: 32px;
         border-radius: 50%;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: background 0.2s;
+        transition: all 0.2s;
         line-height: 1;
     }
-    .map-modal__close:hover { background: rgba(255,255,255,0.35); }
+    .map-modal__close:hover { 
+        background: rgba(255,255,255,0.3);
+        transform: rotate(90deg);
+    }
 
     /* Bản đồ */
     .map-modal__map {
         width: 100%;
-        height: 420px;
+        height: 450px;
+        background: #f8f9fa;
     }
 
     /* Footer modal */
@@ -362,33 +367,38 @@ include 'includes/header.php';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 14px 20px;
-        background: #16213e;
+        padding: 16px 25px;
+        background: #ffffff;
+        border-top: 1px solid #f0f0f0;
     }
     .map-modal__coords {
-        color: #a0aec0;
-        font-size: 1.35rem;
+        color: var(--apple-grey);
+        font-size: 1.4rem;
+        font-weight: 500;
     }
     .map-modal__confirm {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 10px 24px;
+        gap: 8px;
+        padding: 12px 28px;
         border: none;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+        border-radius: 12px;
+        background: var(--primary-blue);
         color: #fff;
         font-size: 1.5rem;
-        font-weight: 600;
+        font-weight: 700;
         cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(33, 118, 255, 0.2);
     }
     .map-modal__confirm:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 14px rgba(56, 178, 172, 0.45);
+        background: var(--primary-blue-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(33, 118, 255, 0.35);
     }
     .map-modal__confirm:disabled {
-        opacity: 0.5;
+        background: #e9ecef;
+        color: #adb5bd;
         cursor: not-allowed;
         transform: none;
         box-shadow: none;
