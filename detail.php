@@ -8,25 +8,43 @@ if ($productId <= 0) {
 }
 
 // Lấy thông tin sản phẩm
-$sql = "SELECT * FROM outfits WHERE id = ?";
+$sql = "SELECT o.*, 
+        (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as color_image 
+        FROM outfits o WHERE o.id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $productId);
 mysqli_stmt_execute($stmt);
 $product = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+// Nếu ảnh chính trong bảng outfits trống, dùng ảnh từ outfit_colors
+if (empty($product['image']) && !empty($product['color_image'])) {
+    $product['image'] = $product['color_image'];
+}
 
 if (!$product) {
     die("Không tìm thấy sản phẩm!");
 }
 
 // Lấy Size và số lượng từ bảng outfit_sizes
-$sqlSizes = "SELECT size_name, quantity FROM outfit_sizes WHERE outfit_id = ?";
+$sqlSizes = "SELECT color_id, size_name, quantity FROM outfit_sizes WHERE outfit_id = ?";
 $stmtSizes = mysqli_prepare($conn, $sqlSizes);
 mysqli_stmt_bind_param($stmtSizes, "i", $productId);
 mysqli_stmt_execute($stmtSizes);
 $resSizes = mysqli_stmt_get_result($stmtSizes);
 $sizeList = [];
 while ($row = mysqli_fetch_assoc($resSizes)) {
-    $sizeList[] = $row; // mỗi phần tử chứa 'size_name' và 'quantity'
+    $sizeList[] = $row;
+}
+
+// Lấy danh sách màu sắc
+$sqlColors = "SELECT * FROM outfit_colors WHERE outfit_id = ?";
+$stmtColors = mysqli_prepare($conn, $sqlColors);
+mysqli_stmt_bind_param($stmtColors, "i", $productId);
+mysqli_stmt_execute($stmtColors);
+$resColors = mysqli_stmt_get_result($stmtColors);
+$colorList = [];
+while ($row = mysqli_fetch_assoc($resColors)) {
+    $colorList[] = $row;
 }
 
 // Hàm Việt hóa (Giữ nguyên logic dịch của ông)
@@ -92,13 +110,48 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                                 <span class="label">Phong cách:</span>
                                 <span class="value"><?php echo translateFitData($product['style']); ?></span>
                             </div>
+                            <?php if (!in_array($product['type'], ['shoes', 'accessory', 'accessories', 'glasses'])): ?>
                             <div class="product-detail__meta-item">
-                                <span class="label">Cân nặng:</span>
+                                <span class="label">Độ rộng:</span>
                                 <span class="value"><?php echo translateFitData($product['fit'] ?? ''); ?></span>
                             </div>
+                            <?php endif; ?>
                             <div class="product-detail__meta-item">
                                 <span class="label">Tình trạng:</span>
                                 <span class="value status" id="stockInfo">Vui lòng chọn size</span>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($product['description'])): ?>
+                        <div class="product-detail__description">
+                            <h3 class="product-detail__label">Mô tả sản phẩm</h3>
+                            <p class="product-detail__text">
+                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
+                            </p>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Chọn Màu sắc -->
+                        <div class="product-detail__option">
+                            <h3 class="product-detail__label">Màu sắc</h3>
+                            <div class="product-detail__colors">
+                                <?php foreach ($colorList as $index => $color): 
+                                    // Tính tồn kho tổng của màu này
+                                    $cid = $color['id'];
+                                    $colorStock = 0;
+                                    foreach ($sizeList as $s) {
+                                        if ($s['color_id'] == $cid) {
+                                            $colorStock += intval($s['quantity']);
+                                        }
+                                    }
+                                    $isOut = $colorStock <= 0;
+                                ?>
+                                    <span class="color-btn-item <?php echo $isOut ? 'out-of-stock' : ''; ?>" 
+                                          style="background-color: <?php echo htmlspecialchars($color['hex_code']); ?>"
+                                          title="<?php echo htmlspecialchars($color['color_name']) . ($isOut ? ' (Hết hàng)' : ''); ?>"
+                                          onclick="<?php echo $isOut ? '' : "selectColorOnDetail(this, " . htmlspecialchars(json_encode($color)) . ")"; ?>">
+                                    </span>
+                                <?php endforeach; ?>
                             </div>
                         </div>
 
@@ -163,33 +216,84 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
         id: <?php echo intval($product['id']); ?>,
         name: <?php echo json_encode($product['name']); ?>,
         image: <?php echo json_encode($product['image']); ?>,
-        price: <?php echo intval($product['price']); ?>
+        price: <?php echo intval($product['price']); ?>,
+        allColors: <?php echo json_encode($colorList); ?>,
+        allSizes: <?php echo json_encode($sizeList); ?>
     };
 
-    // Bản đồ tồn kho theo size (dùng để kiểm tra giới hạn trong giỏ hàng)
-    const sizeStockMap = <?php echo json_encode(array_column($sizeList, 'quantity', 'size_name')); ?>;
+    let selectedColor = currentProduct.allColors.length > 0 ? currentProduct.allColors[0].color_name : 'Default';
+    let selectedColorId = currentProduct.allColors.length > 0 ? currentProduct.allColors[0].id : null;
 
-    // 1. HÀM CHỌN SIZE
-    function selectSize(btnElement) {
-        const size = btnElement.getAttribute('data-size');
-        const sizeQuantity = parseInt(btnElement.getAttribute('data-quantity')) || 0;
-        selectedSize = size;
-        maxStock = sizeQuantity;
+    // 0. HÀM CHỌN MÀU
+    function selectColorOnDetail(btnElement, colorObj) {
+        selectedColor = colorObj.color_name;
+        selectedColorId = colorObj.id;
 
-        // Nếu số lượng đang chọn lớn hơn maxStock mới, reset về 1
-        if (currentQty > maxStock) {
-            currentQty = 1;
+        // Đổi ảnh
+        if (colorObj.image) {
+            document.getElementById('mainProductImg').src = colorObj.image;
+            currentProduct.image = colorObj.image; // Cập nhật ảnh đại diện để thêm vào giỏ
         }
 
-        // Highlight nút được chọn bằng class 'selected'
-        document.querySelectorAll('.size-btn-item').forEach(btn => {
-            btn.classList.remove('selected');
-        });
+        // Highlight nút được chọn
+        document.querySelectorAll('.color-btn-item').forEach(btn => btn.classList.remove('selected'));
         btnElement.classList.add('selected');
 
-        document.getElementById('qtyDisplay').value = currentQty;
+        // Render lại size tương ứng
+        renderSizes(selectedColorId);
+    }
+
+    function renderSizes(colorId) {
+        const sizeContainer = document.querySelector('.product-detail__sizes');
+        sizeContainer.innerHTML = '';
+        selectedSize = null;
+        maxStock = 0;
+        document.getElementById('stockInfo').innerText = 'Vui lòng chọn size';
         
-        // Hiển thị tồn kho chuyên nghiệp
+        // Lấy danh sách tên size duy nhất và sắp xếp
+        const allSizes = currentProduct.allSizes || [];
+        const uniqueSizeNames = [...new Set(allSizes.map(s => s.size_name))];
+        const sizeOrder = ['S', 'M', 'L', 'XL', '2XL', 'XXL', '3XL', 'Oversize'];
+        uniqueSizeNames.sort((a, b) => {
+            const ia = sizeOrder.indexOf(a);
+            const ib = sizeOrder.indexOf(b);
+            if (ia !== -1 && ib !== -1) return ia - ib;
+            return a.localeCompare(b);
+        });
+        
+        uniqueSizeNames.forEach(sizeName => {
+            // Tìm tồn kho cho size này ứng với màu đang chọn
+            const sizeData = allSizes.find(s => s.size_name === sizeName && s.color_id == colorId);
+            const qty = sizeData ? parseInt(sizeData.quantity) : 0;
+            const isOut = qty <= 0;
+
+            const btn = document.createElement('button');
+            btn.className = 'size-btn-item' + (isOut ? ' out-of-stock' : '');
+            btn.innerText = sizeName;
+            
+            if (!isOut) {
+                btn.onclick = () => selectSize(btn, sizeName, qty);
+            } else {
+                btn.title = "Hết hàng cho màu này";
+            }
+            
+            sizeContainer.appendChild(btn);
+        });
+
+        if (uniqueSizeNames.length === 0) {
+            sizeContainer.innerHTML = '<p style="color:#999;">Hết hàng</p>';
+        }
+    }
+
+    function selectSize(btnElement, sizeName, quantity) {
+        selectedSize = sizeName;
+        maxStock = parseInt(quantity);
+        currentQty = 1;
+
+        document.querySelectorAll('.size-btn-item').forEach(btn => btn.classList.remove('selected'));
+        btnElement.classList.add('selected');
+        document.getElementById('qtyDisplay').value = currentQty;
+
         const stockEl = document.getElementById('stockInfo');
         if (maxStock > 0) {
             stockEl.innerText = `Còn ${maxStock} sản phẩm`;
@@ -199,6 +303,19 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
             stockEl.style.color = 'var(--error)';
         }
     }
+
+    // Khởi tạo size lần đầu cho màu mặc định (Ưu tiên màu còn hàng)
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstAvailableColorBtn = document.querySelector('.color-btn-item:not(.out-of-stock)');
+        if (firstAvailableColorBtn) {
+            firstAvailableColorBtn.click();
+        } else {
+            // Nếu tất cả màu đều hết hàng
+            const firstColor = document.querySelector('.color-btn-item');
+            if (firstColor) firstColor.classList.add('selected');
+            renderSizes(null);
+        }
+    });
 
     // 2. HÀM THAY ĐỔI SỐ LƯỢNG (Giới hạn bởi maxStock)
     function changeQty(amount) {
@@ -218,28 +335,28 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
 
     // 3. HÀM THÊM VÀO GIỎ TỪ TRANG CHI TIẾT
     function addToCartFromDetail() {
-        if (!selectedSize) {
-            showToast('Vui lòng chọn kích cỡ trước khi mua!', 'error');
+        if (!selectedSize || !selectedColor) {
+            showToast('Vui lòng chọn Kích cỡ và Màu sắc trước khi mua!', 'error');
             return;
         }
 
         // --- KIỂM TRA TỒN KHO TRƯỚC KHI THÊM (CHẶN CỘNG DỒN) ---
-        const existingItem = cart.find(item => item.id === currentProduct.id && item.size === selectedSize);
-        const qtyInCart = existingItem ? existingItem.quantity : 0;
+        const existingIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize && item.color === selectedColor);
+        const qtyInCart = existingIndex !== -1 ? cart[existingIndex].quantity : 0;
         const totalExpected = qtyInCart + currentQty;
 
         if (totalExpected > maxStock) {
             const remaining = maxStock - qtyInCart;
             if (remaining <= 0) {
-                showToast('Size ' + selectedSize + ' đã đạt giới hạn tồn kho trong giỏ hàng! (Đang có ' + qtyInCart + '/' + maxStock + ')', 'error');
+                showToast(`Sản phẩm ${currentProduct.name} (Size ${selectedSize}, ${selectedColor}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
             } else {
-                showToast('Chỉ có thể thêm tối đa ' + remaining + ' sản phẩm nữa cho size ' + selectedSize + '!', 'error');
+                showToast('Chỉ có thể thêm tối đa ' + remaining + ' sản phẩm nữa!', 'error');
             }
-            return; // DỪNG — không chạy animation, không cập nhật giỏ
+            return;
         }
         // --- KẾT THÚC KIỂM TRA TỒN KHO ---
 
-        // --- Hiệu ứng ảnh bay vào giỏ hàng (GIỮ NGUYÊN) ---
+        // --- Hiệu ứng ảnh bay vào giỏ hàng ---
         const imgEl = document.getElementById('mainProductImg');
         const cartIcon = document.querySelector('.navbar__cart');
         if (imgEl && cartIcon) {
@@ -271,20 +388,21 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
         // --- Kết thúc hiệu ứng ---
 
         // Push vào mảng cart toàn cục (đã khai báo ở footer.php)
-            const existingItemIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize);
-
-            if (existingItemIndex !== -1) {
-                cart[existingItemIndex].quantity += currentQty;
-            } else {
-                cart.push({
-                    id: currentProduct.id,
-                    name: currentProduct.name,
-                    image: currentProduct.image,
-                    price: currentProduct.price,
-                    size: selectedSize,
-                    quantity: currentQty
-                });
-            }
+        if (existingIndex !== -1) {
+            cart[existingIndex].quantity += currentQty;
+        } else {
+            cart.push({
+                id: currentProduct.id,
+                name: currentProduct.name,
+                image: currentProduct.image,
+                price: currentProduct.price,
+                size: selectedSize,
+                color: selectedColor,
+                allColors: currentProduct.allColors,
+                allSizes: currentProduct.allSizes,
+                quantity: currentQty
+            });
+        }
 
         // GỌI HÀM DÙNG CHUNG: lưu localStorage + render lại
         saveCart();

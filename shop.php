@@ -95,12 +95,9 @@ include 'includes/header.php';
                 </div>
 
                 <div class="config-modal__group">
-                    <span class="config-modal__label">Màu sắc (Preview)</span>
-                    <div class="config-modal__colors">
-                        <span class="config-color-btn active" style="background: #000;" onclick="selectColor(this, 'Đen')"></span>
-                        <span class="config-color-btn" style="background: #fff;" onclick="selectColor(this, 'Trắng')"></span>
-                        <span class="config-color-btn" style="background: #808080;" onclick="selectColor(this, 'Xám')"></span>
-                        <span class="config-color-btn" style="background: #000080;" onclick="selectColor(this, 'Xanh')"></span>
+                    <span class="config-modal__label">Màu sắc</span>
+                    <div id="modalColorOptions" class="config-modal__colors">
+                        <!-- Colors will be loaded here -->
                     </div>
                 </div>
 
@@ -174,67 +171,108 @@ include 'includes/header.php';
             selectedConfigSize = null;
             selectedConfigColor = null;
 
-            // Load sizes
-            const sizeContainer = document.getElementById('modalSizeOptions');
-            sizeContainer.innerHTML = '';
+            // 1. Load Colors
+            const colorContainer = document.getElementById('modalColorOptions');
+            colorContainer.innerHTML = '';
             
-            // Lấy kích cỡ từ database. Nếu không có, gán mặc định thông minh theo loại
-            let sizeArray = [];
-            let raw = item.sizes;
-            if (typeof raw === 'string') raw = raw.split(',').filter(x => x.trim());
-            
-            if (raw && Array.isArray(raw) && raw.length > 0) {
-                sizeArray = raw;
-            } else if (item.type === 'shoes') {
-                sizeArray = ['39', '40', '41'];
-            } else if (item.name.toLowerCase().includes('kính') || item.type === 'accessories' || item.type === 'accessory') {
-                sizeArray = ['Oversize'];
-            } else {
-                sizeArray = ['S', 'M', 'L', 'XL'];
-            }
-            
-            console.log("Loading sizes for:", item.name, "Type:", item.type, "Sizes:", sizeArray);
-            
-            sizeArray.forEach((s, index) => {
-                const sClean = s.trim();
-                const btn = document.createElement('button');
-                btn.className = 'config-size-btn';
-                
-                // Giả lập: Hết hàng cho 1 vài size ngẫu nhiên (ví dụ size XL hoặc ngẫu nhiên)
-                const isOutOfStock = (sClean === 'XL' || (Math.random() < 0.2)); 
-                
-                if (isOutOfStock) {
-                    btn.classList.add('out-of-stock');
-                    btn.title = "Hết hàng";
-                } else {
-                    btn.onclick = () => {
-                        document.querySelectorAll('.config-size-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        selectedConfigSize = sClean;
-                    };
-                }
-                
-                btn.textContent = sClean;
-                sizeContainer.appendChild(btn);
-            });
+            if (item.colors && item.colors.length > 0) {
+                // Đếm tổng stock cho mỗi màu
+                item.colors.forEach((c, index) => {
+                    const btn = document.createElement('span');
+                    btn.className = 'config-color-btn';
+                    btn.style.background = c.hex_code;
+                    btn.title = c.color_name;
+                    
+                    // Kiểm tra tồn kho tổng của màu này
+                    const colorStock = item.sizes
+                        .filter(s => s.color_id == c.id)
+                        .reduce((sum, s) => sum + parseInt(s.quantity), 0);
 
-            // Reset color buttons and add mock out-of-stock
-            const colorBtns = document.querySelectorAll('.config-color-btn');
-            colorBtns.forEach((btn, index) => {
-                btn.classList.remove('active', 'out-of-stock');
-                
-                // Giả lập: Hết hàng cho màu cuối cùng hoặc ngẫu nhiên
-                const isColorOut = (index === 3 || (Math.random() < 0.1));
-                if (isColorOut) {
-                    btn.classList.add('out-of-stock');
-                    btn.title = "Màu này đã hết hàng";
+                    if (colorStock <= 0) {
+                        btn.classList.add('out-of-stock');
+                        btn.title = `${c.color_name} (Hết hàng)`;
+                    } else {
+                        btn.onclick = () => {
+                            document.querySelectorAll('.config-color-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            selectedConfigColor = c.color_name;
+                            
+                            // Đổi ảnh theo màu
+                            if (c.image) {
+                                document.getElementById('modalProductImg').src = c.image;
+                            }
+
+                            // Load lại size theo màu đã chọn
+                            renderSizesForColor(c.id);
+                        };
+                    }
+                    
+                    colorContainer.appendChild(btn);
+                });
+
+                // Tự động chọn màu đầu tiên CÒN HÀNG
+                const firstAvailableBtn = colorContainer.querySelector('.config-color-btn:not(.out-of-stock)');
+                if (firstAvailableBtn) {
+                    firstAvailableBtn.click();
+                } else {
+                    // Nếu tất cả màu đều hết hàng
+                    renderSizesForColor(null);
                 }
-            });
+            } else {
+                colorContainer.innerHTML = '<p style="font-size:1.2rem; color:#999;">Không có biến thể màu sắc</p>';
+                selectedConfigColor = 'Default';
+                renderSizesForColor(null);
+            }
 
             modal.classList.add('active');
             
             // Confirm button action
             document.getElementById('btnConfirmAdd').onclick = () => confirmAddToCart();
+        }
+
+        // Hàm render size dựa trên màu sắc được chọn
+        function renderSizesForColor(colorId) {
+            const sizeContainer = document.getElementById('modalSizeOptions');
+            sizeContainer.innerHTML = '';
+            selectedConfigSize = null;
+
+            // Lấy danh sách tất cả các tên size duy nhất của sản phẩm này (để hiện đầy đủ)
+            const allSizes = currentSelectedItem.sizes || [];
+            const uniqueSizeNames = [...new Set(allSizes.map(s => s.size_name))];
+            
+            // Sắp xếp size cơ bản
+            const sizeOrder = ['S', 'M', 'L', 'XL', '2XL', 'XXL', '3XL', 'Oversize'];
+            uniqueSizeNames.sort((a, b) => {
+                const ia = sizeOrder.indexOf(a);
+                const ib = sizeOrder.indexOf(b);
+                if (ia !== -1 && ib !== -1) return ia - ib;
+                return a.localeCompare(b);
+            });
+
+            if (uniqueSizeNames.length > 0) {
+                uniqueSizeNames.forEach(sizeName => {
+                    const btn = document.createElement('button');
+                    btn.className = 'config-size-btn';
+                    btn.textContent = sizeName;
+
+                    // Kiểm tra xem size này có tồn kho cho màu đang chọn không
+                    const sizeData = allSizes.find(s => s.size_name === sizeName && s.color_id == colorId);
+                    
+                    if (!sizeData || parseInt(sizeData.quantity) <= 0) {
+                        btn.classList.add('out-of-stock');
+                        btn.title = "Hết hàng";
+                    } else {
+                        btn.onclick = () => {
+                            document.querySelectorAll('.config-size-btn').forEach(b => b.classList.remove('active'));
+                            btn.classList.add('active');
+                            selectedConfigSize = sizeName;
+                        };
+                    }
+                    sizeContainer.appendChild(btn);
+                });
+            } else {
+                sizeContainer.innerHTML = '<p style="font-size:1.2rem; color:#999;">Hết hàng</p>';
+            }
         }
 
         function closeConfigModal() {
@@ -270,39 +308,27 @@ include 'includes/header.php';
         }
 
         function performAddToCart(id, name, imageSrc, price, size, color) {
-            // Xác định danh sách size khả dụng tương tự như lúc mở Modal
-            let sizeArray = [];
-            let raw = currentSelectedItem.sizes;
-            if (typeof raw === 'string') raw = raw.split(',').filter(x => x.trim());
-
-            if (raw && Array.isArray(raw) && raw.length > 0) {
-                sizeArray = raw;
-            } else if (currentSelectedItem.type === 'shoes') {
-                sizeArray = ['39', '40', '41'];
-            } else if (currentSelectedItem.name.toLowerCase().includes('kính') || currentSelectedItem.type === 'accessories' || currentSelectedItem.type === 'accessory') {
-                sizeArray = ['Oversize'];
-            } else {
-                sizeArray = ['S', 'M', 'L', 'XL'];
-            }
-
-            // Thu thập danh sách size/màu hết hàng từ giao diện Modal hiện tại
-            const outOfStockSizes = [];
-            document.querySelectorAll('.config-size-btn.out-of-stock').forEach(btn => outOfStockSizes.push(btn.textContent.trim()));
-            
-            const outOfStockColors = [];
-            const colorNames = ['Đen', 'Trắng', 'Xám', 'Xanh'];
-            document.querySelectorAll('.config-color-btn.out-of-stock').forEach(btn => {
-                // Lấy index để suy ra tên màu (giả định theo thứ tự cố định)
-                const btns = Array.from(document.querySelectorAll('.config-color-btn'));
-                const idx = btns.indexOf(btn);
-                if (idx !== -1) outOfStockColors.push(colorNames[idx]);
-            });
+            // Lấy tồn kho của biến thể này
+            const allSizes = currentSelectedItem.sizes || [];
+            const colorObj = (currentSelectedItem.colors || []).find(c => c.color_name === color);
+            const colorId = colorObj ? colorObj.id : null;
+            const sizeData = allSizes.find(s => s.size_name === size && s.color_id == colorId);
+            const stock = sizeData ? parseInt(sizeData.quantity) : 0;
 
             const existingIndex = cart.findIndex(item => item.id === id && item.size === size && item.color === color);
-
+            
             if (existingIndex !== -1) {
-                cart[existingIndex].quantity += 1;
+                const nextQty = cart[existingIndex].quantity + 1;
+                if (nextQty > stock) {
+                    showToast(`Sản phẩm ${name} (Size ${size}, ${color}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
+                    return;
+                }
+                cart[existingIndex].quantity = nextQty;
             } else {
+                if (stock < 1) {
+                    showToast('Sản phẩm này hiện đã hết hàng!', 'error');
+                    return;
+                }
                 cart.push({
                     id: id,
                     name: name,
@@ -310,9 +336,8 @@ include 'includes/header.php';
                     price: price,
                     size: size,
                     color: color,
-                    availableSizes: sizeArray,
-                    outOfStockSizes: outOfStockSizes,
-                    outOfStockColors: outOfStockColors,
+                    allColors: currentSelectedItem.colors, 
+                    allSizes: currentSelectedItem.sizes,   
                     quantity: 1
                 });
             }

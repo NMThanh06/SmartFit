@@ -40,6 +40,9 @@ include 'includes/header.php';
 
                         <input class="config-form__input" type="radio" id="date" name="occasion" value="date">
                         <label class="config-form__label" for="date">Hẹn hò</label>
+
+                        <input class="config-form__input" type="radio" id="event" name="occasion" value="event">
+                        <label class="config-form__label" for="event">Sự kiện</label>
                     </div>
                 </div>
 

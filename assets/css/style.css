@@ -1819,7 +1819,7 @@ section.hero--home {
 .cart-item__qty {
     display: flex;
     align-items: center;
-    background: rgba(0, 0, 0, 0.3);
+    background: var(--apple-bg);
     width: fit-content;
     border-radius: 6px;
     overflow: hidden;
@@ -1842,7 +1842,7 @@ section.hero--home {
     width: 30px;
     background: transparent;
     border: none;
-    color: white;
+    color: #000;
     text-align: center;
     font-weight: bold;
 }
@@ -2365,7 +2365,50 @@ section.hero--home {
 .product-detail__separator {
     height: 1px;
     background-color: var(--border-color);
-    margin-bottom: 25px; /* Giảm từ 35px xuống 25px */
+    margin-bottom: 25px;
+}
+
+.product-detail__colors {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.color-btn-item {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 1px #ddd;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+}
+
+.color-btn-item:hover {
+    transform: scale(1.15);
+}
+
+.color-btn-item.selected {
+    box-shadow: 0 0 0 2px var(--apple-black);
+    transform: scale(1.15);
+}
+
+.color-btn-item.out-of-stock {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.color-btn-item.out-of-stock::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #ff3b30;
+    transform: translate(-50%, -50%) rotate(45deg);
 }
 
 .product-detail__option {
@@ -2377,6 +2420,20 @@ section.hero--home {
     font-weight: 700;
     color: var(--apple-black);
     margin-bottom: 15px;
+}
+
+.product-detail__description {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f8f8;
+    border-radius: 15px;
+    border: 1px solid #eee;
+}
+
+.product-detail__text {
+    font-size: 1.4rem;
+    line-height: 1.8;
+    color: var(--apple-grey);
 }
 
 .product-detail__sizes {
@@ -2410,6 +2467,16 @@ section.hero--home {
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
 }
 
+.size-btn-item.out-of-stock {
+    background: #f5f5f7;
+    color: #d1d1d6;
+    border-color: #e5e5ea;
+    cursor: not-allowed;
+    position: relative;
+    pointer-events: none;
+    text-decoration: line-through;
+}
+
 .product-detail__qty {
     display: flex;
     align-items: center;
@@ -2429,7 +2496,7 @@ section.hero--home {
     height: 32px;
     border: none;
     background: none;
-    color: var(--apple-black);
+    color: #000;
     font-size: 1.2rem;
     cursor: pointer;
     display: flex;
@@ -2440,8 +2507,9 @@ section.hero--home {
 }
 
 .qty-btn:hover {
-    background-color: #fff;
+    background-color: #000;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    color: #fff;
 }
 
 .qty-input {

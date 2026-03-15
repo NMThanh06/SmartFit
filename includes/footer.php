@@ -209,21 +209,57 @@
         cart.forEach((item, index) => {
             totalAmount += item.price * item.quantity;
 
-            // Generate Size Options
-            const sizes = item.availableSizes || ['S', 'M', 'L', 'XL'];
-            const outOfStockSizes = item.outOfStockSizes || [];
-            const sizeOptions = sizes.map(s => {
-                const isOut = outOfStockSizes.includes(s);
-                return `<option value="${s}" ${item.size === s ? 'selected' : ''} ${isOut ? 'disabled' : ''}>${s}${isOut ? ' (Hết hàng)' : ''}</option>`;
-            }).join('');
+            // 1. Render Màu sắc
+            let colorOptionsHtml = '';
+            const colors = item.allColors || [];
+            if (colors.length > 0) {
+                colorOptionsHtml = colors.map(c => {
+                    // Kiểm tra tồn kho tổng của màu này trong allSizes của item
+                    const colorStock = (item.allSizes || [])
+                        .filter(s => s.color_id == c.id)
+                        .reduce((sum, s) => sum + parseInt(s.quantity), 0);
+                    
+                    const isOut = colorStock <= 0;
+                    return `
+                        <option value="${c.color_name}" ${item.color === c.color_name ? 'selected' : ''} ${isOut ? 'disabled' : ''}>
+                            ${c.color_name}${isOut ? ' (Hết hàng)' : ''}
+                        </option>
+                    `;
+                }).join('');
+            } else {
+                colorOptionsHtml = `<option value="${item.color}">${item.color}</option>`;
+            }
 
-            // Available colors preview list
-            const colors = ['Đen', 'Trắng', 'Xám', 'Xanh'];
-            const outOfStockColors = item.outOfStockColors || [];
-            const colorOptions = colors.map(c => {
-                const isOut = outOfStockColors.includes(c);
-                return `<option value="${c}" ${item.color === c ? 'selected' : ''} ${isOut ? 'disabled' : ''}>${c}${isOut ? ' (Hết hàng)' : ''}</option>`;
-            }).join('');
+            // 2. Render Kích cỡ (Lọc theo màu hiện tại)
+            let sizeOptionsHtml = '';
+            const allSizes = item.allSizes || [];
+            
+            if (allSizes.length > 0) {
+                // Lấy danh sách tên size duy nhất và sắp xếp
+                const uniqueSizeNames = [...new Set(allSizes.map(s => s.size_name))];
+                const sizeOrder = ['S', 'M', 'L', 'XL', '2XL', 'XXL', '3XL', 'Oversize'];
+                uniqueSizeNames.sort((a, b) => {
+                    const ia = sizeOrder.indexOf(a);
+                    const ib = sizeOrder.indexOf(b);
+                    if (ia !== -1 && ib !== -1) return ia - ib;
+                    return a.localeCompare(b);
+                });
+
+                // Tìm colorId của màu hiện tại
+                const currentColorObj = colors.find(c => c.color_name === item.color);
+                const currentColorId = currentColorObj ? currentColorObj.id : null;
+
+                sizeOptionsHtml = uniqueSizeNames.map(sizeName => {
+                    const sizeData = allSizes.find(s => s.size_name === sizeName && s.color_id == currentColorId);
+                    const isOut = !sizeData || parseInt(sizeData.quantity) <= 0;
+                    return `<option value="${sizeName}" ${item.size === sizeName ? 'selected' : ''} ${isOut ? 'disabled' : ''}>
+                        ${sizeName}${isOut ? ' (Hết hàng)' : ''}
+                    </option>`;
+                }).join('');
+            } else {
+                // FALLBACK: Nếu không có allSizes (dữ liệu cũ), hiển thị size hiện có
+                sizeOptionsHtml = `<option value="${item.size}" selected>${item.size}</option>`;
+            }
 
             html += `
             <div class="cart-item">
@@ -234,15 +270,15 @@
                     
                     <div class="cart-item__config">
                         <div class="cart-item__select-group">
-                            <span class="cart-item__label">Size:</span>
-                            <select class="cart-item__select" onchange="updateCartConfig(${index}, this.value, '${item.color}')">
-                                ${sizeOptions}
+                            <span class="cart-item__label">Màu:</span>
+                            <select class="cart-item__select" onchange="updateCartConfig(${index}, '${item.size}', this.value)">
+                                ${colorOptionsHtml}
                             </select>
                         </div>
                         <div class="cart-item__select-group">
-                            <span class="cart-item__label">Màu:</span>
-                            <select class="cart-item__select" onchange="updateCartConfig(${index}, '${item.size}', this.value)">
-                                ${colorOptions}
+                            <span class="cart-item__label">Size:</span>
+                            <select class="cart-item__select" onchange="updateCartConfig(${index}, this.value, '${item.color}')">
+                                ${sizeOptionsHtml}
                             </select>
                         </div>
                     </div>
@@ -273,7 +309,30 @@
 
         if (newSize === oldSize && newColor === oldColor) return;
 
-        // Kiểm tra xem cấu hình mới có trùng với sp nào đã có trong giỏ không
+        let finalImage = item.image;
+        if (newColor !== oldColor) {
+            const colors = item.allColors || [];
+            const newColorObj = colors.find(c => c.color_name === newColor);
+            if (newColorObj && newColorObj.image) {
+                finalImage = newColorObj.image;
+            }
+        }
+
+        // Kiểm tra tồn kho của cấu hình mới
+        const allSizes = item.allSizes || [];
+        const currentColorObj = (item.allColors || []).find(c => c.color_name === newColor);
+        const currentColorId = currentColorObj ? currentColorObj.id : null;
+        const sizeData = allSizes.find(s => s.size_name === newSize && s.color_id == currentColorId);
+        const maxAvailable = sizeData ? parseInt(sizeData.quantity) : 0;
+
+        // Nếu cấu hình mới hết hàng hoàn toàn (không nên xảy ra vì đã disabled option, nhưng vẫn check cho chắc)
+        if (maxAvailable <= 0) {
+            showToast('Sản phẩm cấu hình này hiện đã hết hàng!', 'error');
+            renderCart();
+            return;
+        }
+
+        // 2. Kiểm tra xem cấu hình mới có trùng với sp nào đã có trong giỏ không
         const existingIndex = cart.findIndex((it, idx) =>
             idx !== index &&
             it.id === item.id &&
@@ -282,13 +341,24 @@
         );
 
         if (existingIndex !== -1) {
-            // Gộp số lượng và xóa item hiện tại
-            cart[existingIndex].quantity += item.quantity;
+            // Gộp số lượng
+            const totalQty = cart[existingIndex].quantity + item.quantity;
+            if (totalQty > maxAvailable) {
+                cart[existingIndex].quantity = maxAvailable;
+                showToast('Đã gộp và giới hạn theo tồn kho tối đa (' + maxAvailable + ')', 'warning');
+            } else {
+                cart[existingIndex].quantity = totalQty;
+            }
             cart.splice(index, 1);
         } else {
-            // Cập nhật cấu hình mới
+            // Cập nhật cấu hình mới và giới hạn quantity nếu vượt quá stock của config mới
             cart[index].size = newSize;
             cart[index].color = newColor;
+            cart[index].image = finalImage;
+            if (cart[index].quantity > maxAvailable) {
+                cart[index].quantity = maxAvailable;
+                showToast('Số lượng đã được điều chỉnh theo tồn kho mới', 'warning');
+            }
         }
 
         saveCart();
@@ -300,6 +370,22 @@
             removeItem(index);
             return;
         }
+
+        const item = cart[index];
+        // Tìm tồn kho tối đa
+        const colors = item.allColors || [];
+        const colorObj = colors.find(c => c.color_name === item.color);
+        const colorId = colorObj ? colorObj.id : null;
+        
+        const allSizes = item.allSizes || [];
+        const sizeData = allSizes.find(s => s.size_name === item.size && s.color_id == colorId);
+        const stock = sizeData ? parseInt(sizeData.quantity) : 0;
+
+        if (newQty > stock) {
+            showToast('Chỉ còn ' + stock + ' sản phẩm trong kho!', 'error');
+            return;
+        }
+
         cart[index].quantity = newQty;
         saveCart();
     }
