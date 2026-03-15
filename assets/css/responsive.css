@@ -64,16 +64,22 @@
 
     /* Bảng kết quả (Result) */
     .result {
-        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 20px;
+        display: none;
         align-items: center;
         justify-content: center;
-        min-height: calc(100vh - 100px);
-        padding: auto;
     }
 
     .result__container {
+        flex-direction: column;
         width: 100%;
-        margin: auto;
+        max-width: 600px;
+        height: auto;
+        max-height: none;
+        padding: 20px;
+        gap: 20px;
     }
 
     .result__title {
@@ -184,18 +190,33 @@
     }
 
     /* Trang kết quả */
+    .result {
+        height: auto;
+        min-height: calc(100vh - var(--navbar-height));
+        padding: 15px;
+    }
+
     .result__container {
         flex-direction: column;
+        width: 100%;
+        height: auto;
+        max-height: none;
+        gap: 20px;
+        padding: 15px;
     }
 
     .result__visual {
-        flex-direction: column;
+        flex: 0 0 auto;
+        width: 100%;
     }
 
     .result__title {
-        line-height: 1.5;
-        margin-top: 10px;
-        margin-bottom: 15px;
+        font-size: 2rem;
+        text-align: center;
+    }
+
+    .result__desc {
+        font-size: 1.3rem;
     }
 
     /* Footer trên mobile */

@@ -338,6 +338,7 @@ window.app = {
         const configForm = document.querySelector('.config-form');
 
         if (resultSection) resultSection.style.display = 'none';
+
         if (configForm) {
             configForm.reset();
             configForm.scrollIntoView({ behavior: 'smooth' });
@@ -372,9 +373,11 @@ window.app = {
             const resultContainer = document.querySelector('.result__container');
 
             // Ẩn kết quả cũ, hiện loading
+            const footer = document.querySelector('.footer');
             if (resultSection) {
                 resultSection.style.display = 'flex';
                 resultSection.classList.add('is-loading');
+                if (footer) footer.style.display = 'none'; // Ẩn footer khi đang chờ
                 resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
             if (resultContainer) resultContainer.style.display = 'none';
@@ -447,6 +450,8 @@ window.app = {
                 console.error("❌ Lỗi:", error);
                 if (loadingProgress) loadingProgress.style.display = 'none';
                 if (resultSection) resultSection.classList.remove('is-loading');
+                const footer = document.querySelector('.footer');
+                if (footer) footer.style.display = 'block'; // Hiện lại footer nế lỗi
                 self.showNotification(error.message, 'error');
             }
 
@@ -482,8 +487,10 @@ window.app = {
 
         // 4. Hiển thị Section kết quả
         const resultSection = document.getElementById('result');
+        const footer = document.querySelector('.footer');
         if (resultSection) {
             resultSection.style.display = 'flex';
+            if (footer) footer.style.display = 'block'; // Hiện lại footer khi có kết quả
             // Chỉ scroll nếu không phải đang khôi phục từ localStorage
             if (!data.isRestored) {
                 resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -547,8 +554,10 @@ window.app = {
     resetForm: function () {
         const configForm = document.getElementById('configForm');
         const resultSection = document.getElementById('result');
+
         if (configForm) configForm.reset();
         if (resultSection) resultSection.style.display = 'none';
+
         document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
     },
 
