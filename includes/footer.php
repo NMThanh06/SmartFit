@@ -45,7 +45,7 @@
                                     <a href="<?php echo $root; ?>pages/privacy.php" class="footer__link">Chính sách bảo mật<span>Bảo vệ thông tin người dùng.</span></a>
                                 </li>
                                 <li class="footer__item">
-                                    <a href="#" class="footer__link">Điều khoản dịch vụ<span>Quy định sử dụng trang web.</span></a>
+                                    <a href="<?php echo $root; ?>pages/terms.php" class="footer__link">Điều khoản dịch vụ<span>Quy định sử dụng trang web.</span></a>
                                 </li>
                             </ul>
                         </div>
