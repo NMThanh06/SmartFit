@@ -338,6 +338,74 @@
             },
             "seller_note": "",
             "age": "All"
+        },
+        {
+            "id": "11",
+            "type": "top",
+            "name": "Áo khoác dù",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic",
+                "street",
+                "vintage"
+            ],
+            "color": "neutral",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773584890_8784.png",
+            "price": 199000,
+            "sizes": {
+                "M": 12
+            },
+            "age": "All",
+            "seller_note": "áo này chỉ phù hợp với ngày mưa"
+        },
+        {
+            "id": "12",
+            "type": "shoes",
+            "name": "dép",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic",
+                "street",
+                "vintage"
+            ],
+            "color": "light",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773589088_9990.png",
+            "price": 99000,
+            "sizes": {
+                "42": 12
+            },
+            "age": "All",
+            "seller_note": "dép này rất phù hợp với ngày mưa"
         }
     ]
 }

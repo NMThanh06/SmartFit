@@ -85,6 +85,10 @@ window.app = {
     getWeatherByPosition: function (position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
+        // Lưu lại tọa độ người dùng để dùng cho nút Vị trí của tôi
+        window.userLat = lat;
+        window.userLng = lon;
+
         console.log(`📍 Tìm thấy tọa độ từ Geolocation: ${lat}, ${lon}`);
         this.updateCurrentWeather(lat, lon);
     },
@@ -94,14 +98,46 @@ window.app = {
         console.log(`🌍 Đang lấy thời tiết cho: ${lat}, ${lng}`);
         const url = `${this.config.apiUrl}?lat=${lat}&lon=${lng}&appid=${this.config.apiKey}&units=metric&lang=vi`;
 
-        fetch(url)
-            .then(response => {
-                if (!response.ok) throw new Error("Không lấy được dữ liệu thời tiết");
-                return response.json();
-            })
-            .then(data => {
-                console.log("🌤 Dữ liệu thời tiết:", data);
-                this.updateUI(data);
+        // BẮT BUỘC: Gọi Reverse Geocoding API để lấy Quận/Huyện, Tỉnh/Thành
+        const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&email=contact@smartfit.com`;
+
+        Promise.all([
+            fetch(url).then(r => {
+                if (!r.ok) throw new Error("Không lấy được dữ liệu thời tiết");
+                return r.json();
+            }),
+            fetch(geocodeUrl, { headers: { 'Accept-Language': 'vi' } })
+                .then(r => {
+                    if (r.status === 429) {
+                        console.warn("Nominatim Rate Limit (429)");
+                        return null;
+                    }
+                    return r.ok ? r.json() : null;
+                })
+                .catch(() => null)
+        ])
+            .then(([weatherData, geoData]) => {
+                console.log("🌤 Dữ liệu thời tiết:", weatherData);
+
+                let detailedName = weatherData.name || "Nơi này";
+                if (geoData && geoData.address) {
+                    const addr = geoData.address;
+                    // Lấy Cấp hành chính nhỏ hơn (Quận/Huyện/Xã...)
+                    const district = addr.county || addr.suburb || addr.city_district || addr.town || addr.village || addr.quarter || addr.neighbourhood;
+                    // Lấy Tỉnh/Thành phố
+                    const city = addr.city || addr.province || addr.state || addr.region;
+
+                    if (city && district) {
+                        detailedName = `${city}, ${district}`;
+                    } else if (city) {
+                        detailedName = city;
+                    } else if (district) {
+                        detailedName = district;
+                    }
+                }
+                weatherData.detailedName = detailedName; // Mở rộng data thời tiết
+
+                this.updateUI(weatherData);
             })
             .catch(error => {
                 console.error("Lỗi API:", error);
@@ -131,7 +167,12 @@ window.app = {
 
         const temp = Math.round(data.main.temp);
         const condition = data.weather ? data.weather[0].main : 'Clouds';
-        const locationName = data.name || "Nơi này";
+        const locationName = data.detailedName || data.name || "Nơi này";
+
+        // Lưu vào biến toàn cục của app để truyền cho AI làm context
+        this.currentLocationContext = locationName;
+        // Lưu lại dữ liệu thời tiết hiện tại để phục hồi khi bỏ chọn dropdown
+        this.currentWeatherData = data;
 
         // 1. Thay đổi số Độ
         const tempEl = document.querySelector('.info__weather__temp');
@@ -347,7 +388,8 @@ window.app = {
                 try {
                     data = JSON.parse(textResponse);
                 } catch (err) {
-                    throw new Error("Lỗi Server trả về không phải JSON");
+                    throw new Error("Lỗi Server");
+                    // lỗi này hiển thị khi server trả về không phải là JSON
                 }
 
                 console.log("✅ Kết quả trả về:", data);
@@ -450,18 +492,27 @@ window.app = {
 
         const tempText = document.querySelector('.info__weather__temp')?.innerText || '25';
         const weatherText = document.querySelector('.info__weather__text')?.innerText || 'Trời quang';
-        
+
         let descText = document.querySelector('.info__desc')?.innerHTML || 'HCM —';
-        // Extract Location from <b>LocationName</b> —
-        let location = 'Hồ Chí Minh';
-        const locationMatch = descText.match(/<b>(.*?)<\/b>/);
-        if (locationMatch && locationMatch[1]) {
-            location = locationMatch[1].trim();
+        // Extract Location. Lấy từ biến currentLocationContext đã được gán bởi Nominatim, 
+        // hoặc fallback qua bóc tách regex
+        let location = this.currentLocationContext || 'Hồ Chí Minh';
+        if (!this.currentLocationContext) {
+            const locationMatch = descText.match(/<b>(.*?)<\/b>/);
+            if (locationMatch && locationMatch[1]) {
+                location = locationMatch[1].trim();
+            }
+        }
+
+        let targetDate = 'Hôm nay';
+        if (this.selectedDateContext) {
+            targetDate = this.selectedDateContext; // VD: 'Ngày mai, 16/03' hoặc 'Thứ 3, 17/03'
         }
 
         return {
             occasion, gender, style, color, fit, note, age, location,
             weather: { temp: parseInt(tempText), condition: weatherText.trim() },
+            targetDate: targetDate, // Thêm context ngày dự báo
             timeOfDay: 'day'
         };
     },
@@ -618,9 +669,10 @@ window.app = {
     // Gọi API Open-Meteo và render dropdown
     fetch7DaysForecast: function (lat, lng) {
         const self = this;
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
+        // Lấy 8 ngày vì 1 ngày là hôm nay, lấy thêm 7 ngày tương lai
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=8`;
 
-        console.log('📅 Đang lấy dự báo 7 ngày...');
+        console.log('📅 Đang lấy dự báo 7 ngày tiếp theo...');
 
         fetch(url)
             .then(response => {
@@ -628,54 +680,76 @@ window.app = {
                 return response.json();
             })
             .then(data => {
-                console.log('📅 Dữ liệu dự báo 7 ngày:', data);
+                console.log('📅 Dữ liệu dự báo:', data);
                 const daily = data.daily;
                 if (!daily || !daily.time) return;
 
                 const dropdown = document.getElementById('forecastDropdown');
                 if (!dropdown) return;
 
-                // Xóa các option cũ
-                dropdown.innerHTML = '';
+                // Xóa các option cũ và giữ lại default
+                dropdown.innerHTML = '<option value="">-- Dự báo 7 ngày --</option>';
 
-                // Tạo 7 option mới
-                daily.time.forEach(function (dateStr, i) {
+                const daysOfWeek = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+
+                // Bắt đầu vòng lặp. Bỏ qua ngày hôm nay (i = 0), duyệt 7 ngày tiếp theo
+                for (let i = 1; i <= 7 && i < daily.time.length; i++) {
+                    const dateStr = daily.time[i];
                     const weatherCode = daily.weathercode[i];
                     const tempMax = Math.round(daily.temperature_2m_max[i]);
                     const tempMin = Math.round(daily.temperature_2m_min[i]);
                     const rainProb = daily.precipitation_probability_max[i];
+
                     const weatherText = self.translateWeatherCode(weatherCode);
 
-                    // Format ngày tháng (VD: 13/03)
+                    // Nhiệt độ trung bình dùng chung cho ngày đó
+                    const tempAvg = Math.round((tempMax + tempMin) / 2);
+
                     const dateObj = new Date(dateStr);
+                    const dayOfWeek = daysOfWeek[dateObj.getDay()];
                     const dayMonth = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-                    const label = i === 0 ? 'Hôm nay' : dayMonth;
+
+                    // Logic label "Ngày mai"
+                    const label = i === 1 ? `Ngày mai, ${dayMonth}` : `${dayOfWeek}, ${dayMonth}`;
 
                     // Value chứa toàn bộ thông tin ngày đó dạng JSON
                     const optionValue = JSON.stringify({
                         date: dateStr,
+                        dateLabel: label,
                         weatherCode: weatherCode,
                         weatherText: weatherText,
-                        tempMax: tempMax,
-                        tempMin: tempMin,
+                        temp: tempAvg,
                         rainProbability: rainProb
                     });
 
                     const option = document.createElement('option');
                     option.value = optionValue;
-                    option.textContent = `${label}: ${weatherText} - ${tempMax}°C (Mưa: ${rainProb}%)`;
+                    option.textContent = `${label}: ${weatherText} - ${tempAvg}°C`;
                     dropdown.appendChild(option);
-                });
-
-                // Mặc định lưu dữ liệu "Hôm nay" vào localStorage
-                if (dropdown.options.length > 0) {
-                    localStorage.setItem('smartfit_target_weather', dropdown.options[0].value);
-                    console.log('💾 Đã lưu dự báo Hôm nay vào localStorage');
                 }
             })
             .catch(error => {
-                console.error('❌ Lỗi lấy dự báo 7 ngày:', error);
+                console.error('❌ Lỗi lấy dự báo:', error);
             });
+    },
+
+    // Map weather code from open-meteo to OpenWeatherMap icon code
+    getOWMIconFromMeteoCode: function (code, isDay = true) {
+        const d = isDay ? 'd' : 'n';
+        const iconMap = {
+            0: '01', 1: '02', 2: '03', 3: '04',
+            45: '50', 48: '50',
+            51: '09', 53: '09', 55: '09',
+            56: '09', 57: '09',
+            61: '10', 63: '10', 65: '10',
+            66: '13', 67: '13',
+            71: '13', 73: '13', 75: '13', 77: '13',
+            80: '09', 81: '09', 82: '09',
+            85: '13', 86: '13',
+            95: '11', 96: '11', 99: '11'
+        };
+        const baseIcon = iconMap[code] || '03';
+        return `${baseIcon}${d}`;
     },
 
     // Khởi tạo sự kiện change cho dropdown dự báo
@@ -683,11 +757,50 @@ window.app = {
         const dropdown = document.getElementById('forecastDropdown');
         if (!dropdown) return;
 
+        const self = this;
+
         dropdown.addEventListener('change', function () {
             const selectedValue = dropdown.value;
             if (selectedValue) {
+                const data = JSON.parse(selectedValue);
                 localStorage.setItem('smartfit_target_weather', selectedValue);
-                console.log('💾 Đã lưu dự báo ngày đã chọn:', JSON.parse(selectedValue));
+                console.log('💾 Đã chọn dự báo ngày:', data);
+
+                // Cập nhật UI Hero Section cho ngày tương lai
+                const tempEl = document.querySelector('.info__weather__temp');
+                if (tempEl) tempEl.innerHTML = `${data.temp}<span>°C</span>`;
+
+                const weatherTextElement = document.querySelector('.info__weather__text');
+                if (weatherTextElement) {
+                    const capitalDesc = data.weatherText.charAt(0).toUpperCase() + data.weatherText.slice(1);
+                    weatherTextElement.innerHTML = capitalDesc + '&nbsp;';
+                }
+
+                const iconEl = document.querySelector('.info__weather__icon');
+                if (iconEl) {
+                    const iconCode = self.getOWMIconFromMeteoCode(data.weatherCode);
+                    iconEl.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="weather icon" style="width: 48px; height: 48px; vertical-align: middle;">`;
+                }
+
+                const descElement = document.querySelector('.info__desc');
+                if (descElement) {
+                    let descMsg = `<b>${self.currentLocationContext || "Hồ Chí Minh"}</b> — `;
+                    if (data.rainProbability > 50) descMsg += `Dự báo ${data.dateLabel} có mưa rào, nhớ chuẩn bị đồ đi mua nhé ☔`;
+                    else if (data.temp < 20) descMsg += `Dự báo ${data.dateLabel} khá lạnh, ưu tiên đồ ấm nhé 🥶`;
+                    else descMsg += `Dự báo ${data.dateLabel} thời tiết sẽ rất đẹp ✨`;
+                    descElement.innerHTML = descMsg;
+                }
+
+                // Lưu vào Global Context của app để FormData bốc vào
+                self.selectedDateContext = data.dateLabel;
+
+            } else {
+                // Return to current real-time condition
+                console.log('↩️ Khôi phục thời tiết hiện tại');
+                if (self.currentWeatherData) {
+                    self.updateUI(self.currentWeatherData);
+                }
+                self.selectedDateContext = null;
             }
         });
     },

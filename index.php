@@ -143,6 +143,11 @@ include 'includes/header.php';
                     <h3 class="map-modal__title"><i class="fa-solid fa-map-location-dot"></i> Chọn vị trí trên bản đồ</h3>
                     <button class="map-modal__close" id="btnCloseMap">&times;</button>
                 </div>
+                <div class="map-modal__searchbox">
+                    <input type="text" id="mapSearchInput" placeholder="Tìm kiếm địa điểm (VD: Cầu Giấy, Hà Nội)">
+                    <button id="btnMapSearch" title="Tìm kiếm"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <button id="btnMyLocation" title="Vị trí của tôi"><i class="fa-solid fa-location-crosshairs"></i></button>
+                </div>
                 <div id="map" class="map-modal__map"></div>
                 <div class="map-modal__footer">
                     <span class="map-modal__coords" id="mapCoordsDisplay">Chưa chọn vị trí</span>
@@ -168,11 +173,11 @@ include 'includes/header.php';
 
                 <div class="result__visual">
                     <div class="visual-item">
-                        <img src="./assets/img/top.jpeg" alt="Áo" id="imgTop">
+                        <img src="./assets/img/default-top.jpg" alt="Áo" id="imgTop">
                     </div>
 
                     <div class="visual-item">
-                        <img src="./assets/img/bottom.jpeg" alt="Quần" id="imgBottom">
+                        <img src="./assets/img/default-bottom.jpg" alt="Quần" id="imgBottom">
                     </div>
                 </div>
 
@@ -356,6 +361,43 @@ include 'includes/header.php';
     .map-modal__close:hover { background: rgba(255,255,255,0.35); }
 
     /* Bản đồ */
+    .map-modal__searchbox {
+        display: flex;
+        gap: 8px;
+        padding: 12px 20px;
+        background: #16213e;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .map-modal__searchbox input {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(102, 126, 234, 0.5);
+        background: #1a1a2e;
+        color: #fff;
+        font-size: 1.4rem;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .map-modal__searchbox input:focus {
+        border-color: #667eea;
+    }
+    .map-modal__searchbox button {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        width: 44px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        transition: transform 0.2s;
+    }
+    .map-modal__searchbox button:hover {
+        transform: translateY(-2px);
+    }
     .map-modal__map {
         width: 100%;
         height: 420px;
@@ -412,9 +454,57 @@ include 'includes/header.php';
     const modal      = document.getElementById('mapModal');
     const overlay    = modal.querySelector('.map-modal__overlay');
     const coordsText = document.getElementById('mapCoordsDisplay');
+    
+    // Nút tìm kiếm và vị trí
+    const searchInput = document.getElementById('mapSearchInput');
+    const btnSearch   = document.getElementById('btnMapSearch');
+    const btnMyLoc    = document.getElementById('btnMyLocation');
 
     let map    = null;   // instance Leaflet
     let marker = null;   // marker hiện tại
+
+    // ===== Hàm Dịch ngược tọa độ ra địa chỉ =====
+    function geocodeLatLng(lat, lng) {
+        const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&email=contact@smartfit.com`;
+        
+        if (marker) marker.bindPopup('<span style="color:#333;">Đang dịch địa chỉ...</span>').openPopup();
+
+        fetch(url, { headers: { 'Accept-Language': 'vi' } })
+            .then(async r => {
+                if (r.status === 429) throw new Error("429");
+                if (!r.ok) throw new Error("Network error");
+                return r.json();
+            })
+            .then(data => {
+                let detailedName = "Vị trí đã chọn";
+                if (data && data.address) {
+                    const addr = data.address;
+                    const district = addr.county || addr.suburb || addr.city_district || addr.town || addr.village || addr.quarter || addr.neighbourhood;
+                    const city = addr.city || addr.province || addr.state || addr.region;
+                    
+                    if (city && district) {
+                        detailedName = `${city}, ${district}`;
+                    } else if (city) {
+                        detailedName = city;
+                    } else if (district) {
+                        detailedName = district;
+                    }
+                }
+                if (marker) {
+                    marker.bindPopup(`<b style="color:#000; font-size:1.2rem;">${detailedName}</b>`).openPopup();
+                }
+                coordsText.textContent = detailedName;
+            })
+            .catch(err => {
+                console.error(err);
+                if (err.message === "429") {
+                    alert('Hệ thống đang xử lý nhiều yêu cầu, vui lòng thử lại sau vài giây');
+                    if (marker) marker.bindPopup('<span style="color:#d9534f;">Giới hạn truy cập API</span>').openPopup();
+                } else {
+                    if (marker) marker.bindPopup('<span style="color:#d9534f;">Không thể tải địa chỉ</span>').openPopup();
+                }
+            });
+    }
 
     // ===== Mở Modal & khởi tạo bản đồ =====
     btnOpen.addEventListener('click', function () {
@@ -447,8 +537,76 @@ include 'includes/header.php';
 
                 // Bật nút Xác nhận
                 btnConfirm.disabled = false;
+                
+                // Decode tạo popup
+                geocodeLatLng(selectedLat, selectedLng);
             });
         }
+
+        // Sự kiện Vị trí của tôi
+        btnMyLoc.addEventListener('click', function() {
+            if (window.userLat && window.userLng) {
+                map.flyTo([window.userLat, window.userLng], 14);
+                selectedLat = window.userLat;
+                selectedLng = window.userLng;
+                if (marker) map.removeLayer(marker);
+                marker = L.marker([selectedLat, selectedLng]).addTo(map);
+                btnConfirm.disabled = false;
+                geocodeLatLng(selectedLat, selectedLng);
+            } else {
+                alert("Chưa lấy được tọa độ vị trí của bạn.");
+            }
+        });
+
+        // Sự kiện Tìm kiếm
+        btnSearch.addEventListener('click', function() {
+            const query = searchInput.value.trim();
+            if (!query) return;
+            const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&email=contact@smartfit.com`;
+            
+            fetch(url, { headers: { 'Accept-Language': 'vi' } })
+                .then(async r => {
+                    if (r.status === 429) throw new Error("429");
+                    if (!r.ok) throw new Error("Network error");
+                    return r.json();
+                })
+                .then(data => {
+                    if (data && data.length > 0) {
+                        selectedLat = parseFloat(data[0].lat);
+                        selectedLng = parseFloat(data[0].lon);
+                        map.flyTo([selectedLat, selectedLng], 14);
+                        if (marker) map.removeLayer(marker);
+                        marker = L.marker([selectedLat, selectedLng]).addTo(map);
+                        btnConfirm.disabled = false;
+                        geocodeLatLng(selectedLat, selectedLng);
+                    } else {
+                        alert("Không tìm thấy địa điểm.");
+                    }
+                })
+                .catch(err => {
+                    if (err.message === "429") {
+                        alert('Hệ thống đang xử lý nhiều yêu cầu, vui lòng thử lại sau vài giây');
+                    } else {
+                        console.error("Lỗi tìm kiếm:", err);
+                    }
+                });
+        });
+
+        searchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') btnSearch.click();
+        });
+
+        // Debounce cho thanh tìm kiếm (chờ 1000ms sau khi ngừng gõ)
+        let searchTimeout;
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const query = searchInput.value.trim();
+                if (query) {
+                    btnSearch.click();
+                }
+            }, 1000);
+        });
 
         // Fix bản đồ bị render lỗi khi modal vừa mở
         setTimeout(function () {
