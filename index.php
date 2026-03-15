@@ -15,6 +15,17 @@ include 'includes/header.php';
                 <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
             </div>
 
+            <!-- Nút Chọn vị trí + Dropdown dự báo -->
+            <div class="hero__location-row">
+                <button id="btnChooseLocation" class="btn-choose-location">
+                    <i class="fa-solid fa-location-dot"></i> Chọn vị trí
+                </button>
+
+                <select id="forecastDropdown" class="forecast-dropdown">
+                    <option value="">-- Dự báo 7 ngày --</option>
+                </select>
+            </div>
+
             <form id="configForm" class="config-form" action="">
 
                 <div class="config-form__group">
@@ -120,6 +131,24 @@ include 'includes/header.php';
             </button>
         </section>
 
+        <!-- ====== Modal Bản đồ ====== -->
+        <div id="mapModal" class="map-modal">
+            <div class="map-modal__overlay"></div>
+            <div class="map-modal__content">
+                <div class="map-modal__header">
+                    <h3 class="map-modal__title"><i class="fa-solid fa-map-location-dot"></i> Chọn vị trí trên bản đồ</h3>
+                    <button class="map-modal__close" id="btnCloseMap">&times;</button>
+                </div>
+                <div id="map" class="map-modal__map"></div>
+                <div class="map-modal__footer">
+                    <span class="map-modal__coords" id="mapCoordsDisplay">Chưa chọn vị trí</span>
+                    <button id="btnConfirmLocation" class="map-modal__confirm">
+                        <i class="fa-solid fa-check"></i> Xác nhận
+                    </button>
+                </div>
+            </div>
+        </div>
+
         <!-- Result Section -->
         <section class="result" id="result">
 
@@ -195,6 +224,252 @@ include 'includes/header.php';
                 </div>
             </div>
         </section>
+
+<!-- ====== CSS + JS cho Bản đồ ====== -->
+<style>
+    /* --- Nút Chọn vị trí --- */
+    .btn-choose-location {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        margin: 12px 0;
+        border: none;
+        border-radius: 30px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn-choose-location:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.55);
+    }
+    .btn-choose-location:active {
+        transform: scale(0.97);
+    }
+
+    /* --- Hàng chứa nút + dropdown --- */
+    .hero__location-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+    }
+
+    /* --- Dropdown dự báo 7 ngày --- */
+    .forecast-dropdown {
+        padding: 10px 18px;
+        border: 2px solid rgba(102, 126, 234, 0.5);
+        border-radius: 30px;
+        background: rgba(26, 26, 46, 0.85);
+        color: #fff;
+        font-size: 1.4rem;
+        font-weight: 500;
+        cursor: pointer;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        min-width: 280px;
+    }
+    .forecast-dropdown:hover,
+    .forecast-dropdown:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 12px rgba(102, 126, 234, 0.35);
+    }
+    .forecast-dropdown option {
+        background: #1a1a2e;
+        color: #e2e8f0;
+        padding: 8px;
+    }
+
+    /* --- Modal --- */
+    .map-modal {
+        display: none;                /* ẩn mặc định */
+        position: fixed;
+        inset: 0;
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+    .map-modal.active {
+        display: flex;
+    }
+
+    .map-modal__overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(4px);
+    }
+
+    .map-modal__content {
+        position: relative;
+        width: 90%;
+        max-width: 750px;
+        background: #1a1a2e;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        animation: mapModalIn 0.35s ease;
+    }
+    @keyframes mapModalIn {
+        from { opacity: 0; transform: scale(0.9) translateY(30px); }
+        to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .map-modal__header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+    .map-modal__title {
+        color: #fff;
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .map-modal__close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        color: #fff;
+        font-size: 2.2rem;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.2s;
+        line-height: 1;
+    }
+    .map-modal__close:hover { background: rgba(255,255,255,0.35); }
+
+    /* Bản đồ */
+    .map-modal__map {
+        width: 100%;
+        height: 420px;
+    }
+
+    /* Footer modal */
+    .map-modal__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        background: #16213e;
+    }
+    .map-modal__coords {
+        color: #a0aec0;
+        font-size: 1.35rem;
+    }
+    .map-modal__confirm {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 24px;
+        border: none;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #38b2ac, #4fd1c5);
+        color: #fff;
+        font-size: 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .map-modal__confirm:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 14px rgba(56, 178, 172, 0.45);
+    }
+    .map-modal__confirm:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+</style>
+
+<script>
+(function () {
+    // ===== Biến lưu tọa độ tạm =====
+    let selectedLat = null;
+    let selectedLng = null;
+
+    // ===== Tham chiếu DOM =====
+    const btnOpen    = document.getElementById('btnChooseLocation');
+    const btnConfirm = document.getElementById('btnConfirmLocation');
+    const btnClose   = document.getElementById('btnCloseMap');
+    const modal      = document.getElementById('mapModal');
+    const overlay    = modal.querySelector('.map-modal__overlay');
+    const coordsText = document.getElementById('mapCoordsDisplay');
+
+    let map    = null;   // instance Leaflet
+    let marker = null;   // marker hiện tại
+
+    // ===== Mở Modal & khởi tạo bản đồ =====
+    btnOpen.addEventListener('click', function () {
+        modal.classList.add('active');
+        btnConfirm.disabled = true;
+
+        // Chỉ khởi tạo bản đồ 1 lần
+        if (!map) {
+            map = L.map('map').setView([10.7769, 106.7009], 13); // TP.HCM
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            // Sự kiện click lên bản đồ
+            map.on('click', function (e) {
+                selectedLat = e.latlng.lat;
+                selectedLng = e.latlng.lng;
+
+                // Xóa marker cũ nếu có
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+
+                // Tạo marker mới
+                marker = L.marker([selectedLat, selectedLng]).addTo(map);
+
+                // Cập nhật text tọa độ
+                coordsText.textContent = selectedLat.toFixed(5) + ', ' + selectedLng.toFixed(5);
+                coordsText.style.color = '#4fd1c5';
+
+                // Bật nút Xác nhận
+                btnConfirm.disabled = false;
+            });
+        }
+
+        // Fix bản đồ bị render lỗi khi modal vừa mở
+        setTimeout(function () {
+            map.invalidateSize();
+        }, 300);
+    });
+
+    // ===== Đóng Modal =====
+    function closeModal() {
+        modal.classList.remove('active');
+    }
+    btnClose.addEventListener('click', closeModal);
+    overlay.addEventListener('click', closeModal);
+
+    // ===== Xác nhận vị trí =====
+    btnConfirm.addEventListener('click', function () {
+        if (selectedLat !== null && selectedLng !== null) {
+            console.log('Tọa độ đã chọn: ', selectedLat, selectedLng);
+            // Gọi hàm cập nhật thời tiết với tọa độ mới từ bản đồ
+            window.app.updateCurrentWeather(selectedLat, selectedLng);
+            closeModal();
+        }
+    });
+})();
+</script>
 
 <?php include 'includes/footer.php'; ?>
 </body>

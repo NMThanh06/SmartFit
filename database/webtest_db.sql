@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 10, 2026 at 12:16 AM
+-- Generation Time: Mar 13, 2026 at 03:18 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -41,6 +41,15 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `fullname`, `phone`, `address`, `note`, `payment_method`, `total_amount`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Nguyễn Minh Thành', '0971996900', 'ấp thới thuận', 'dahfk a', 'vnpay', 1747000, 'pending', '2026-03-10 07:39:18', '2026-03-10 07:39:18'),
+(2, 1, 'g', '0971996942', 'ấp thới thuận', 'cho cuong', 'momo', 560000, 'pending', '2026-03-10 07:40:54', '2026-03-10 07:40:54'),
+(3, 1, 'g', '0971996942', 'ấp thới thuận', '', 'cod', 2692000, 'pending', '2026-03-11 08:38:48', '2026-03-11 08:38:48');
+
 -- --------------------------------------------------------
 
 --
@@ -55,6 +64,24 @@ CREATE TABLE `order_details` (
   `quantity` int(11) NOT NULL,
   `price` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_details`
+--
+
+INSERT INTO `order_details` (`id`, `order_id`, `outfit_id`, `size_name`, `quantity`, `price`) VALUES
+(1, 1, 9, '40', 2, 250000),
+(2, 1, 8, '40', 1, 250000),
+(3, 1, 8, '39', 1, 250000),
+(4, 1, 10, 'Oversize', 2, 199000),
+(5, 1, 5, 'M', 1, 349000),
+(6, 2, 7, 'M', 1, 200000),
+(7, 2, 3, 'M', 2, 180000),
+(8, 3, 10, 'OVER', 8, 199000),
+(9, 3, 7, 'M', 1, 200000),
+(10, 3, 1, 'M', 1, 150000),
+(11, 3, 9, '39', 2, 250000),
+(12, 3, 9, '41', 1, 250000);
 
 -- --------------------------------------------------------
 
@@ -96,20 +123,20 @@ INSERT INTO `outfits` (`id`, `name`, `type`, `price`, `image`, `color`, `gender`
 -- --------------------------------------------------------
 
 --
--- Table structure for table `outfit_conflicts`
+-- Table structure for table `outfit_pairings`
 --
 
-CREATE TABLE `outfit_conflicts` (
+CREATE TABLE `outfit_pairings` (
   `id` int(11) NOT NULL,
   `outfit_id` int(11) NOT NULL,
-  `conflict_name` varchar(255) NOT NULL
+  `pairing_name` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
--- Dumping data for table `outfit_conflicts`
+-- Dumping data for table `outfit_pairings`
 --
 
-INSERT INTO `outfit_conflicts` (`id`, `outfit_id`, `conflict_name`) VALUES
+INSERT INTO `outfit_pairings` (`id`, `outfit_id`, `pairing_name`) VALUES
 (1, 5, 'Quần tây nam âu phục');
 
 -- --------------------------------------------------------
@@ -131,7 +158,7 @@ CREATE TABLE `outfit_sizes` (
 
 INSERT INTO `outfit_sizes` (`id`, `outfit_id`, `size_name`, `quantity`) VALUES
 (1, 1, 'S', 10),
-(2, 1, 'M', 20),
+(2, 1, 'M', 19),
 (3, 1, 'L', 15),
 (4, 1, 'XL', 5),
 (5, 2, 'S', 5),
@@ -149,17 +176,17 @@ INSERT INTO `outfit_sizes` (`id`, `outfit_id`, `size_name`, `quantity`) VALUES
 (17, 5, '41', 15),
 (18, 5, '42', 8),
 (19, 6, 'M', 1),
-(20, 7, 'M', 15),
+(20, 7, 'M', 14),
 (21, 7, 'XL', 20),
 (22, 7, 'XXL', 5),
 (23, 8, '41', 10),
 (24, 8, '42', 15),
 (25, 8, '40', 20),
-(26, 9, '41', 15),
+(26, 9, '41', 14),
 (27, 9, '42', 15),
-(28, 9, '39', 20),
+(28, 9, '39', 18),
 (29, 9, '40', 5),
-(30, 10, 'OVER', 10);
+(30, 10, 'OVER', 2);
 
 -- --------------------------------------------------------
 
@@ -192,16 +219,6 @@ CREATE TABLE `shopping_cart` (
   `quantity` int(11) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `shopping_cart`
---
-
-INSERT INTO `shopping_cart` (`id`, `user_id`, `outfit_id`, `size_name`, `quantity`, `created_at`) VALUES
-(1, 1, 9, '40', 2, '2026-03-09 20:06:06'),
-(2, 1, 8, '40', 1, '2026-03-09 22:45:38'),
-(3, 1, 8, '39', 1, '2026-03-09 22:45:43'),
-(4, 1, 10, 'Oversize', 1, '2026-03-09 22:52:03');
 
 -- --------------------------------------------------------
 
@@ -250,9 +267,9 @@ ALTER TABLE `outfits`
   ADD PRIMARY KEY (`id`);
 
 --
--- Indexes for table `outfit_conflicts`
+-- Indexes for table `outfit_pairings`
 --
-ALTER TABLE `outfit_conflicts`
+ALTER TABLE `outfit_pairings`
   ADD PRIMARY KEY (`id`),
   ADD KEY `outfit_id` (`outfit_id`);
 
@@ -297,13 +314,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `outfits`
@@ -312,9 +329,9 @@ ALTER TABLE `outfits`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
--- AUTO_INCREMENT for table `outfit_conflicts`
+-- AUTO_INCREMENT for table `outfit_pairings`
 --
-ALTER TABLE `outfit_conflicts`
+ALTER TABLE `outfit_pairings`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
@@ -327,13 +344,13 @@ ALTER TABLE `outfit_sizes`
 -- AUTO_INCREMENT for table `saved_outfits`
 --
 ALTER TABLE `saved_outfits`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `shopping_cart`
 --
 ALTER TABLE `shopping_cart`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `users`
@@ -359,9 +376,9 @@ ALTER TABLE `order_details`
   ADD CONSTRAINT `fk_detail_outfit` FOREIGN KEY (`outfit_id`) REFERENCES `outfits` (`id`);
 
 --
--- Constraints for table `outfit_conflicts`
+-- Constraints for table `outfit_pairings`
 --
-ALTER TABLE `outfit_conflicts`
+ALTER TABLE `outfit_pairings`
   ADD CONSTRAINT `fk_outfit_conflicts` FOREIGN KEY (`outfit_id`) REFERENCES `outfits` (`id`) ON DELETE CASCADE;
 
 --
