@@ -73,6 +73,41 @@ include 'includes/header.php';
             </div>
         </section>
 
+        <!-- Product Configuration Modal -->
+        <div id="productConfigModal" class="config-modal">
+            <div class="config-modal__container">
+                <button class="config-modal__close" onclick="closeConfigModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="config-modal__product">
+                    <img id="modalProductImg" src="" alt="" class="config-modal__img">
+                    <div class="config-modal__info">
+                        <h3 id="modalProductName">Tên sản phẩm</h3>
+                        <div id="modalProductPrice" class="config-modal__price">0đ</div>
+                    </div>
+                </div>
+
+                <div class="config-modal__group">
+                    <span class="config-modal__label">Kích cỡ</span>
+                    <div id="modalSizeOptions" class="config-modal__sizes">
+                        <!-- Sizes will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="config-modal__group">
+                    <span class="config-modal__label">Màu sắc (Preview)</span>
+                    <div class="config-modal__colors">
+                        <span class="config-color-btn active" style="background: #000;" onclick="selectColor(this, 'Đen')"></span>
+                        <span class="config-color-btn" style="background: #fff;" onclick="selectColor(this, 'Trắng')"></span>
+                        <span class="config-color-btn" style="background: #808080;" onclick="selectColor(this, 'Xám')"></span>
+                        <span class="config-color-btn" style="background: #000080;" onclick="selectColor(this, 'Xanh')"></span>
+                    </div>
+                </div>
+
+                <button id="btnConfirmAdd" class="config-modal__btn-confirm">Xác nhận thêm vào giỏ</button>
+            </div>
+        </div>
+
         <?php include 'includes/footer.php'; ?>
 
     <!-- Backend cho trang cửa hàng -->
@@ -81,28 +116,6 @@ include 'includes/header.php';
         // SHOP-SPECIFIC FUNCTIONS
         // ========================================
 
-        // 1. Hàm tự động chọn bộ Size dựa vào Loại sản phẩm (Type)
-        function getSizeOptions(item) {
-            const type = (item.type || '').toLowerCase();
-            const name = (item.name || '').toLowerCase();
-
-            // 1. Ưu tiên lấy Size từ Database nếu đã nhập
-            if (item.sizes) {
-                let sList = typeof item.sizes === 'string' 
-                    ? item.sizes.replace(/[\[\]"]/g, '').split(',') 
-                    : item.sizes;
-                return sList.map(s => `<option value="${s.trim()}">${s.trim()}</option>`).join('');
-            }
-
-            // 2. Phân loại thông minh hơn (Nếu DB chưa có size)
-            if (type === 'shoes' || name.includes('giày')) {
-                return `<option value="39">Size 39</option><option value="40" selected>Size 40</option><option value="41">Size 41</option>`;
-            } else if (['accessory', 'glasses', 'hat'].includes(type) || name.includes('kính') || name.includes('mũ')) {
-                return `<option value="Oversize" selected>Oversize</option><option value="Freesize">Freesize</option>`;
-            } else {
-                return `<option value="S">Size S</option><option value="M" selected>Size M</option><option value="L">Size L</option>`;
-            }
-        }
 
         // 2. Tải danh sách sản phẩm trang Shop
         async function loadProducts() {
@@ -114,8 +127,11 @@ include 'includes/header.php';
                 grid.innerHTML = '';
 
                 data.items.forEach(item => {
-                    const dynamicSizes = getSizeOptions(item);
-
+                    // Đảm bảo item.sizes luôn là mảng
+                    if (typeof item.sizes === 'string') {
+                        item.sizes = item.sizes.split(',').filter(s => s.trim() !== '');
+                    }
+                    
                     grid.innerHTML += `
                     <div class="col l-3 m-4 c-6">
                         <div class="product-card">
@@ -128,13 +144,7 @@ include 'includes/header.php';
                                 </h3>
                                 <div class="product-card__price">${formatPrice(item.price)}</div>
                                 
-                                <div class="product-card__size" style="margin-bottom: 10px;">
-                                    <select id="size-select-${item.id}" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; outline: none; cursor: pointer;">
-                                        ${dynamicSizes}
-                                    </select>
-                                </div>
-
-                                <div class="product-card__buy" onclick="addToCart(event, ${item.id}, '${item.name}', '${item.image}', ${item.price})">
+                                <div class="product-card__buy" onclick='openConfigModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
                                     <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ
                                 </div>
                             </div>
@@ -144,45 +154,151 @@ include 'includes/header.php';
             } catch (error) { console.error("Lỗi tải sản phẩm:", error); }
         }
 
-        // 3. Thêm vào giỏ hàng (Sử dụng hàm từ shared footer)
-        function addToCart(event, id, name, imageSrc, price) {
-            const btn = event.currentTarget;
+        // ========================================
+        // MODAL CONFIGURATION LOGIC
+        // ========================================
+        let currentSelectedItem = null;
+        let selectedConfigSize = null;
+        let selectedConfigColor = null;
 
-            // 1. Lấy size đã chọn từ Dropdown
-            const sizeSelect = document.getElementById(`size-select-${id}`);
-            const selectedSize = sizeSelect ? sizeSelect.value : 'M'; 
-
-            // 2. HIỆU ỨNG BAY
-            const cartIcon = document.querySelector('.navbar__cart');
-            const productCard = btn.closest('.product-card');
-            const imgToFly = productCard ? productCard.querySelector('img') : null;
+        function openConfigModal(item) {
+            currentSelectedItem = item;
+            const modal = document.getElementById('productConfigModal');
             
-            if (imgToFly && cartIcon) {
-                const flyImg = imgToFly.cloneNode();
-                const imgRect = imgToFly.getBoundingClientRect();
-                const cartRect = cartIcon.getBoundingClientRect();
+            // Set basic info
+            document.getElementById('modalProductImg').src = item.image;
+            document.getElementById('modalProductName').textContent = item.name;
+            document.getElementById('modalProductPrice').textContent = formatPrice(item.price);
+            
+            // Reset selections
+            selectedConfigSize = null;
+            selectedConfigColor = null;
 
-                flyImg.classList.add('fly-item');
-                flyImg.style.top = `${imgRect.top}px`;
-                flyImg.style.left = `${imgRect.left}px`;
-                flyImg.style.width = `${imgRect.width}px`;
-                flyImg.style.height = `${imgRect.height}px`;
+            // Load sizes
+            const sizeContainer = document.getElementById('modalSizeOptions');
+            sizeContainer.innerHTML = '';
+            
+            // Lấy kích cỡ từ database. Nếu không có, gán mặc định thông minh theo loại
+            let sizeArray = [];
+            let raw = item.sizes;
+            if (typeof raw === 'string') raw = raw.split(',').filter(x => x.trim());
+            
+            if (raw && Array.isArray(raw) && raw.length > 0) {
+                sizeArray = raw;
+            } else if (item.type === 'shoes') {
+                sizeArray = ['39', '40', '41'];
+            } else if (item.name.toLowerCase().includes('kính') || item.type === 'accessories' || item.type === 'accessory') {
+                sizeArray = ['Oversize'];
+            } else {
+                sizeArray = ['S', 'M', 'L', 'XL'];
+            }
+            
+            console.log("Loading sizes for:", item.name, "Type:", item.type, "Sizes:", sizeArray);
+            
+            sizeArray.forEach((s, index) => {
+                const sClean = s.trim();
+                const btn = document.createElement('button');
+                btn.className = 'config-size-btn';
+                
+                // Giả lập: Hết hàng cho 1 vài size ngẫu nhiên (ví dụ size XL hoặc ngẫu nhiên)
+                const isOutOfStock = (sClean === 'XL' || (Math.random() < 0.2)); 
+                
+                if (isOutOfStock) {
+                    btn.classList.add('out-of-stock');
+                    btn.title = "Hết hàng";
+                } else {
+                    btn.onclick = () => {
+                        document.querySelectorAll('.config-size-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        selectedConfigSize = sClean;
+                    };
+                }
+                
+                btn.textContent = sClean;
+                sizeContainer.appendChild(btn);
+            });
 
-                document.body.appendChild(flyImg);
+            // Reset color buttons and add mock out-of-stock
+            const colorBtns = document.querySelectorAll('.config-color-btn');
+            colorBtns.forEach((btn, index) => {
+                btn.classList.remove('active', 'out-of-stock');
+                
+                // Giả lập: Hết hàng cho màu cuối cùng hoặc ngẫu nhiên
+                const isColorOut = (index === 3 || (Math.random() < 0.1));
+                if (isColorOut) {
+                    btn.classList.add('out-of-stock');
+                    btn.title = "Màu này đã hết hàng";
+                }
+            });
 
-                setTimeout(() => {
-                    flyImg.style.top = `${cartRect.top + 10}px`;
-                    flyImg.style.left = `${cartRect.left + 10}px`;
-                    flyImg.style.width = '20px'; 
-                    flyImg.style.height = '20px'; 
-                    flyImg.style.opacity = '0';
-                }, 10);
+            modal.classList.add('active');
+            
+            // Confirm button action
+            document.getElementById('btnConfirmAdd').onclick = () => confirmAddToCart();
+        }
 
-                setTimeout(() => flyImg.remove(), 800);
+        function closeConfigModal() {
+            document.getElementById('productConfigModal').classList.remove('active');
+        }
+
+        function selectColor(btn, colorName) {
+            document.querySelectorAll('.config-color-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            selectedConfigColor = colorName;
+        }
+
+        function confirmAddToCart() {
+            if (!currentSelectedItem) return;
+            
+            if (!selectedConfigSize || !selectedConfigColor) {
+                if (window.showToast) {
+                    showToast('Vui lòng chọn đầy đủ Kích cỡ và Màu sắc!', 'error');
+                } else {
+                    alert('Vui lòng chọn đầy đủ Kích cỡ và Màu sắc!');
+                }
+                return;
+            }
+            
+            // Gọi logic thêm vào giỏ hàng thực sự
+            performAddToCart(currentSelectedItem.id, currentSelectedItem.name, currentSelectedItem.image, currentSelectedItem.price, selectedConfigSize, selectedConfigColor);
+            
+            closeConfigModal();
+            
+            // Animation hiệu ứng bay từ modal
+            const modalImg = document.getElementById('modalProductImg');
+            animateFly(modalImg);
+        }
+
+        function performAddToCart(id, name, imageSrc, price, size, color) {
+            // Xác định danh sách size khả dụng tương tự như lúc mở Modal
+            let sizeArray = [];
+            let raw = currentSelectedItem.sizes;
+            if (typeof raw === 'string') raw = raw.split(',').filter(x => x.trim());
+
+            if (raw && Array.isArray(raw) && raw.length > 0) {
+                sizeArray = raw;
+            } else if (currentSelectedItem.type === 'shoes') {
+                sizeArray = ['39', '40', '41'];
+            } else if (currentSelectedItem.name.toLowerCase().includes('kính') || currentSelectedItem.type === 'accessories' || currentSelectedItem.type === 'accessory') {
+                sizeArray = ['Oversize'];
+            } else {
+                sizeArray = ['S', 'M', 'L', 'XL'];
             }
 
-            // 3. Push vào mảng cart toàn cục (Đã khai báo trong footer.php)
-            const existingIndex = cart.findIndex(item => item.id === id && item.size === selectedSize);
+            // Thu thập danh sách size/màu hết hàng từ giao diện Modal hiện tại
+            const outOfStockSizes = [];
+            document.querySelectorAll('.config-size-btn.out-of-stock').forEach(btn => outOfStockSizes.push(btn.textContent.trim()));
+            
+            const outOfStockColors = [];
+            const colorNames = ['Đen', 'Trắng', 'Xám', 'Xanh'];
+            document.querySelectorAll('.config-color-btn.out-of-stock').forEach(btn => {
+                // Lấy index để suy ra tên màu (giả định theo thứ tự cố định)
+                const btns = Array.from(document.querySelectorAll('.config-color-btn'));
+                const idx = btns.indexOf(btn);
+                if (idx !== -1) outOfStockColors.push(colorNames[idx]);
+            });
+
+            const existingIndex = cart.findIndex(item => item.id === id && item.size === size && item.color === color);
 
             if (existingIndex !== -1) {
                 cart[existingIndex].quantity += 1;
@@ -192,18 +308,56 @@ include 'includes/header.php';
                     name: name,
                     image: imageSrc,
                     price: price,
-                    size: selectedSize,
+                    size: size,
+                    color: color,
+                    availableSizes: sizeArray,
+                    outOfStockSizes: outOfStockSizes,
+                    outOfStockColors: outOfStockColors,
                     quantity: 1
                 });
             }
-
-            // 4. Lưu + render lại (Hàm từ footer.php)
             saveCart();
+            if (window.showToast) showToast(`Đã thêm ${name} vào giỏ hàng!`, 'success');
+        }
+
+        function animateFly(targetImg) {
+            const cartIcon = document.querySelector('.navbar__cart');
+            if (!targetImg || !cartIcon) return;
+
+            const flyImg = targetImg.cloneNode();
+            const imgRect = targetImg.getBoundingClientRect();
+            const cartRect = cartIcon.getBoundingClientRect();
+
+            flyImg.classList.add('fly-item');
+            flyImg.style.top = `${imgRect.top}px`;
+            flyImg.style.left = `${imgRect.left}px`;
+            flyImg.style.width = `${imgRect.width}px`;
+            flyImg.style.height = `${imgRect.height}px`;
+
+            document.body.appendChild(flyImg);
+
+            setTimeout(() => {
+                flyImg.style.top = `${cartRect.top + 10}px`;
+                flyImg.style.left = `${cartRect.left + 10}px`;
+                flyImg.style.width = '20px'; 
+                flyImg.style.height = '20px'; 
+                flyImg.style.opacity = '0';
+            }, 10);
+
+            setTimeout(() => flyImg.remove(), 800);
         }
 
         // Khởi động khi tải trang xong
         window.addEventListener('DOMContentLoaded', () => {
             loadProducts();
+            
+            // Close modal when clicking outside container
+            window.onclick = (event) => {
+                const modal = document.getElementById('productConfigModal');
+                if (event.target == modal) {
+                    closeConfigModal();
+                }
+            };
         });
     </script>
 </body>

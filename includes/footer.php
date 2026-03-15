@@ -1,149 +1,161 @@
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="grid wide">
-                <div class="row footer__content">
-                    <!-- Brand Column -->
-                    <div class="col l-4 m-12 c-12">
-                        <div class="footer__brand">
-                            <div class="footer__logo">
-                                <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="SmartFit Logo" class="footer__logo-img">
-                                <span>SmartFit</span>
-                            </div>
-                            <p class="footer__slogan">Nâng tầm phong cách cá nhân cùng trí tuệ nhân tạo.</p>
-                            <div class="footer__socials">
-                                <a href="https://github.com/NMThanh06/SmartFit" class="footer__social-item" target="_blank" title="GitHub Repository">
-                                    <i class="fa-brands fa-github"></i>
-                                </a>
-                            </div>
-                        </div>
+<!-- Footer -->
+<footer class="footer">
+    <div class="grid wide">
+        <div class="row footer__content">
+            <!-- Brand Column -->
+            <div class="col l-4 m-12 c-12">
+                <div class="footer__brand">
+                    <div class="footer__logo">
+                        <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="SmartFit Logo"
+                            class="footer__logo-img">
+                        <span>SmartFit</span>
                     </div>
-
-                    <!-- Product Column -->
-                    <div class="col l-4 m-6 c-12">
-                        <div class="footer__section">
-                            <h3 class="footer__heading">Tính năng</h3>
-                            <ul class="footer__list">
-                                <li class="footer__item">
-                                    <a href="<?php echo $root; ?>index.php" class="footer__link">Phối đồ AI<span>Gợi ý trang phục thông minh theo thời tiết.</span></a>
-                                </li>
-                                <li class="footer__item">
-                                    <a href="<?php echo $root; ?>pages/wardrobe.php" class="footer__link">Tủ đồ<span>Quản lý và lưu trữ bộ sưu tập cá nhân.</span></a>
-                                </li>
-                                <li class="footer__item">
-                                    <a href="<?php echo $root; ?>shop.php" class="footer__link">Cửa hàng<span>Khám phá những món đồ thời trang mới nhất.</span></a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Legal Column -->
-                    <div class="col l-4 m-6 c-12">
-                        <div class="footer__section">
-                            <h3 class="footer__heading">Chính sách</h3>
-                            <ul class="footer__list">
-                                <li class="footer__item">
-                                    <a href="<?php echo $root; ?>pages/privacy.php" class="footer__link">Chính sách bảo mật<span>Bảo vệ thông tin người dùng.</span></a>
-                                </li>
-                                <li class="footer__item">
-                                    <a href="<?php echo $root; ?>pages/terms.php" class="footer__link">Điều khoản dịch vụ<span>Quy định sử dụng trang web.</span></a>
-                                </li>
-                            </ul>
-                        </div>
+                    <p class="footer__slogan">Nâng tầm phong cách cá nhân cùng trí tuệ nhân tạo.</p>
+                    <div class="footer__socials">
+                        <a href="https://github.com/NMThanh06/SmartFit" class="footer__social-item" target="_blank"
+                            title="GitHub Repository">
+                            <i class="fa-brands fa-github"></i>
+                        </a>
                     </div>
                 </div>
+            </div>
 
-                <!-- Copyright Row -->
-                <div class="footer__bottom">
-                    <div class="footer__copyright">© 2026 SmartFit Inc. All rights reserved.</div>
-                    <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
+            <!-- Product Column -->
+            <div class="col l-4 m-6 c-12">
+                <div class="footer__section">
+                    <h3 class="footer__heading">Tính năng</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item">
+                            <a href="<?php echo $root; ?>index.php" class="footer__link">Phối đồ AI<span>Gợi ý trang
+                                    phục thông minh theo thời tiết.</span></a>
+                        </li>
+                        <li class="footer__item">
+                            <a href="<?php echo $root; ?>pages/wardrobe.php" class="footer__link">Tủ đồ<span>Quản lý và
+                                    lưu trữ bộ sưu tập cá nhân.</span></a>
+                        </li>
+                        <li class="footer__item">
+                            <a href="<?php echo $root; ?>shop.php" class="footer__link">Cửa hàng<span>Khám phá những món
+                                    đồ thời trang mới nhất.</span></a>
+                        </li>
+                    </ul>
                 </div>
             </div>
-        </footer>
-    </main>
 
-    <!-- Auth Form -->
-    <section id="authOverlay" class="auth-overlay">
-        <div class="auth-card">
-            <i id="closeAuth" class="fa-solid fa-xmark auth-card__close"></i>
-
-            <div id="loginForm">
-                <div class="auth-card__title">Đăng nhập</div>
-                <form action="<?php echo $root; ?>includes/login.php" method="post" class="auth-card__form">
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Email :</h4>
-                        <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
-                    </div>
-                    <button type="submit" class="auth-card__button button">Đăng nhập</button>
-                </form>
-                <p class="auth-card__switch">Bạn chưa có tài khoản? <a href="#" id="toRegister">Đăng ký ngay</a></p>
-            </div>
-
-            <div id="registerForm" style="display: none;">
-                <div class="auth-card__title">Đăng ký</div>
-                <form action="<?php echo $root; ?>includes/signup-form.php" method="post" class="auth-card__form">
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tên :</h4>
-                        <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Email :</h4>
-                        <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input" name="psw-repeat" required>
-                    </div>
-                    <button type="submit" class="auth-card__button button">Đăng ký</button>
-                </form>
-                <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>
+            <!-- Legal Column -->
+            <div class="col l-4 m-6 c-12">
+                <div class="footer__section">
+                    <h3 class="footer__heading">Chính sách</h3>
+                    <ul class="footer__list">
+                        <li class="footer__item">
+                            <a href="<?php echo $root; ?>pages/privacy.php" class="footer__link">Chính sách bảo
+                                mật<span>Bảo vệ thông tin người dùng.</span></a>
+                        </li>
+                        <li class="footer__item">
+                            <a href="<?php echo $root; ?>pages/terms.php" class="footer__link">Điều khoản dịch
+                                vụ<span>Quy định sử dụng trang web.</span></a>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
-    </section>
 
-    <!-- Giỏ hàng -->
-    <div class="cart-overlay" id="cartOverlay" onclick="app.closeCart()"></div>
+        <!-- Copyright Row -->
+        <div class="footer__bottom">
+            <div class="footer__copyright">© 2026 SmartFit Inc. All rights reserved.</div>
+            <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
+        </div>
+    </div>
+</footer>
+</main>
 
-    <div class="cart-drawer" id="cartDrawer">
+<!-- Auth Form -->
+<section id="authOverlay" class="auth-overlay">
+    <div class="auth-card">
+        <i id="closeAuth" class="fa-solid fa-xmark auth-card__close"></i>
 
-        <div class="cart-drawer__header">
-            <h2>Giỏ hàng của bạn</h2>
-            <button class="cart-close-btn" onclick="app.closeCart()"><i class="fa-solid fa-xmark"></i></button>
+        <div id="loginForm">
+            <div class="auth-card__title">Đăng nhập</div>
+            <form action="<?php echo $root; ?>includes/login.php" method="post" class="auth-card__form">
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Email :</h4>
+                    <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
+                </div>
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Mật khẩu :</h4>
+                    <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw"
+                        required>
+                </div>
+                <button type="submit" class="auth-card__button button">Đăng nhập</button>
+            </form>
+            <p class="auth-card__switch">Bạn chưa có tài khoản? <a href="#" id="toRegister">Đăng ký ngay</a></p>
         </div>
 
-        <div class="cart-drawer__body">
+        <div id="registerForm" style="display: none;">
+            <div class="auth-card__title">Đăng ký</div>
+            <form action="<?php echo $root; ?>includes/signup-form.php" method="post" class="auth-card__form">
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Tên :</h4>
+                    <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
+                </div>
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Email :</h4>
+                    <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email"
+                        required>
+                </div>
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Mật khẩu :</h4>
+                    <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw"
+                        required>
+                </div>
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
+                    <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input"
+                        name="psw-repeat" required>
+                </div>
+                <button type="submit" class="auth-card__button button">Đăng ký</button>
+            </form>
+            <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>
+        </div>
+    </div>
+</section>
 
-            <div class="cart-empty" id="cartEmpty" style="display: none;">
-                <i class="fa-solid fa-box-open empty-icon"></i>
-                <p>Giỏ hàng của bạn đang trống</p>
-                <button class="btn-shopping" onclick="app.closeCart()">Tiếp tục mua sắm</button>
-            </div>
+<!-- Giỏ hàng -->
+<div class="cart-overlay" id="cartOverlay" onclick="app.closeCart()"></div>
 
-            <div class="cart-items" id="cartItems">
+<div class="cart-drawer" id="cartDrawer">
 
-            </div>
+    <div class="cart-drawer__header">
+        <h2>Giỏ hàng của bạn</h2>
+        <button class="cart-close-btn" onclick="app.closeCart()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
 
+    <div class="cart-drawer__body">
+
+        <div class="cart-empty" id="cartEmpty" style="display: none;">
+            <i class="fa-solid fa-box-open empty-icon"></i>
+            <p>Giỏ hàng của bạn đang trống</p>
+            <button class="btn-shopping" onclick="app.closeCart()">Tiếp tục mua sắm</button>
         </div>
 
-        <div class="cart-drawer__footer" id="cartFooter">
-            <div class="cart-total">
-                <span>Tổng cộng:</span>
-                <span class="total-price"></span>
-            </div>
-            <button class="btn-checkout" onclick="window.location.href='<?php echo $root; ?>pages/checkout.php'">Thanh toán ngay</button>
+        <div class="cart-items" id="cartItems">
+
         </div>
 
     </div>
 
-    <!-- ========== SHARED CART JS (Single Source of Truth: localStorage) ========== -->
-    <script>
+    <div class="cart-drawer__footer" id="cartFooter">
+        <div class="cart-total">
+            <span>Tổng cộng:</span>
+            <span class="total-price"></span>
+        </div>
+        <button class="btn-checkout" onclick="window.location.href='<?php echo $root; ?>pages/checkout.php'">Thanh toán
+            ngay</button>
+    </div>
+
+</div>
+
+<!-- ========== SHARED CART JS (Single Source of Truth: localStorage) ========== -->
+<script>
     // --- BIẾN TOÀN CỤC: Giỏ hàng từ localStorage ---
     let cart = JSON.parse(localStorage.getItem('smartfit_cart')) || [];
 
@@ -196,15 +208,45 @@
 
         cart.forEach((item, index) => {
             totalAmount += item.price * item.quantity;
-            const sizeLabel = item.size ? ` | Size: ${item.size}` : '';
+
+            // Generate Size Options
+            const sizes = item.availableSizes || ['S', 'M', 'L', 'XL'];
+            const outOfStockSizes = item.outOfStockSizes || [];
+            const sizeOptions = sizes.map(s => {
+                const isOut = outOfStockSizes.includes(s);
+                return `<option value="${s}" ${item.size === s ? 'selected' : ''} ${isOut ? 'disabled' : ''}>${s}${isOut ? ' (Hết hàng)' : ''}</option>`;
+            }).join('');
+
+            // Available colors preview list
+            const colors = ['Đen', 'Trắng', 'Xám', 'Xanh'];
+            const outOfStockColors = item.outOfStockColors || [];
+            const colorOptions = colors.map(c => {
+                const isOut = outOfStockColors.includes(c);
+                return `<option value="${c}" ${item.color === c ? 'selected' : ''} ${isOut ? 'disabled' : ''}>${c}${isOut ? ' (Hết hàng)' : ''}</option>`;
+            }).join('');
 
             html += `
             <div class="cart-item">
                 <img src="${item.image}" alt="${item.name}" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'" class="cart-item__img">
                 <div class="cart-item__info">
                     <h4 class="cart-item__name">${item.name}</h4>
-                    <div class="cart-item__price">${formatPrice(item.price)} <span style="font-size:1.2rem;color:#ccc;font-weight:normal">${sizeLabel}</span></div>
+                    <div class="cart-item__price">${formatPrice(item.price)}</div>
                     
+                    <div class="cart-item__config">
+                        <div class="cart-item__select-group">
+                            <span class="cart-item__label">Size:</span>
+                            <select class="cart-item__select" onchange="updateCartConfig(${index}, this.value, '${item.color}')">
+                                ${sizeOptions}
+                            </select>
+                        </div>
+                        <div class="cart-item__select-group">
+                            <span class="cart-item__label">Màu:</span>
+                            <select class="cart-item__select" onchange="updateCartConfig(${index}, '${item.size}', this.value)">
+                                ${colorOptions}
+                            </select>
+                        </div>
+                    </div>
+
                     <div class="cart-item__qty">
                         <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity - 1})">-</button>
                         <input type="text" value="${item.quantity}" readonly>
@@ -221,6 +263,35 @@
         cartItems.innerHTML = html;
         document.querySelector('.total-price').innerText = formatPrice(totalAmount);
         updateCartIconQty();
+    }
+
+    // --- Cập nhật cấu hình: Size và Màu sắc ---
+    function updateCartConfig(index, newSize, newColor) {
+        const item = cart[index];
+        const oldSize = item.size;
+        const oldColor = item.color;
+
+        if (newSize === oldSize && newColor === oldColor) return;
+
+        // Kiểm tra xem cấu hình mới có trùng với sp nào đã có trong giỏ không
+        const existingIndex = cart.findIndex((it, idx) =>
+            idx !== index &&
+            it.id === item.id &&
+            it.size === newSize &&
+            it.color === newColor
+        );
+
+        if (existingIndex !== -1) {
+            // Gộp số lượng và xóa item hiện tại
+            cart[existingIndex].quantity += item.quantity;
+            cart.splice(index, 1);
+        } else {
+            // Cập nhật cấu hình mới
+            cart[index].size = newSize;
+            cart[index].color = newColor;
+        }
+
+        saveCart();
     }
 
     // --- Tăng/giảm số lượng item trong giỏ ---
@@ -251,4 +322,4 @@
         renderCart();
         updateCartIconQty();
     });
-    </script>
+</script>

@@ -14,11 +14,11 @@ $items = [];
 
 // 3. Đổ dữ liệu từ MySQL vào mảng PHP
 if ($result && mysqli_num_rows($result) > 0) {
-    while($row = mysqli_fetch_assoc($result)) {
+    while ($row = mysqli_fetch_assoc($result)) {
         $items[] = [
-            'id' => (int)$row['id'],
+            'id' => (int) $row['id'],
             'name' => $row['name'],
-            'price' => (int)$row['price'],
+            'price' => (int) $row['price'],
             'image' => $row['image']
         ];
     }

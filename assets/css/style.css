@@ -1764,7 +1764,56 @@ section.hero--home {
     font-size: 1.5rem;
     color: var(--error);
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+}
+
+.cart-item__config {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 15px;
+}
+
+.cart-item__select-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%; /* Đảm bảo nhóm chiếm hết chiều rộng parent */
+}
+
+.cart-item__label {
+    font-size: 1.1rem;
+    color: var(--apple-grey);
+    text-transform: uppercase;
+    font-weight: 600;
+    min-width: 40px; /* Tăng nhẹ để nhãn đều hơn */
+}
+
+.cart-item__select {
+    background: rgba(0, 0, 0, 0.4); /* Nền tối hơn để chữ trắng nổi bật */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 1.2rem;
+    color: #ffffff; /* Chữ trắng theo yêu cầu */
+    cursor: pointer;
+    outline: none;
+    transition: all 0.2s;
+    flex: 1; /* Cho phép select dài ra bằng nhau */
+    max-width: 100px; /* Giới hạn để không quá dài trong drawer */
+    appearance: none; /* Reset mặc định trình duyệt nếu cần */
+    text-align: center;
+}
+
+.cart-item__select:hover {
+    background: #ffffff; /* Nền trắng khi hover */
+    color: #000000; /* Chữ đen khi hover */
+    border-color: #ffffff;
+}
+
+.cart-item__select option:disabled {
+    color: #999;
+    background-color: #f5f5f7;
 }
 
 .cart-item__qty {
@@ -1967,6 +2016,206 @@ section.hero--home {
     border-radius: 50%;
     pointer-events: none;
     transition: all 0.8s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* Modal Chọn Cấu Hình Sản Phẩm */
+.config-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    z-index: 2000;
+    display: none; /* Hiện bằng JS */
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.config-modal.active {
+    display: flex;
+    opacity: 1;
+}
+
+.config-modal__container {
+    background: #ffffff;
+    width: 90%;
+    max-width: 450px;
+    border-radius: 28px;
+    padding: 30px;
+    position: relative;
+    transform: translateY(20px);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+}
+
+.config-modal.active .config-modal__container {
+    transform: translateY(0);
+}
+
+.config-modal__close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 32px;
+    height: 32px;
+    background: #f5f5f7;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    color: var(--apple-grey);
+    transition: all 0.2s;
+}
+
+.config-modal__close:hover {
+    background: #e9ecef;
+    color: var(--apple-black);
+    transform: rotate(90deg);
+}
+
+.config-modal__product {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 25px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.config-modal__img {
+    width: 100px;
+    height: 100px;
+    border-radius: 12px;
+    object-fit: cover;
+    background: #fdfdfd;
+}
+
+.config-modal__info h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--apple-black);
+    margin-bottom: 8px;
+}
+
+.config-modal__price {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #e31b23;
+}
+
+.config-modal__group {
+    margin-bottom: 20px;
+}
+
+.config-modal__label {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--apple-black);
+    margin-bottom: 12px;
+    display: block;
+}
+
+.config-modal__sizes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.config-size-btn {
+    min-width: 50px;
+    height: 48px; /* Tăng height phù hợp với apple style */
+    border: 1px solid var(--border-color);
+    background: #fff;
+    border-radius: 12px;
+    font-size: 1.4rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+}
+
+.config-size-btn:hover {
+    border-color: var(--apple-black);
+}
+
+.config-size-btn.active {
+    background: var(--apple-black);
+    color: #fff;
+    border-color: var(--apple-black);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.config-size-btn.out-of-stock {
+    background: #f5f5f7;
+    color: #d1d1d6;
+    border-color: #e5e5ea;
+    cursor: not-allowed;
+    position: relative;
+    pointer-events: none;
+    text-decoration: line-through;
+}
+
+.config-modal__colors {
+    display: flex;
+    gap: 15px;
+}
+
+.config-color-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid white;
+    cursor: pointer;
+    box-shadow: 0 0 0 1px var(--border-color);
+    transition: all 0.2s;
+    position: relative;
+}
+
+.config-color-btn.active {
+    box-shadow: 0 0 0 2px var(--apple-black);
+    transform: scale(1.1);
+}
+
+.config-color-btn.out-of-stock {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.config-color-btn.out-of-stock::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #ff3b30;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.config-modal__btn-confirm {
+    width: 100%;
+    height: 56px;
+    background: var(--apple-black);
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.3s;
+}
+
+.config-modal__btn-confirm:hover {
+    background: #333;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
 }
 
 /* Badge số lượng trên icon giỏ hàng */
