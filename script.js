@@ -30,6 +30,7 @@ window.app = {
         this.startClock();
         this.initFormEvent();
         this.initForecastDropdown();
+        this.initScrollBtn();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -765,6 +766,61 @@ window.app = {
             if (selectedValue) {
                 localStorage.setItem('smartfit_target_weather', selectedValue);
                 console.log('💾 Đã lưu dự báo ngày đã chọn:', JSON.parse(selectedValue));
+            }
+        });
+    },
+
+      // ---------------------------------------------------------
+    // Nút cuộn trang (Scroll Button)
+    // ---------------------------------------------------------
+    initScrollBtn: function () {
+        const scrollBtn = document.getElementById('scrollBtn');
+        const heroSection = document.getElementById('hero');
+        const featuresSection = document.querySelector('.features');
+
+        if (!scrollBtn) return;
+
+        console.log("🖱️ Khởi tạo Nút cuộn trang...");
+
+        // Xử lý xoay mũi tên: Xoay lên khi ra khỏi Hero
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Nếu Hero KHÔNG còn thấy được (đã cuộn xuống qua khỏi nó)
+                if (!entry.isIntersecting) {
+                    scrollBtn.classList.add('up');
+                } else {
+                    // Nếu đang ở Hero
+                    scrollBtn.classList.remove('up');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '-80px 0px 0px 0px' // Bỏ qua phần navbar sticky
+        });
+
+        observer.observe(heroSection);
+
+        // Xử lý sự kiện click
+        scrollBtn.addEventListener('click', () => {
+            if (scrollBtn.classList.contains('up')) {
+                // Quay lên đầu trang
+                heroSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            } else {
+                // Cuộn xuống
+                if (featuresSection) {
+                    featuresSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    window.scrollBy({
+                        top: window.innerHeight,
+                        behavior: 'smooth'
+                    });
+                }
             }
         });
     },
