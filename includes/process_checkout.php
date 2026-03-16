@@ -92,9 +92,10 @@ try {
     // ========================================
     // BƯỚC 2: TẠO HÓA ĐƠN CHÍNH (Bảng orders)
     // ========================================
-    $orderSql = "INSERT INTO orders (user_id, fullname, phone, address, note, payment_method, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    $payment_status = 'pending';
+    $orderSql = "INSERT INTO orders (user_id, fullname, phone, address, note, payment_method, payment_status, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $orderStmt = mysqli_prepare($conn, $orderSql);
-    mysqli_stmt_bind_param($orderStmt, "isssssi", $userId, $fullname, $phone, $address, $note, $payment_method, $totalAmount);
+    mysqli_stmt_bind_param($orderStmt, "issssssi", $userId, $fullname, $phone, $address, $note, $payment_method, $payment_status, $totalAmount);
     mysqli_stmt_execute($orderStmt);
     
     $orderId = mysqli_insert_id($conn);
@@ -128,11 +129,45 @@ try {
     // ========================================
     mysqli_commit($conn);
     
-    echo json_encode([
-        'status' => 'success', 
-        'message' => 'Đặt hàng thành công! Mã đơn: #' . $orderId,
-        'order_id' => $orderId
-    ]);
+    // ========================================
+    // BƯỚC 5: XỬ LÝ THEO TỪNG PHƯƠNG THỨC THANH TOÁN
+    // ========================================
+    switch ($payment_method) {
+        case 'cod':
+            echo json_encode([
+                'status' => 'success', 
+                'message' => 'Đặt hàng thành công! Mã đơn: #' . $orderId,
+                'order_id' => $orderId,
+                'redirect_url' => 'order_history.php' // Hoặc success.php tùy hệ thống frontend redirect
+            ]);
+            break;
+            
+        case 'vnpay':
+            // Bắt đầu session cho VNPAY nếu chưa start
+            if (session_status() === PHP_SESSION_NONE) {
+                session_start();
+            }
+            $_SESSION['order_id'] = $orderId;
+            $_SESSION['total_amount'] = $totalAmount;
+            
+            // File này sẽ phụ trách tạo VNPAY URL và echo JSON để frontend redirect tới VNPay
+            require_once 'vnpay_create.php';
+            break;
+            
+        case 'momo':
+            echo json_encode([
+                'status' => 'error', 
+                'message' => 'Chức năng thanh toán qua Ví MoMo đang được phát triển!'
+            ]);
+            break;
+            
+        default:
+            echo json_encode([
+                'status' => 'error', 
+                'message' => 'Phương thức thanh toán không hợp lệ!'
+            ]);
+            break;
+    }
 
 } catch (Exception $e) {
     // ========================================
