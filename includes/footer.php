@@ -77,12 +77,12 @@
             <div class="auth-card__title">Đăng nhập</div>
             <form action="<?php echo $root; ?>includes/login.php" method="post" class="auth-card__form">
                 <div class="auth-card__group">
-                    <h4 class="auth-card__heading">Email :</h4>
-                    <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
+                    <h4 class="auth-card__heading">Email hoặc Tên đăng nhập</h4>
+                    <input type="text" placeholder="Nhập Email hoặc Tên đăng nhập" class="auth-card__input" name="email" required>
                 </div>
                 <div class="auth-card__group">
-                    <h4 class="auth-card__heading">Mật khẩu :</h4>
-                    <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw"
+                    <h4 class="auth-card__heading">Mật khẩu</h4>
+                    <input type="password" placeholder="Nhập mật khẩu" class="auth-card__input" name="psw"
                         required>
                 </div>
                 <button type="submit" class="auth-card__button button">Đăng nhập</button>
@@ -94,22 +94,22 @@
             <div class="auth-card__title">Đăng ký</div>
             <form action="<?php echo $root; ?>includes/signup-form.php" method="post" class="auth-card__form">
                 <div class="auth-card__group">
-                    <h4 class="auth-card__heading">Tên :</h4>
-                    <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
+                    <h4 class="auth-card__heading">Tên đăng nhập</h4>
+                    <input type="text" placeholder="Nhập tên đăng nhập" class="auth-card__input" name="name" required>
                 </div>
                 <div class="auth-card__group">
-                    <h4 class="auth-card__heading">Email :</h4>
-                    <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email"
+                    <h4 class="auth-card__heading">Email</h4>
+                    <input type="email" placeholder="Nhập email" class="auth-card__input" name="email"
                         required>
                 </div>
                 <div class="auth-card__group">
-                    <h4 class="auth-card__heading">Mật khẩu :</h4>
-                    <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw"
+                    <h4 class="auth-card__heading">Mật khẩu</h4>
+                    <input type="password" placeholder="Tạo mật khẩu" class="auth-card__input" name="psw"
                         required>
                 </div>
                 <div class="auth-card__group">
-                    <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
-                    <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input"
+                    <h4 class="auth-card__heading">Xác nhận mật khẩu</h4>
+                    <input type="password" placeholder="Nhập lại mật khẩu" class="auth-card__input"
                         name="psw-repeat" required>
                 </div>
                 <button type="submit" class="auth-card__button button">Đăng ký</button>

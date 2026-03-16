@@ -28,11 +28,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $password = $_POST['psw'] ?? '';
 
     if (empty($email) || empty($password)) {
-        sendResponse(false, 'Vui lòng nhập email và mật khẩu');
+        sendResponse(false, 'Vui lòng nhập thông tin đăng nhập và mật khẩu');
     }
 
-    $stmt = mysqli_prepare($conn, "SELECT id, name, email, password FROM users WHERE email = ?");
-    mysqli_stmt_bind_param($stmt, 's', $email);
+    $stmt = mysqli_prepare($conn, "SELECT id, name, email, password FROM users WHERE email = ? OR name = ?");
+    mysqli_stmt_bind_param($stmt, 'ss', $email, $email);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $user = mysqli_fetch_assoc($result);
