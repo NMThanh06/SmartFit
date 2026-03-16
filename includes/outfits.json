@@ -3,10 +3,9 @@
         {
             "id": "3",
             "type": "bottom",
-            "name": "Quần Jean",
+            "name": "Quần jean ống rộng",
             "gender": [
-                "male",
-                "female"
+                "male"
             ],
             "occasion": [
                 "study",
@@ -18,21 +17,19 @@
                 "basic",
                 "street"
             ],
-            "color": "Xanh nhạt",
+            "color": "Xanh dương",
             "fit": [
                 "oversized"
             ],
             "weather": [
-                "hot",
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773671985_outfit_3_color_1.jpg",
-            "price": 300000,
+            "image": "/SmartFit/assets/img/1773675502_outfit_3_color_1.jpg",
+            "price": 199000,
             "sizes": {
-                "L": 2,
-                "M": 5,
-                "S": 10
+                "XL": 12,
+                "XXL": 33
             },
             "age": "All",
             "seller_note": ""
@@ -67,8 +64,8 @@
             "image": "/SmartFit/assets/img/1773591299_outfit_2_color_1.avif",
             "price": 1000000,
             "sizes": {
-                "38": 5,
-                "39": 9,
+                "38": 4,
+                "39": 8,
                 "40": 6,
                 "41": 1,
                 "42": 2
@@ -106,8 +103,7 @@
             "price": 200000,
             "sizes": {
                 "L": 8,
-                "M": 18,
-                "Oversize": 5,
+                "M": 12,
                 "S": 7,
                 "XL": 15
             },

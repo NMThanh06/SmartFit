@@ -117,10 +117,10 @@
                     <span>Thanh toán khi nhận hàng (COD)</span>
                 </label>
 
-                <label class="payment-option" onclick="showInstruction('momo')">
-                    <input type="radio" name="payment_method" value="momo">
+                <label class="payment-option" onclick="event.preventDefault(); showToast('Thanh toán MoMo đang bảo trì!', 'error')" style="opacity: 0.6; cursor: not-allowed;">
+                    <input type="radio" name="payment_method" value="momo" disabled>
                     <span style="background: #a50064; color: white; padding: 5px 10px; border-radius: 5px; margin-right: 15px; font-weight: bold;">MoMo</span>
-                    <span>Thanh toán qua Ví MoMo</span>
+                    <span>Thanh toán qua Ví MoMo (Bảo trì)</span>
                 </label>
 
                 <label class="payment-option" onclick="showInstruction('vnpay')">
@@ -244,12 +244,15 @@
             return;
         }
 
+        const paymentInput = document.querySelector('input[name="payment_method"]:checked');
+        const paymentMethod = paymentInput ? paymentInput.value : 'cod';
+
         const orderData = {
             fullname: document.getElementById('fullname').value,
             phone: document.getElementById('phone').value,
             address: document.getElementById('address').value,
             note: document.getElementById('note').value,
-            payment_method: document.querySelector('input[name="payment_method"]:checked').value,
+            payment_method: paymentMethod,
             cart_items: cart // Gửi giỏ hàng từ localStorage lên server
         };
 
@@ -267,9 +270,13 @@
                 // XÓA GIỎ HÀNG TRÊN LOCALSTORAGE SAU KHI ĐẶT HÀNG THÀNH CÔNG
                 localStorage.removeItem('smartfit_cart');
                 
-                // Đợi 2 giây để người dùng đọc Toast rồi mới chuyển sang lịch sử đơn hàng
+                // Đợi 2 giây để người dùng đọc Toast rồi mới chuyển sang trang tiếp theo
                 setTimeout(() => {
-                    window.location.href = "order_history.php"; 
+                    if (result.redirect_url) {
+                        window.location.href = result.redirect_url;
+                    } else {
+                        window.location.href = "order_history.php"; 
+                    }
                 }, 2000);
             } else {
                 showToast(result.message, 'error');

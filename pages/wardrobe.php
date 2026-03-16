@@ -13,10 +13,10 @@ if (isset($_SESSION['user_id'])) {
     
     // SQL lấy thông tin từ bảng
     $sql = "SELECT so.id as saved_id, so.style_name,
-                   t.name as top_name, t.image as top_img,
-                   b.name as bottom_name, b.image as bottom_img,
-                   s.name as shoes_name, s.image as shoes_img,
-                   a.name as acc_name, a.image as acc_img
+                   t.name as top_name, (SELECT image FROM outfit_colors WHERE outfit_id = t.id LIMIT 1) as top_img,
+                   b.name as bottom_name, (SELECT image FROM outfit_colors WHERE outfit_id = b.id LIMIT 1) as bottom_img,
+                   s.name as shoes_name, (SELECT image FROM outfit_colors WHERE outfit_id = s.id LIMIT 1) as shoes_img,
+                   a.name as acc_name, (SELECT image FROM outfit_colors WHERE outfit_id = a.id LIMIT 1) as acc_img
             FROM saved_outfits so
             JOIN outfits t ON so.top_id = t.id
             JOIN outfits b ON so.bottom_id = b.id
@@ -63,10 +63,10 @@ include '../includes/header.php';
                         <div class="wardrobe-card">
                             <div class="wardrobe-card__gallery">
                                 <div class="wardrobe-card__img">
-                                    <img src="../assets/img/<?php echo basename($outfit['top_img']); ?>" alt="Áo">
+                                    <img src="<?php echo htmlspecialchars($outfit['top_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Áo" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
                                 </div>
                                 <div class="wardrobe-card__img">
-                                    <img src="../assets/img/<?php echo basename($outfit['bottom_img']); ?>" alt="Quần">
+                                    <img src="<?php echo htmlspecialchars($outfit['bottom_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Quần" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
                                 </div>
                             </div>
 
