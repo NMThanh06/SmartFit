@@ -75,7 +75,50 @@ include $base_dir . 'includes/header.php';
                         <?php if (mysqli_num_rows($orders_result) > 0): ?>
                             <?php while ($order = mysqli_fetch_assoc($orders_result)): ?>
                                 <tr>
-                                    <td><strong>#<?= $order['id'] ?></strong></td>
+                                    <td>
+                                        <div class="order-id-wrapper">
+                                            <strong>#<?= $order['id'] ?></strong>
+                                            <button type="button" class="btn-view-detail" 
+                                                onclick="openOrderDetail(<?= htmlspecialchars(json_encode($order)) ?>, this)">
+                                                <i class="fa-solid fa-eye"></i> Xem
+                                            </button>
+                                        </div>
+
+                                        <!-- Hidden Items for Modal -->
+                                        <div class="order-items-hidden" style="display: none;">
+                                            <?php
+                                                $detailSql = "
+                                                    SELECT d.*, o.name, 
+                                                           (SELECT image FROM outfit_colors WHERE outfit_id = o.id LIMIT 1) as image 
+                                                    FROM order_details d 
+                                                    JOIN outfits o ON d.outfit_id = o.id 
+                                                    WHERE d.order_id = ?";
+                                                $detailStmt = mysqli_prepare($conn, $detailSql);
+                                                mysqli_stmt_bind_param($detailStmt, "i", $order['id']);
+                                                mysqli_stmt_execute($detailStmt);
+                                                $detailsResult = mysqli_stmt_get_result($detailStmt);
+                                                
+                                                while ($item = mysqli_fetch_assoc($detailsResult)):
+                                            ?>
+                                                <div class="order-item">
+                                                    <div class="order-item__img-wrapper">
+                                                        <img src="<?= htmlspecialchars($item['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg') ?>" class="order-item__img">
+                                                    </div>
+                                                    <div class="order-item__info">
+                                                        <h4 class="order-item__name"><?= htmlspecialchars($item['name']) ?></h4>
+                                                        <div class="order-item__meta">
+                                                            <span>Size: <?= htmlspecialchars($item['size_name']) ?></span>
+                                                            <span class="order-item__separator">|</span>
+                                                            <span>SL: <?= $item['quantity'] ?></span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="order-item__price">
+                                                        <?= number_format($item['price'], 0, ',', '.') ?>đ
+                                                    </div>
+                                                </div>
+                                            <?php endwhile; ?>
+                                        </div>
+                                    </td>
                                     <td>
                                         <div class="customer-info">
                                             <span class="customer-name"><?= htmlspecialchars($order['fullname']) ?></span>
@@ -136,11 +179,106 @@ include $base_dir . 'includes/header.php';
     </div>
 </div>
 
+<!-- Order Detail Modal (Tái sử dụng cấu trúc từ order_history.php) -->
+<div id="orderDetailModal" class="order-modal">
+    <div class="order-modal__content">
+        <div class="order-modal__header">
+            <h2 class="order-modal__title">Chi tiết đơn hàng <span id="modalOrderId"></span></h2>
+            <button class="order-modal__close" onclick="closeOrderDetail()">&times;</button>
+        </div>
+        
+        <div class="order-modal__body">
+            <div class="order-modal__section">
+                <h3 class="order-modal__section-title"><i class="fa-solid fa-truck"></i> Thông tin giao hàng</h3>
+                <div class="order-modal__info-grid">
+                    <div class="order-modal__info-item">
+                        <span class="label">Người nhận:</span>
+                        <span id="modalFullname" class="value"></span>
+                    </div>
+                    <div class="order-modal__info-item">
+                        <span class="label">Số điện thoại:</span>
+                        <span id="modalPhone" class="value"></span>
+                    </div>
+                    <div class="order-modal__info-item">
+                        <span class="label">Thời gian đặt:</span>
+                        <span id="modalOrderDate" class="value"></span>
+                    </div>
+                    <div class="order-modal__info-item order-modal__info-item--full">
+                        <span class="label">Địa chỉ:</span>
+                        <span id="modalAddress" class="value"></span>
+                    </div>
+                    <div class="order-modal__info-item order-modal__info-item--full">
+                        <span class="label">Ghi chú từ khách:</span>
+                        <span id="modalNote" class="value italic"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-modal__section">
+                <h3 class="order-modal__section-title"><i class="fa-solid fa-credit-card"></i> Thanh toán</h3>
+                <div class="order-modal__info-grid">
+                    <div class="order-modal__info-item">
+                        <span class="label">Phương thức:</span>
+                        <span id="modalPaymentMethod" class="value uppercase"></span>
+                    </div>
+                    <div class="order-modal__info-item">
+                        <span class="label">Trạng thái thanh toán:</span>
+                        <span id="modalPaymentStatus" class="value uppercase"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="order-modal__section">
+                <h3 class="order-modal__section-title"><i class="fa-solid fa-list-ul"></i> Danh sách sản phẩm</h3>
+                <div id="modalOrderItems" class="order-modal__items">
+                    <!-- Danh sách sản phẩm sẽ được copy vào đây bằng JS -->
+                </div>
+            </div>
+        </div>
+
+        <div class="order-modal__footer">
+            <div class="order-modal__total">
+                <span>Tổng doanh thu:</span>
+                <span id="modalTotalValue"></span>
+            </div>
+            <button class="order-modal__btn-close" onclick="closeOrderDetail()">Đóng cửa sổ</button>
+        </div>
+    </div>
+</div>
+
 <style>
     /* CSS cho trang Quản lý đơn hàng (Đồng bộ với manage_products.php) */
     .manage-orders {
-        padding: 100px 0 60px;
+        padding: 80px 0 60px;
         animation: fadeIn 0.8s ease;
+    }
+
+    .order-id-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn-view-detail {
+        background: #f0f0f5;
+        color: #555;
+        border: 1px solid #ddd;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        width: fit-content;
+        transition: 0.2s;
+    }
+
+    .btn-view-detail:hover {
+        background: var(--apple-black);
+        color: #fff;
+        border-color: var(--apple-black);
     }
 
     .manage-orders__header {
@@ -304,12 +442,168 @@ include $base_dir . 'includes/header.php';
         transform: translateY(-2px);
     }
 
+    /* Modal Styles (Đồng bộ với order_history.php) */
+    .order-modal {
+        display: none;
+        position: fixed;
+        z-index: 10001;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .order-modal.active { display: flex; }
+
+    .order-modal__content {
+        background-color: #fff;
+        width: 90%;
+        max-width: 700px;
+        max-height: 90vh;
+        border-radius: 24px;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        animation: modalSlideUp 0.4s ease;
+    }
+
+    @keyframes modalSlideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+
+    .order-modal__header {
+        padding: 20px 30px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .order-modal__title { font-size: 2rem; font-weight: 800; }
+    .order-modal__title span { color: var(--primary-purple); }
+    .order-modal__close { background: none; border: none; font-size: 3rem; color: #999; cursor: pointer; }
+
+    .order-modal__body { padding: 30px; overflow-y: auto; flex: 1; }
+    .order-modal__section { margin-bottom: 30px; }
+    .order-modal__section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #f5f5f7;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .order-modal__section-title i { color: var(--primary-purple); }
+
+    .order-modal__info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    .order-modal__info-item { display: flex; flex-direction: column; gap: 5px; }
+    .order-modal__info-item--full { grid-column: span 2; }
+    .order-modal__info-item .label { font-size: 1.3rem; color: #888; font-weight: 500; }
+    .order-modal__info-item .value { font-size: 1.5rem; color: #222; font-weight: 700; }
+    .order-modal__info-item .italic { font-style: italic; color: #666; font-weight: 400; }
+
+    /* Items in Modal */
+    .order-modal__items { background: #f8f8fa; border-radius: 15px; padding: 15px; }
+    .order-item {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+    }
+    .order-item:last-child { border-bottom: none; }
+    .order-item__img-wrapper { width: 60px; height: 60px; border-radius: 10px; overflow: hidden; border: 1px solid #eee; }
+    .order-item__img { width: 100%; height: 100%; object-fit: cover; }
+    .order-item__info { flex: 1; }
+    .order-item__name { font-size: 1.5rem; font-weight: 700; color: #333; margin-bottom: 5px; }
+    .order-item__meta { font-size: 1.3rem; color: #777; display: flex; gap: 10px; }
+    .order-item__price { font-size: 1.5rem; font-weight: 700; color: var(--primary-purple); }
+
+    .order-modal__footer {
+        padding: 25px 30px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .order-modal__total { font-size: 1.8rem; font-weight: 800; color: #222; }
+    #modalTotalValue { color: var(--primary-purple); margin-left: 10px; }
+    .order-modal__btn-close {
+        background: var(--apple-black);
+        color: #fff;
+        padding: 12px 25px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+    .order-modal__btn-close:hover { opacity: 0.9; transform: translateY(-2px); }
+
     /* Tablet/Mobile Responsive */
     @media (max-width: 768px) {
         .manage-orders__title { font-size: 2.8rem; }
         .manage-table { font-size: 1.2rem; }
         .status-select { min-width: 140px; font-size: 1.2rem; }
+        .order-modal__info-grid { grid-template-columns: 1fr; }
+        .order-modal__info-item--full { grid-column: span 1; }
     }
 </style>
+
+<script>
+    function openOrderDetail(order, btn) {
+        const modal = document.getElementById('orderDetailModal');
+        
+        // Điền thông tin cơ bản
+        document.getElementById('modalOrderId').innerText = '#' + order.id;
+        document.getElementById('modalFullname').innerText = order.fullname || 'Chưa cập nhật';
+        document.getElementById('modalPhone').innerText = order.phone || 'Chưa cập nhật';
+        
+        // Định dạng ngày đặt
+        const date = new Date(order.created_at);
+        const dateString = date.toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'}) + ' - ' + date.toLocaleDateString('vi-VN');
+        document.getElementById('modalOrderDate').innerText = dateString;
+
+        document.getElementById('modalAddress').innerText = order.address || 'Chưa cập nhật';
+        document.getElementById('modalNote').innerText = order.note ? '"' + order.note + '"' : 'Không có ghi chú từ khách';
+        document.getElementById('modalPaymentMethod').innerText = order.payment_method;
+        document.getElementById('modalPaymentStatus').innerText = order.payment_status;
+        
+        const totalFormatted = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(order.total_amount);
+        document.getElementById('modalTotalValue').innerText = totalFormatted;
+
+        // Lấy danh sách sản phẩm từ div hidden gần nút bấm nhất
+        const tr = btn.closest('tr');
+        const hiddenItems = tr.querySelector('.order-items-hidden').cloneNode(true);
+        hiddenItems.style.display = 'block'; // Hiển thị list
+        
+        const modalItemsContainer = document.getElementById('modalOrderItems');
+        modalItemsContainer.innerHTML = '';
+        modalItemsContainer.appendChild(hiddenItems);
+
+        // Hiện modal
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeOrderDetail() {
+        const modal = document.getElementById('orderDetailModal');
+        modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Đóng khi click ngoài
+    window.onclick = function(event) {
+        const modal = document.getElementById('orderDetailModal');
+        if (event.target == modal) closeOrderDetail();
+    }
+</script>
 
 <?php include $base_dir . 'includes/footer.php'; ?>
