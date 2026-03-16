@@ -1,6 +1,43 @@
 {
     "items": [
         {
+            "id": "3",
+            "type": "bottom",
+            "name": "Quần Jean",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "Xanh nhạt",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773671985_outfit_3_color_1.jpg",
+            "price": 300000,
+            "sizes": {
+                "L": 2,
+                "M": 5,
+                "S": 10
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "2",
             "type": "shoes",
             "name": "Giày Nike Air Force 1",
@@ -32,7 +69,7 @@
             "sizes": {
                 "38": 5,
                 "39": 9,
-                "40": 7,
+                "40": 6,
                 "41": 1,
                 "42": 2
             },
@@ -65,11 +102,12 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773591237_outfit_1_color_1.webp",
+            "image": "/SmartFit/assets/img/1773675838_outfit_1_color_1.webp",
             "price": 200000,
             "sizes": {
                 "L": 8,
                 "M": 18,
+                "Oversize": 5,
                 "S": 7,
                 "XL": 15
             },

@@ -15,36 +15,42 @@ include 'includes/header.php';
                     <aside class="shop-sidebar">
                         <div class="shop-filter">
                             <h3 class="shop-filter__title">Danh mục</h3>
-                            <ul class="shop-filter__list">
+                            <ul class="shop-filter__list" id="categoryFilter">
                                 <li class="shop-filter__item active" data-type="all">Tất cả sản phẩm</li>
                                 <li class="shop-filter__item" data-type="top">Áo</li>
                                 <li class="shop-filter__item" data-type="bottom">Quần</li>
-                                <li class="shop-filter__item" data-type="accessory">Giày & Phụ kiện</li>
+                                <li class="shop-filter__item" data-type="accessory_shoes">Giày & Phụ kiện</li>
                             </ul>
                         </div>
 
                         <div class="shop-filter">
-                            <h3 class="shop-filter__title">Kích cỡ</h3>
-                            <div class="shop-filter__sizes">
-                                <span class="shop-filter__size">S</span>
-                                <span class="shop-filter__size">M</span>
-                                <span class="shop-filter__size">L</span>
-                                <span class="shop-filter__size">XL</span>
-                                <span class="shop-filter__size">Oversize</span>
+                            <div class="shop-filter__header">
+                                <h3 class="shop-filter__title">Kích cỡ</h3>
+                                <button class="shop-filter__clear" onclick="resetSizeFilter()" title="Xóa bộ lọc kích cỡ">Xóa</button>
+                            </div>
+                            <div class="shop-filter__sizes" id="sizeFilter">
+                                <span class="shop-filter__size" data-size="S">S</span>
+                                <span class="shop-filter__size" data-size="M">M</span>
+                                <span class="shop-filter__size" data-size="L">L</span>
+                                <span class="shop-filter__size" data-size="XL">XL</span>
+                                <span class="shop-filter__size" data-size="Oversize">Oversize</span>
                             </div>
                         </div>
 
                         <div class="shop-filter">
                             <h3 class="shop-filter__title">Khoảng giá</h3>
-                            <div class="shop-filter__price">
+                            <div class="shop-filter__price" id="priceFilter">
                                 <label class="shop-filter__checkbox">
-                                    <input type="checkbox"> 0đ - 200.000đ
+                                    <input type="radio" name="price_range" data-min="0" data-max="0" checked> Tất cả giá
                                 </label>
                                 <label class="shop-filter__checkbox">
-                                    <input type="checkbox"> 200.000đ - 500.000đ
+                                    <input type="radio" name="price_range" data-min="0" data-max="200000"> 0đ - 200.000đ
                                 </label>
                                 <label class="shop-filter__checkbox">
-                                    <input type="checkbox"> Trên 500.000đ
+                                    <input type="radio" name="price_range" data-min="200000" data-max="500000"> 200.000đ - 500.000đ
+                                </label>
+                                <label class="shop-filter__checkbox">
+                                    <input type="radio" name="price_range" data-min="500000" data-max="9999999"> Trên 500.000đ
                                 </label>
                             </div>
                         </div>
@@ -57,10 +63,11 @@ include 'includes/header.php';
                                 <input type="text" class="shop-search__input" placeholder="Tìm kiếm sản phẩm...">
                             </div>
                             <div class="shop-sort">
-                                <select class="shop-sort__select">
+                                <select class="shop-sort__select" id="sortFilter">
                                     <option value="newest">Mới nhất</option>
                                     <option value="price-asc">Giá tăng dần</option>
                                     <option value="price-desc">Giá giảm dần</option>
+                                    <option value="oldest">Cũ nhất</option>
                                 </select>
                             </div>
                         </div>
@@ -115,13 +122,19 @@ include 'includes/header.php';
 
 
         // 2. Tải danh sách sản phẩm trang Shop
-        async function loadProducts() {
+        // 2. Tải danh sách sản phẩm trang Shop
+        async function loadProducts(params = '') {
             try {
-                const response = await fetch('includes/api_outfits.php');
+                const response = await fetch(`includes/api_outfits.php${params}`);
                 const data = await response.json();
                 const grid = document.getElementById('productGrid');
                 if (!grid) return;
                 grid.innerHTML = '';
+
+                if (data.items.length === 0) {
+                    grid.innerHTML = '<div class="col l-12" style="text-align:center; padding: 40px; font-size:1.6rem; color:#888;">Không tìm thấy sản phẩm nào phù hợp.</div>';
+                    return;
+                }
 
                 data.items.forEach(item => {
                     // Đảm bảo item.sizes luôn là mảng
@@ -149,6 +162,74 @@ include 'includes/header.php';
                     </div>`;
                 });
             } catch (error) { console.error("Lỗi tải sản phẩm:", error); }
+        }
+
+        // --- HÀM LỌC TỔNG HỢP ---
+        function applyFilters() {
+            const type = document.querySelector('#categoryFilter .shop-filter__item.active')?.dataset.type || 'all';
+            const size = document.querySelector('#sizeFilter .shop-filter__size.active')?.dataset.size || '';
+            const sort = document.getElementById('sortFilter').value;
+            const query = document.querySelector('.shop-search__input').value.trim();
+            
+            const selectedPrice = document.querySelector('input[name="price_range"]:checked');
+            const minPrice = selectedPrice?.dataset.min || 0;
+            const maxPrice = selectedPrice?.dataset.max || 0;
+
+            const params = new URLSearchParams({
+                type: type,
+                sort: sort,
+                size: size,
+                min_price: minPrice,
+                max_price: maxPrice,
+                q: query
+            });
+
+            loadProducts(`?${params.toString()}`);
+        }
+
+        // --- HÀM RESET RIÊNG CHO SIZE ---
+        function resetSizeFilter() {
+            document.querySelectorAll('#sizeFilter .shop-filter__size').forEach(i => i.classList.remove('active'));
+            applyFilters();
+        }
+
+        // --- KHỞI TẠO SỰ KIỆN LỌC ---
+        function initShopFilters() {
+            // 0. Tìm kiếm theo từ khóa (Debounce 300ms)
+            let searchTimeout;
+            document.querySelector('.shop-search__input').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 300);
+            });
+            // 1. Lọc theo Danh mục
+            document.querySelectorAll('#categoryFilter .shop-filter__item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('#categoryFilter .shop-filter__item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    applyFilters();
+                });
+            });
+
+            // 2. Lọc theo Kích cỡ
+            document.querySelectorAll('#sizeFilter .shop-filter__size').forEach(item => {
+                item.addEventListener('click', () => {
+                    if (item.classList.contains('active')) {
+                        item.classList.remove('active'); // Bỏ chọn
+                    } else {
+                        document.querySelectorAll('#sizeFilter .shop-filter__size').forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                    }
+                    applyFilters();
+                });
+            });
+
+            // 3. Sắp xếp
+            document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+            // 4. Lọc theo Giá
+            document.querySelectorAll('input[name="price_range"]').forEach(input => {
+                input.addEventListener('change', applyFilters);
+            });
         }
 
         // ========================================
@@ -375,6 +456,7 @@ include 'includes/header.php';
         // Khởi động khi tải trang xong
         window.addEventListener('DOMContentLoaded', () => {
             loadProducts();
+            initShopFilters();
             
             // Close modal when clicking outside container
             window.onclick = (event) => {
