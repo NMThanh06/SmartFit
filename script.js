@@ -312,6 +312,10 @@ window.app = {
                     <i class="fa-solid fa-caret-down user-info__arrow"></i>
                 </div>
                 <div id="userDropdown" class="user-dropdown">
+                    <a href="pages/admin_dashboard.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Bảng điều khiển</span>
+                    </a>
                     <a href="pages/personal_info.php" class="user-dropdown__item">
                         <i class="fa-solid fa-id-card"></i>
                         <span>Thông tin cá nhân</span>

@@ -102,6 +102,16 @@ require_once __DIR__ . '/config.php';
                             </div>
 
                             <div id="userDropdown" class="user-dropdown">
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('admin_dashboard.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/admin_dashboard.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                    <span>Bảng điều khiển</span>
+                                </a>
+                                <?php endif; ?>
+
                                 <a href="<?php echo $root; ?>pages/personal_info.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-id-card"></i>
                                     <span>Thông tin cá nhân</span>

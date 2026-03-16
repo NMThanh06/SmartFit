@@ -9,6 +9,7 @@ $acl = [
     'manage_products.php' => ['admin', 'sales'],
     'manage_orders.php' => ['admin', 'sales'],
     'manage_users.php' => ['admin'],
+    'admin_dashboard.php' => ['admin', 'sales'],
     
     // Mặc định: Nếu trang không có trong danh sách này, mọi role đều được vào (Public/Common)
 ];
