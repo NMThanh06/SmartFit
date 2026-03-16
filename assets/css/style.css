@@ -316,13 +316,18 @@
 .config-form__group {
     width: 32%;
     min-width: 250px;
+    height: 115px;
     background: #ffffff;
     border: 1px solid var(--border-color);
     border-radius: 20px;
-    padding: 15px 20px;
+    padding: 10px 15px;
     box-sizing: border-box;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
 }
 
 .config-form__group:hover {
@@ -344,8 +349,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 5px;
 }
 
 .config-form__input {
@@ -386,7 +391,7 @@
 
 .config-form__label {
     display: inline-block;
-    padding: 8px 16px;
+    padding: 8px 12px;
     border-radius: 12px;
     background: #f1f3f5;
     border: 1px solid #e9ecef;
