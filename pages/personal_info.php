@@ -20,20 +20,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_info'])) {
     $address  = mysqli_real_escape_string($conn, $_POST['address']);
     $age      = (int)$_POST['age'];
     $gender   = mysqli_real_escape_string($conn, $_POST['gender']);
-
-    // Sử dụng Prepared Statement để bảo mật
-    $sql_update = "UPDATE users SET fullname = ?, phone = ?, address = ?, age = ?, gender = ? WHERE id = ?";
-    if ($stmt = mysqli_prepare($conn, $sql_update)) {
-        mysqli_stmt_bind_param($stmt, "sssisi", $fullname, $phone, $address, $age, $gender, $user_id);
+    
+    // Xử lý Upload Avatar
+    $avatar_path = null;
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
+        $allowed = ['jpg', 'jpeg', 'png', 'webp'];
+        $filename = $_FILES['avatar']['name'];
+        $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
         
-        if (mysqli_stmt_execute($stmt)) {
-            $message = "Cập nhật thông tin thành công!";
-            $message_type = "success";
-        } else {
-            $message = "Có lỗi xảy ra: " . mysqli_error($conn);
-            $message_type = "error";
+        if (in_array($ext, $allowed)) {
+            $new_filename = time() . '_' . rand(1000, 9999) . '.' . $ext;
+            $upload_dir = '../assets/img/avatars/';
+            
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            $destination = $upload_dir . $new_filename;
+            if (move_uploaded_file($_FILES['avatar']['tmp_name'], $destination)) {
+                $avatar_path = 'assets/img/avatars/' . $new_filename;
+            }
         }
-        mysqli_stmt_close($stmt);
+    }
+
+    // Cập nhật CSDL
+    if ($avatar_path) {
+        // Có ảnh mới
+        $sql_update = "UPDATE users SET fullname = ?, phone = ?, address = ?, age = ?, gender = ?, avatar = ? WHERE id = ?";
+        if ($stmt = mysqli_prepare($conn, $sql_update)) {
+            mysqli_stmt_bind_param($stmt, "sssissi", $fullname, $phone, $address, $age, $gender, $avatar_path, $user_id);
+            if (mysqli_stmt_execute($stmt)) {
+                $message = "Cập nhật thông tin và ảnh đại diện thành công!";
+                $message_type = "success";
+            }
+            mysqli_stmt_close($stmt);
+        }
+    } else {
+        // Không có ảnh mới hoặc lỗi upload
+        $sql_update = "UPDATE users SET fullname = ?, phone = ?, address = ?, age = ?, gender = ? WHERE id = ?";
+        if ($stmt = mysqli_prepare($conn, $sql_update)) {
+            mysqli_stmt_bind_param($stmt, "sssisi", $fullname, $phone, $address, $age, $gender, $user_id);
+            if (mysqli_stmt_execute($stmt)) {
+                $message = "Cập nhật thông tin thành công!";
+                $message_type = "success";
+            }
+            mysqli_stmt_close($stmt);
+        }
     }
 }
 
@@ -49,6 +81,9 @@ $display_address  = $user_data['address']  ? $user_data['address']  : "Chưa c�
 $display_age      = $user_data['age']      ? $user_data['age']      : "Chưa cập nhật";
 $display_gender   = ($user_data['gender'] == 'male') ? "Nam" : (($user_data['gender'] == 'female') ? "Nữ" : "Chưa cập nhật");
 
+// Xử lý đường dẫn Avatar
+$user_avatar = !empty($user_data['avatar']) ? '../' . $user_data['avatar'] : '../assets/img/default_avatar.jpg';
+
 // Include header (đảm bảo đường dẫn đúng)
 require_once '../includes/header.php';
 ?>
@@ -58,12 +93,14 @@ require_once '../includes/header.php';
         <div class="personal-container">
             <!-- Header thông tin -->
             <div class="personal-header">
-                <div class="personal-avatar">
-                    <i class="fa-solid fa-circle-user"></i>
+                <div class="personal-avatar-wrapper">
+                    <div class="personal-avatar">
+                        <img src="<?php echo $user_avatar; ?>" alt="Avatar" id="avatarPreview">
+                    </div>
                 </div>
                 <div class="personal-welcome">
                     <h1 class="personal-title">Thông tin cá nhân</h1>
-                    <p class="personal-subtitle">Quản lý thông tin tài khoản và sở thích thời trang của bạn</p>
+                    <p class="personal-subtitle">Quản lý tài khoản và ảnh đại diện của bạn</p>
                 </div>
             </div>
 
@@ -74,7 +111,17 @@ require_once '../includes/header.php';
             <?php endif; ?>
 
             <!-- Form thông tin -->
-            <form id="infoForm" method="POST" action="">
+            <form id="infoForm" method="POST" action="" enctype="multipart/form-data">
+                
+                <!-- Avatar Upload (Chỉ hiện khi Edit) -->
+                <div class="info-item edit-mode info-item--avatar">
+                    <label class="info-label">Thay đổi ảnh đại diện</label>
+                    <div class="avatar-upload-box">
+                        <input type="file" name="avatar" id="avatarInput" accept="image/*" class="info-input">
+                        <p class="avatar-hint">Chấp nhận: JPG, PNG, WEBP. Tối đa 2MB.</p>
+                    </div>
+                </div>
+
                 <div class="info-grid">
                     <!-- Tên đăng nhập (Read-only) -->
                     <div class="info-item">
@@ -97,7 +144,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Họ và tên</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_fullname; ?></span>
-                            <input type="text" name="fullname" class="edit-mode info-input" value="<?php echo $user_data['fullname']; ?>" placeholder="Nhập họ tên đầy đủ">
+                            <input type="text" name="fullname" class="edit-mode info-input" value="<?php echo htmlspecialchars($user_data['fullname']); ?>" placeholder="Nhập họ tên đầy đủ">
                         </div>
                     </div>
 
@@ -106,7 +153,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Số điện thoại</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_phone; ?></span>
-                            <input type="text" name="phone" class="edit-mode info-input" value="<?php echo $user_data['phone']; ?>" placeholder="Nhập số điện thoại">
+                            <input type="text" name="phone" class="edit-mode info-input" value="<?php echo htmlspecialchars($user_data['phone']); ?>" placeholder="Nhập số điện thoại">
                         </div>
                     </div>
 
@@ -137,7 +184,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Địa chỉ giao hàng</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_address; ?></span>
-                            <textarea name="address" class="edit-mode info-textarea" placeholder="Nhập địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện...)"><?php echo $user_data['address']; ?></textarea>
+                            <textarea name="address" class="edit-mode info-textarea" placeholder="Nhập địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện...)"><?php echo htmlspecialchars($user_data['address']); ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -187,22 +234,61 @@ require_once '../includes/header.php';
     .personal-header {
         display: flex;
         align-items: center;
-        gap: 25px;
+        gap: 35px;
         margin-bottom: 40px;
         padding-bottom: 30px;
         border-bottom: 1px solid var(--personal-border);
     }
 
+    .personal-avatar-wrapper {
+        position: relative;
+    }
+
     .personal-avatar {
-        font-size: 80px;
-        color: #d2d2d7;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #f5f5f7;
+        border: 4px solid #fff;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .personal-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    /* Avatar Upload field */
+    .info-item--avatar {
+        margin-bottom: 25px;
+        padding: 20px;
+        background: #fdfdfd;
+        border: 1px dashed #d2d2d7;
+        border-radius: 15px;
+    }
+
+    .avatar-upload-box {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .avatar-hint {
+        font-size: 1.2rem;
+        color: var(--personal-text-sub);
+        margin: 0;
     }
 
     .personal-title {
         font-size: 3.2rem;
         font-weight: 700;
         color: var(--personal-text-main);
-        margin: 0 0 15px 0;
+        margin: 0 0 10px 0;
     }
 
     .personal-subtitle {
@@ -389,6 +475,23 @@ require_once '../includes/header.php';
             // Có thể thêm logic reset form nếu muốn
             // document.getElementById('infoForm').reset();
         });
+
+        // Xử lý xem trước ảnh (Avatar Preview)
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarPreview = document.getElementById('avatarPreview');
+
+        if (avatarInput && avatarPreview) {
+            avatarInput.addEventListener('change', function() {
+                const file = this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        avatarPreview.src = e.target.result;
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
 
         // Tự động ẩn thông báo sau 3 giây
         const alert = document.querySelector('.alert');
