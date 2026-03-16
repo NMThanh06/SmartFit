@@ -1,6 +1,40 @@
 {
     "items": [
         {
+            "id": "3",
+            "type": "bottom",
+            "name": "Quần jean ống rộng",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "Xanh dương",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773675502_outfit_3_color_1.jpg",
+            "price": 199000,
+            "sizes": {
+                "XL": 12,
+                "XXL": 33
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "2",
             "type": "shoes",
             "name": "Giày Nike Air Force 1",
@@ -30,9 +64,9 @@
             "image": "/SmartFit/assets/img/1773591299_outfit_2_color_1.avif",
             "price": 1000000,
             "sizes": {
-                "38": 5,
-                "39": 9,
-                "40": 7,
+                "38": 4,
+                "39": 8,
+                "40": 6,
                 "41": 1,
                 "42": 2
             },
@@ -69,7 +103,7 @@
             "price": 200000,
             "sizes": {
                 "L": 8,
-                "M": 18,
+                "M": 12,
                 "S": 7,
                 "XL": 15
             },

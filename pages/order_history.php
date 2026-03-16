@@ -70,7 +70,12 @@ include '../includes/header.php';
 
                             <div class="order-card__items">
                                 <?php
-                                    $detailSql = "SELECT d.*, o.name, o.image FROM order_details d JOIN outfits o ON d.outfit_id = o.id WHERE d.order_id = ?";
+                                    $detailSql = "
+                                        SELECT d.*, o.name, 
+                                               (SELECT image FROM outfit_colors WHERE outfit_id = o.id LIMIT 1) as image 
+                                        FROM order_details d 
+                                        JOIN outfits o ON d.outfit_id = o.id 
+                                        WHERE d.order_id = ?";
                                     $detailStmt = mysqli_prepare($conn, $detailSql);
                                     mysqli_stmt_bind_param($detailStmt, "i", $order['id']);
                                     mysqli_stmt_execute($detailStmt);
@@ -80,7 +85,7 @@ include '../includes/header.php';
                                 ?>
                                     <div class="order-item">
                                         <div class="order-item__img-wrapper">
-                                            <img src="<?php echo htmlspecialchars($item['image']); ?>" class="order-item__img" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo htmlspecialchars($item['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" class="order-item__img" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
                                         </div>
                                         <div class="order-item__info">
                                             <h4 class="order-item__name"><?php echo htmlspecialchars($item['name']); ?></h4>
