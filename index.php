@@ -141,7 +141,7 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
                     <h3 class="config-form__heading">Độ rộng (Fit) ?</h3>
                     <div class="config-form__options">
                         <input class="config-form__input" type="radio" id="fit-oversize" name="fit" value="oversized">
-                        <label class="config-form__label" for="fit-oversize">Oversized</label>
+                        <label class="config-form__label" for="fit-oversize">Oversize</label>
 
                         <input class="config-form__input" type="radio" id="fit-regular" name="fit" value="regular">
                         <label class="config-form__label" for="fit-regular">Vừa vặn</label>

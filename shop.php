@@ -108,11 +108,67 @@ include 'includes/header.php';
                     </div>
                 </div>
 
+                <div class="config-modal__group">
+                    <span class="config-modal__label">Số lượng</span>
+                    <div class="config-modal__qty">
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeModalQty(-1)">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <input type="text" id="modalQtyDisplay" value="1" readonly class="qty-input">
+                            <button class="qty-btn" onclick="changeModalQty(1)">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <span id="modalStockInfo" class="config-modal__stock">Vui lòng chọn size</span>
+                    </div>
+                </div>
+
                 <button id="btnConfirmAdd" class="config-modal__btn-confirm">Xác nhận thêm vào giỏ</button>
             </div>
         </div>
 
         <?php include 'includes/footer.php'; ?>
+        
+        <style>
+            .config-modal__qty {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .config-modal__stock {
+                font-size: 1.2rem;
+                color: #888;
+            }
+            /* Tái sử dụng hoặc định nghĩa lại qty-control cho modal shop */
+            .qty-control {
+                display: flex;
+                align-items: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+                width: fit-content;
+            }
+            .qty-btn {
+                background: #f8f9fa;
+                border: none;
+                width: 32px;
+                height: 32px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .qty-btn:hover { background: #e9ecef; }
+            .qty-input {
+                width: 40px;
+                height: 32px;
+                text-align: center;
+                border: none;
+                border-left: 1px solid #ddd;
+                border-right: 1px solid #ddd;
+                font-weight: 600;
+                background: #fff;
+            }
+        </style>
 
     <!-- Backend cho trang cửa hàng -->
     <script>
@@ -311,11 +367,35 @@ include 'includes/header.php';
             document.getElementById('btnConfirmAdd').onclick = () => confirmAddToCart();
         }
 
+        let modalCurrentQty = 1;
+        let modalMaxStock = 0;
+
+        function changeModalQty(amount) {
+            if (!selectedConfigSize) {
+                showToast('Vui lòng chọn kích cỡ trước!', 'error');
+                return;
+            }
+            let nextQty = modalCurrentQty + amount;
+            if (nextQty < 1) nextQty = 1;
+            if (nextQty > modalMaxStock) {
+                showToast('Chỉ còn ' + modalMaxStock + ' sản phẩm trong kho!', 'error');
+                nextQty = modalMaxStock;
+            }
+            modalCurrentQty = nextQty;
+            document.getElementById('modalQtyDisplay').value = modalCurrentQty;
+        }
+
         // Hàm render size dựa trên màu sắc được chọn
         function renderSizesForColor(colorId) {
             const sizeContainer = document.getElementById('modalSizeOptions');
+            const stockInfo = document.getElementById('modalStockInfo');
             sizeContainer.innerHTML = '';
             selectedConfigSize = null;
+            modalMaxStock = 0;
+            modalCurrentQty = 1;
+            document.getElementById('modalQtyDisplay').value = 1;
+            stockInfo.textContent = 'Vui lòng chọn size';
+            stockInfo.style.color = '#999';
 
             // Lấy danh sách tất cả các tên size duy nhất của sản phẩm này (để hiện đầy đủ)
             const allSizes = currentSelectedItem.sizes || [];
@@ -338,8 +418,9 @@ include 'includes/header.php';
 
                     // Kiểm tra xem size này có tồn kho cho màu đang chọn không
                     const sizeData = allSizes.find(s => s.size_name === sizeName && s.color_id == colorId);
-                    
-                    if (!sizeData || parseInt(sizeData.quantity) <= 0) {
+                    const qty = sizeData ? parseInt(sizeData.quantity) : 0;
+
+                    if (!sizeData || qty <= 0) {
                         btn.classList.add('out-of-stock');
                         btn.title = "Hết hàng";
                     } else {
@@ -347,6 +428,11 @@ include 'includes/header.php';
                             document.querySelectorAll('.config-size-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
                             selectedConfigSize = sizeName;
+                            modalMaxStock = qty;
+                            modalCurrentQty = 1;
+                            document.getElementById('modalQtyDisplay').value = 1;
+                            stockInfo.textContent = `Còn ${qty} sản phẩm`;
+                            stockInfo.style.color = 'var(--success)';
                         };
                     }
                     sizeContainer.appendChild(btn);
@@ -378,8 +464,16 @@ include 'includes/header.php';
                 return;
             }
             
-            // Gọi logic thêm vào giỏ hàng thực sự
-            performAddToCart(currentSelectedItem.id, currentSelectedItem.name, currentSelectedItem.image, currentSelectedItem.price, selectedConfigSize, selectedConfigColor);
+            // Gọi logic thêm vào giỏ hàng thực sự với số lượng chọn
+            performAddToCart(
+                currentSelectedItem.id, 
+                currentSelectedItem.name, 
+                currentSelectedItem.image, 
+                currentSelectedItem.price, 
+                selectedConfigSize, 
+                selectedConfigColor,
+                modalCurrentQty
+            );
             
             closeConfigModal();
             
@@ -388,7 +482,7 @@ include 'includes/header.php';
             animateFly(modalImg);
         }
 
-        function performAddToCart(id, name, imageSrc, price, size, color) {
+        function performAddToCart(id, name, imageSrc, price, size, color, qty = 1) {
             // Lấy tồn kho của biến thể này
             const allSizes = currentSelectedItem.sizes || [];
             const colorObj = (currentSelectedItem.colors || []).find(c => c.color_name === color);
@@ -399,15 +493,15 @@ include 'includes/header.php';
             const existingIndex = cart.findIndex(item => item.id === id && item.size === size && item.color === color);
             
             if (existingIndex !== -1) {
-                const nextQty = cart[existingIndex].quantity + 1;
+                const nextQty = cart[existingIndex].quantity + qty;
                 if (nextQty > stock) {
                     showToast(`Sản phẩm ${name} (Size ${size}, ${color}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
                     return;
                 }
                 cart[existingIndex].quantity = nextQty;
             } else {
-                if (stock < 1) {
-                    showToast('Sản phẩm này hiện đã hết hàng!', 'error');
+                if (stock < qty) {
+                    showToast('Sản phẩm này không đủ số lượng trong kho!', 'error');
                     return;
                 }
                 cart.push({
@@ -419,11 +513,11 @@ include 'includes/header.php';
                     color: color,
                     allColors: currentSelectedItem.colors, 
                     allSizes: currentSelectedItem.sizes,   
-                    quantity: 1
+                    quantity: qty
                 });
             }
             saveCart();
-            if (window.showToast) showToast(`Đã thêm ${name} vào giỏ hàng!`, 'success');
+            if (window.showToast) showToast(`Đã thêm ${qty} ${name} vào giỏ hàng!`, 'success');
         }
 
         function animateFly(targetImg) {
