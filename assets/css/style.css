@@ -1871,7 +1871,7 @@ section.hero--home {
 .cart-total {
     display: flex;
     justify-content: space-between;
-    color: var(--text-main);
+    color: var(--error);
     font-size: 1.8rem;
     font-weight: bold;
     margin-bottom: 20px;
