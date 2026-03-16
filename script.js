@@ -31,6 +31,7 @@ window.app = {
         this.initFormEvent();
         this.initForecastDropdown();
         this.initScrollBtn();
+        this.restoreOutfit();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -337,19 +338,8 @@ window.app = {
         // Khởi tạo lại sự kiện cho menu user mới tạo
         this.initUserMenu();
         
-        // Tự động khôi phục dữ liệu lên nút "Lưu set đồ" nếu đang có kết quả
-        const savedData = localStorage.getItem('smartfit_last_outfit');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
-            if (btnSave) {
-                btnSave.setAttribute('data-top', data.topId);
-                btnSave.setAttribute('data-bottom', data.bottomId);
-                btnSave.setAttribute('data-shoes', data.shoesId);
-                btnSave.setAttribute('data-acc', data.accId || 'null');
-                btnSave.setAttribute('data-style', data.style);
-            }
-        }
+        // Tự động khôi phục kết quả phối đồ lên UI sau khi đăng nhập
+        this.restoreOutfit();
     },
 
     // Submenu User
