@@ -223,22 +223,30 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
                     <div class="result__items">
                         <div class="item-box">
                             <i class="fa-brands fa-redhat item-icon"></i>
-                            <span id="itemHead">Mũ lưỡi trai đen</span>
+                            <a href="javascript:void(0)" id="itemHeadLink" class="item-link" target="_blank">
+                                <span id="itemHead">Mũ lưỡi trai đen</span>
+                            </a>
                         </div>
 
                         <div class="item-box">
                             <i class="fa-solid fa-shirt item-icon"></i>
-                            <span id="itemTopName">Hoodie Oversized xám</span>
+                            <a href="javascript:void(0)" id="itemTopLink" class="item-link" target="_blank">
+                                <span id="itemTopName">Hoodie Oversized xám</span>
+                            </a>
                         </div>
 
                         <div class="item-box">
                             <i class="fa-solid fa-vials item-icon"></i>
-                            <span id="itemBottomName">Quần Cargo túi hộp</span>
+                            <a href="javascript:void(0)" id="itemBottomLink" class="item-link" target="_blank">
+                                <span id="itemBottomName">Quần Cargo túi hộp</span>
+                            </a>
                         </div>
 
                         <div class="item-box">
                             <i class="fa-solid fa-shoe-prints item-icon"></i>
-                            <span id="itemShoes">Sneaker Jordan 1 High</span>
+                            <a href="javascript:void(0)" id="itemShoesLink" class="item-link" target="_blank">
+                                <span id="itemShoes">Sneaker Jordan 1 High</span>
+                            </a>
                         </div>
                     </div>
 

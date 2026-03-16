@@ -1412,6 +1412,20 @@ section.hero--home {
     text-transform: capitalize;
 }
 
+/* Link sản phẩm gợi ý */
+.item-link {
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: default;
+}
+
+.item-link.is-clickable:hover {
+    color: #2f81f7;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
 .footer__list {
     list-style: none;
     padding: 0;

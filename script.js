@@ -517,6 +517,24 @@ window.app = {
         setText('itemShoes', data.shoes);
         setText('itemHead', data.accessories);
 
+        // 3.1 Cập nhật Link chi tiết sản phẩm
+        const updateItemLink = (linkId, productId) => {
+            const el = document.getElementById(linkId);
+            if (el) {
+                if (productId && productId !== 'null') {
+                    el.href = `detail.php?id=${productId}`;
+                    el.classList.add('is-clickable');
+                } else {
+                    el.href = "javascript:void(0)";
+                    el.classList.remove('is-clickable');
+                }
+            }
+        };
+        updateItemLink('itemTopLink', data.topId);
+        updateItemLink('itemBottomLink', data.bottomId);
+        updateItemLink('itemShoesLink', data.shoesId);
+        updateItemLink('itemHeadLink', data.accId);
+
         // 4. Hiển thị Section kết quả
         const resultSection = document.getElementById('result');
         const footer = document.querySelector('.footer');
