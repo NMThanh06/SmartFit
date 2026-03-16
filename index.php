@@ -1,5 +1,23 @@
 <?php
 include 'includes/header.php';
+
+// Khởi tạo các biến chứa thông tin người dùng (mặc định trống)
+$user_gender = '';
+$user_age = '';
+
+// Nếu đã đăng nhập, lấy dữ liệu thực tế từ DB
+if (isset($_SESSION['user_id'])) {
+    $u_id = $_SESSION['user_id'];
+    $sql = "SELECT gender, age FROM users WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $u_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    if ($u_info = mysqli_fetch_assoc($res)) {
+        $user_gender = $u_info['gender'] ?: '';
+        $user_age = $u_info['age'] ?: '';
+    }
+}
 ?>
 
         <!-- Hero Section -->
@@ -50,10 +68,10 @@ include 'includes/header.php';
                     <h3 class="config-form__heading">Bạn là ?</h3>
 
                     <div class="config-form__options">
-                        <input class="config-form__input" type="radio" id="male" name="gender" value="male">
+                        <input class="config-form__input" type="radio" id="male" name="gender" value="male" <?php echo ($user_gender === 'male') ? 'checked' : ''; ?>>
                         <label class="config-form__label" for="male">Nam</label>
 
-                        <input class="config-form__input" type="radio" id="female" name="gender" value="female">
+                        <input class="config-form__input" type="radio" id="female" name="gender" value="female" <?php echo ($user_gender === 'female') ? 'checked' : ''; ?>>
                         <label class="config-form__label" for="female">Nữ</label>
                     </div>
                 </div>
@@ -61,7 +79,7 @@ include 'includes/header.php';
                 <div class="config-form__group">
                     <h3 class="config-form__heading">Độ tuổi của bạn ?</h3>
                     <div class="config-form__options">
-                        <input class="config-form__input--age" type="number" id="age" name="age" min="1" max="100" placeholder="Số tuổi">
+                        <input class="config-form__input--age" type="number" id="age" name="age" min="1" max="100" placeholder="Số tuổi" value="<?php echo htmlspecialchars($user_age); ?>">
                     </div>
                 </div>
 
