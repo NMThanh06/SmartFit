@@ -15,6 +15,8 @@ function sendResponse($success, $message, $data = []) {
     } else {
         if ($success) {
             $_SESSION['success'] = $message;
+            // Đánh dấu vừa đăng nhập để khôi phục outfit ở index.php
+            $_SESSION['smartfit_just_logged_in'] = true;
         } else {
             $_SESSION['error'] = $message;
         }

@@ -18,7 +18,18 @@ if (isset($_SESSION['user_id'])) {
         $user_age = $u_info['age'] ?: '';
     }
 }
+
+// Kiểm tra xem có vừa mới đăng nhập xong không (để khôi phục phối đồ)
+$just_logged_in = false;
+if (isset($_SESSION['smartfit_just_logged_in'])) {
+    $just_logged_in = true;
+    unset($_SESSION['smartfit_just_logged_in']);
+}
 ?>
+
+<script>
+    window.smartfit_just_logged_in = <?php echo $just_logged_in ? 'true' : 'false'; ?>;
+</script>
 
         <!-- Hero Section -->
         <section class="hero hero--index" id="hero">
