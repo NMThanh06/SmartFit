@@ -1,7 +1,4 @@
 <?php
-$page_extra_body = '
-    <div class="web__background--overlay"></div>
-';
 include 'includes/header.php';
 
 $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
@@ -11,25 +8,43 @@ if ($productId <= 0) {
 }
 
 // Lấy thông tin sản phẩm
-$sql = "SELECT * FROM outfits WHERE id = ?";
+$sql = "SELECT o.*, 
+        (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as color_image 
+        FROM outfits o WHERE o.id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $productId);
 mysqli_stmt_execute($stmt);
 $product = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+// Nếu ảnh chính trong bảng outfits trống, dùng ảnh từ outfit_colors
+if (empty($product['image']) && !empty($product['color_image'])) {
+    $product['image'] = $product['color_image'];
+}
 
 if (!$product) {
     die("Không tìm thấy sản phẩm!");
 }
 
 // Lấy Size và số lượng từ bảng outfit_sizes
-$sqlSizes = "SELECT size_name, quantity FROM outfit_sizes WHERE outfit_id = ?";
+$sqlSizes = "SELECT color_id, size_name, quantity FROM outfit_sizes WHERE outfit_id = ?";
 $stmtSizes = mysqli_prepare($conn, $sqlSizes);
 mysqli_stmt_bind_param($stmtSizes, "i", $productId);
 mysqli_stmt_execute($stmtSizes);
 $resSizes = mysqli_stmt_get_result($stmtSizes);
 $sizeList = [];
 while ($row = mysqli_fetch_assoc($resSizes)) {
-    $sizeList[] = $row; // mỗi phần tử chứa 'size_name' và 'quantity'
+    $sizeList[] = $row;
+}
+
+// Lấy danh sách màu sắc
+$sqlColors = "SELECT * FROM outfit_colors WHERE outfit_id = ?";
+$stmtColors = mysqli_prepare($conn, $sqlColors);
+mysqli_stmt_bind_param($stmtColors, "i", $productId);
+mysqli_stmt_execute($stmtColors);
+$resColors = mysqli_stmt_get_result($stmtColors);
+$colorList = [];
+while ($row = mysqli_fetch_assoc($resColors)) {
+    $colorList[] = $row;
 }
 
 // Hàm Việt hóa (Giữ nguyên logic dịch của ông)
@@ -55,63 +70,136 @@ function translateFitData($data)
 $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ kiện' : translateFitData($product['type']);
 ?>
 
-        <!-- Detail product -->
-        <section class="detail-page">
-            <div class="grid wide">
-                <a href="shop.php" class="detail__back-btn" style="display: inline-block; color: white; margin-bottom: 20px; text-decoration: none; font-size: 1.6rem;"><i class="fa-solid fa-arrow-left"></i> Quay lại cửa hàng</a>
-
-                <div class="row" id="productDetailWrapper">
-    <div class="col l-6 m-6 c-12">
-        <div class="detail__image">
-            <img src="<?php echo htmlspecialchars($product['image']); ?>" id="mainProductImg" style="width: 100%; border-radius: 8px;" onerror="this.src='./assets/img/default-placeholder.jpg'">
+<section class="detail-page">
+    <div class="grid wide">
+        <div class="detail-back">
+            <a href="shop.php" class="detail-back__link">
+                <i class="fa-solid fa-arrow-left"></i>
+                Quay lại cửa hàng
+            </a>
         </div>
-    </div>
 
-    <div class="col l-6 m-6 c-12">
-        <div class="detail__info" style="color: white;">
-            <h1 class="detail__name" style="font-size: 3.2rem; margin-bottom: 10px;"><?php echo htmlspecialchars($product['name']); ?></h1>
-            <div class="detail__price" style="color: #ff4d4f; font-size: 2.6rem; font-weight: bold; margin-bottom: 25px;">
-                <?php echo number_format($product['price'], 0, ',', '.'); ?> đ
-            </div>
+        <div class="product-detail">
+            <div class="row">
+                <!-- Cột trái: Ảnh sản phẩm -->
+                <div class="col l-6 m-12 c-12">
+                    <div class="product-detail__gallery">
+                        <div class="product-detail__image">
+                            <img src="<?php echo htmlspecialchars($product['image']); ?>" id="mainProductImg" 
+                                 alt="<?php echo htmlspecialchars($product['name']); ?>"
+                                 onerror="this.src='./assets/img/default-placeholder.jpg'">
+                        </div>
+                    </div>
+                </div>
 
-            <div class="detail__desc" style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; margin-bottom: 25px; font-size: 1.5rem; line-height: 2;">
-                <div><strong>Loại:</strong> <?php echo $displayType; ?></div>
-                <div><strong>Phong cách:</strong> <?php echo translateFitData($product['style']); ?></div>
-                <div><strong>Phù hợp:</strong> <?php echo translateFitData($product['occasion']); ?></div>
-                <div><strong>Độ rộng:</strong> <?php echo translateFitData($product['fit'] ?? ''); ?></div>
-                <div style="color: #ffcc00;"><strong>Kho còn:</strong> <span id="stockInfo">Vui lòng chọn size</span></div>
-            </div>
+                <!-- Cột phải: Thông tin sản phẩm -->
+                <div class="col l-6 m-12 c-12">
+                    <div class="product-detail__content">
+                        <h1 class="product-detail__title"><?php echo htmlspecialchars($product['name']); ?></h1>
+                        
+                        <div class="product-detail__price">
+                            <?php echo number_format($product['price'], 0, ',', '.'); ?> đ
+                        </div>
 
-            <div class="detail__size" style="margin-bottom: 25px;">
-                <p style="margin-bottom: 12px; font-size: 1.6rem;">Chọn Kích Cỡ:</p>
-                <div class="detail__size-options" style="display: flex; gap: 12px;">
-                    <?php foreach ($sizeList as $size): ?>
-                        <button class="size-btn-item" onclick="selectSize(this)" data-size="<?php echo htmlspecialchars($size['size_name']); ?>" data-quantity="<?php echo intval($size['quantity']); ?>"
-                            style="min-width: 60px; height: 45px; border: 1px solid #888; background: transparent; color: white; cursor: pointer; border-radius: 4px; font-weight: bold;">
-                            <?php echo htmlspecialchars($size['size_name']); ?>
-                        </button>
-                    <?php
-endforeach; ?>
+                        <div class="product-detail__meta">
+                            <div class="product-detail__meta-item">
+                                <span class="label">Loại:</span>
+                                <span class="value"><?php echo $displayType; ?></span>
+                            </div>
+                            <div class="product-detail__meta-item">
+                                <span class="label">Phong cách:</span>
+                                <span class="value"><?php echo translateFitData($product['style']); ?></span>
+                            </div>
+                            <?php if (!in_array($product['type'], ['shoes', 'accessory', 'accessories', 'glasses'])): ?>
+                            <div class="product-detail__meta-item">
+                                <span class="label">Độ rộng:</span>
+                                <span class="value"><?php echo translateFitData($product['fit'] ?? ''); ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <div class="product-detail__meta-item">
+                                <span class="label">Tình trạng:</span>
+                                <span class="value status" id="stockInfo">Vui lòng chọn size</span>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($product['description'])): ?>
+                        <div class="product-detail__description">
+                            <h3 class="product-detail__label">Mô tả sản phẩm</h3>
+                            <p class="product-detail__text">
+                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
+                            </p>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Chọn Màu sắc -->
+                        <div class="product-detail__option">
+                            <h3 class="product-detail__label">Màu sắc</h3>
+                            <div class="product-detail__colors">
+                                <?php foreach ($colorList as $index => $color): 
+                                    // Tính tồn kho tổng của màu này
+                                    $cid = $color['id'];
+                                    $colorStock = 0;
+                                    foreach ($sizeList as $s) {
+                                        if ($s['color_id'] == $cid) {
+                                            $colorStock += intval($s['quantity']);
+                                        }
+                                    }
+                                    $isOut = $colorStock <= 0;
+                                ?>
+                                    <span class="color-btn-item <?php echo $isOut ? 'out-of-stock' : ''; ?>" 
+                                          style="background-color: <?php echo htmlspecialchars($color['hex_code']); ?>"
+                                          title="<?php echo htmlspecialchars($color['color_name']) . ($isOut ? ' (Hết hàng)' : ''); ?>"
+                                          onclick="<?php echo $isOut ? '' : "selectColorOnDetail(this, " . htmlspecialchars(json_encode($color)) . ")"; ?>">
+                                    </span>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <div class="product-detail__separator"></div>
+
+                        <!-- Chọn Size -->
+                        <div class="product-detail__option">
+                            <h3 class="product-detail__label">Kích thước</h3>
+                            <div class="product-detail__sizes">
+                                <?php foreach ($sizeList as $size): ?>
+                                    <button class="size-btn-item" onclick="selectSize(this)" 
+                                            data-size="<?php echo htmlspecialchars($size['size_name']); ?>" 
+                                            data-quantity="<?php echo intval($size['quantity']); ?>">
+                                        <?php echo htmlspecialchars($size['size_name']); ?>
+                                    </button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+
+                        <!-- Chọn Số lượng -->
+                        <div class="product-detail__option">
+                            <h3 class="product-detail__label">Số lượng</h3>
+                            <div class="product-detail__qty">
+                                <div class="qty-control">
+                                    <button class="qty-btn" onclick="changeQty(-1)">
+                                        <i class="fa-solid fa-minus"></i>
+                                    </button>
+                                    <input type="text" id="qtyDisplay" value="1" readonly class="qty-input">
+                                    <button class="qty-btn" onclick="changeQty(1)">
+                                        <i class="fa-solid fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Nút hành động -->
+                        <div class="product-detail__actions">
+                            <button onclick="addToCartFromDetail()" class="btn-add-cart">
+                                <i class="fa-solid fa-cart-plus"></i>
+                                Thêm vào giỏ hàng
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="detail__qty" style="margin-bottom: 35px; display: flex; align-items: center; gap: 20px;">
-                <span style="font-size: 1.6rem;">Số Lượng:</span>
-                <div style="display: flex; align-items: center; background: #444; border-radius: 4px;">
-                    <button class="qty-btn" onclick="changeQty(-1)" style="width: 35px; height: 35px; border: none; background: none; color: white; cursor: pointer;">-</button>
-                    <input type="text" id="qtyDisplay" value="1" readonly style="width: 45px; text-align: center; border: none; background: none; color: white; font-weight: bold;">
-                    <button class="qty-btn" onclick="changeQty(1)" style="width: 35px; height: 35px; border: none; background: none; color: white; cursor: pointer;">+</button>
-                </div>
-            </div>
-
-            <button onclick="addToCartFromDetail()" class="button" style="width: 100%; padding: 18px; background: #ff4d4f; color: white; border: none; font-size: 1.6rem; font-weight: bold; cursor: pointer; border-radius: 6px;">
-                <i class="fa-solid fa-cart-shopping"></i> THÊM VÀO GIỎ HÀNG
-            </button>
         </div>
     </div>
-</div>
-            </div>
-        </section>
+</section>
 
 
 <?php require_once 'includes/footer.php'; ?>
@@ -128,35 +216,106 @@ endforeach; ?>
         id: <?php echo intval($product['id']); ?>,
         name: <?php echo json_encode($product['name']); ?>,
         image: <?php echo json_encode($product['image']); ?>,
-        price: <?php echo intval($product['price']); ?>
+        price: <?php echo intval($product['price']); ?>,
+        allColors: <?php echo json_encode($colorList); ?>,
+        allSizes: <?php echo json_encode($sizeList); ?>
     };
 
-    // Bản đồ tồn kho theo size (dùng để kiểm tra giới hạn trong giỏ hàng)
-    const sizeStockMap = <?php echo json_encode(array_column($sizeList, 'quantity', 'size_name')); ?>;
+    let selectedColor = currentProduct.allColors.length > 0 ? currentProduct.allColors[0].color_name : 'Default';
+    let selectedColorId = currentProduct.allColors.length > 0 ? currentProduct.allColors[0].id : null;
 
-    // 1. HÀM CHỌN SIZE
-    function selectSize(btnElement) {
-        const size = btnElement.getAttribute('data-size');
-        const sizeQuantity = parseInt(btnElement.getAttribute('data-quantity')) || 0;
-        selectedSize = size;
-        maxStock = sizeQuantity;
+    // 0. HÀM CHỌN MÀU
+    function selectColorOnDetail(btnElement, colorObj) {
+        selectedColor = colorObj.color_name;
+        selectedColorId = colorObj.id;
 
-        // Nếu số lượng đang chọn lớn hơn maxStock mới, reset về 1
-        if (currentQty > maxStock) {
-            currentQty = 1;
+        // Đổi ảnh
+        if (colorObj.image) {
+            document.getElementById('mainProductImg').src = colorObj.image;
+            currentProduct.image = colorObj.image; // Cập nhật ảnh đại diện để thêm vào giỏ
         }
 
         // Highlight nút được chọn
-        document.querySelectorAll('.size-btn-item').forEach(btn => {
-            btn.style.background = 'transparent';
-            btn.style.color = 'white';
-        });
-        btnElement.style.background = 'white';
-        btnElement.style.color = 'black';
+        document.querySelectorAll('.color-btn-item').forEach(btn => btn.classList.remove('selected'));
+        btnElement.classList.add('selected');
 
-        document.getElementById('qtyDisplay').value = currentQty;
-        document.getElementById('stockInfo').innerText = maxStock + ' sản phẩm';
+        // Render lại size tương ứng
+        renderSizes(selectedColorId);
     }
+
+    function renderSizes(colorId) {
+        const sizeContainer = document.querySelector('.product-detail__sizes');
+        sizeContainer.innerHTML = '';
+        selectedSize = null;
+        maxStock = 0;
+        document.getElementById('stockInfo').innerText = 'Vui lòng chọn size';
+        
+        // Lấy danh sách tên size duy nhất và sắp xếp
+        const allSizes = currentProduct.allSizes || [];
+        const uniqueSizeNames = [...new Set(allSizes.map(s => s.size_name))];
+        const sizeOrder = ['S', 'M', 'L', 'XL', '2XL', 'XXL', '3XL', 'Oversize'];
+        uniqueSizeNames.sort((a, b) => {
+            const ia = sizeOrder.indexOf(a);
+            const ib = sizeOrder.indexOf(b);
+            if (ia !== -1 && ib !== -1) return ia - ib;
+            return a.localeCompare(b);
+        });
+        
+        uniqueSizeNames.forEach(sizeName => {
+            // Tìm tồn kho cho size này ứng với màu đang chọn
+            const sizeData = allSizes.find(s => s.size_name === sizeName && s.color_id == colorId);
+            const qty = sizeData ? parseInt(sizeData.quantity) : 0;
+            const isOut = qty <= 0;
+
+            const btn = document.createElement('button');
+            btn.className = 'size-btn-item' + (isOut ? ' out-of-stock' : '');
+            btn.innerText = sizeName;
+            
+            if (!isOut) {
+                btn.onclick = () => selectSize(btn, sizeName, qty);
+            } else {
+                btn.title = "Hết hàng cho màu này";
+            }
+            
+            sizeContainer.appendChild(btn);
+        });
+
+        if (uniqueSizeNames.length === 0) {
+            sizeContainer.innerHTML = '<p style="color:#999;">Hết hàng</p>';
+        }
+    }
+
+    function selectSize(btnElement, sizeName, quantity) {
+        selectedSize = sizeName;
+        maxStock = parseInt(quantity);
+        currentQty = 1;
+
+        document.querySelectorAll('.size-btn-item').forEach(btn => btn.classList.remove('selected'));
+        btnElement.classList.add('selected');
+        document.getElementById('qtyDisplay').value = currentQty;
+
+        const stockEl = document.getElementById('stockInfo');
+        if (maxStock > 0) {
+            stockEl.innerText = `Còn ${maxStock} sản phẩm`;
+            stockEl.style.color = 'var(--success)';
+        } else {
+            stockEl.innerText = 'Hết hàng';
+            stockEl.style.color = 'var(--error)';
+        }
+    }
+
+    // Khởi tạo size lần đầu cho màu mặc định (Ưu tiên màu còn hàng)
+    document.addEventListener('DOMContentLoaded', () => {
+        const firstAvailableColorBtn = document.querySelector('.color-btn-item:not(.out-of-stock)');
+        if (firstAvailableColorBtn) {
+            firstAvailableColorBtn.click();
+        } else {
+            // Nếu tất cả màu đều hết hàng
+            const firstColor = document.querySelector('.color-btn-item');
+            if (firstColor) firstColor.classList.add('selected');
+            renderSizes(null);
+        }
+    });
 
     // 2. HÀM THAY ĐỔI SỐ LƯỢNG (Giới hạn bởi maxStock)
     function changeQty(amount) {
@@ -176,28 +335,28 @@ endforeach; ?>
 
     // 3. HÀM THÊM VÀO GIỎ TỪ TRANG CHI TIẾT
     function addToCartFromDetail() {
-        if (!selectedSize) {
-            showToast('Vui lòng chọn kích cỡ trước khi mua!', 'error');
+        if (!selectedSize || !selectedColor) {
+            showToast('Vui lòng chọn Kích cỡ và Màu sắc trước khi mua!', 'error');
             return;
         }
 
         // --- KIỂM TRA TỒN KHO TRƯỚC KHI THÊM (CHẶN CỘNG DỒN) ---
-        const existingItem = cart.find(item => item.id === currentProduct.id && item.size === selectedSize);
-        const qtyInCart = existingItem ? existingItem.quantity : 0;
+        const existingIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize && item.color === selectedColor);
+        const qtyInCart = existingIndex !== -1 ? cart[existingIndex].quantity : 0;
         const totalExpected = qtyInCart + currentQty;
 
         if (totalExpected > maxStock) {
             const remaining = maxStock - qtyInCart;
             if (remaining <= 0) {
-                showToast('Size ' + selectedSize + ' đã đạt giới hạn tồn kho trong giỏ hàng! (Đang có ' + qtyInCart + '/' + maxStock + ')', 'error');
+                showToast(`Sản phẩm ${currentProduct.name} (Size ${selectedSize}, ${selectedColor}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
             } else {
-                showToast('Chỉ có thể thêm tối đa ' + remaining + ' sản phẩm nữa cho size ' + selectedSize + '!', 'error');
+                showToast('Chỉ có thể thêm tối đa ' + remaining + ' sản phẩm nữa!', 'error');
             }
-            return; // DỪNG — không chạy animation, không cập nhật giỏ
+            return;
         }
         // --- KẾT THÚC KIỂM TRA TỒN KHO ---
 
-        // --- Hiệu ứng ảnh bay vào giỏ hàng (GIỮ NGUYÊN) ---
+        // --- Hiệu ứng ảnh bay vào giỏ hàng ---
         const imgEl = document.getElementById('mainProductImg');
         const cartIcon = document.querySelector('.navbar__cart');
         if (imgEl && cartIcon) {
@@ -229,10 +388,8 @@ endforeach; ?>
         // --- Kết thúc hiệu ứng ---
 
         // Push vào mảng cart toàn cục (đã khai báo ở footer.php)
-        const existingItemIndex = cart.findIndex(item => item.id === currentProduct.id && item.size === selectedSize);
-
-        if (existingItemIndex !== -1) {
-            cart[existingItemIndex].quantity += currentQty;
+        if (existingIndex !== -1) {
+            cart[existingIndex].quantity += currentQty;
         } else {
             cart.push({
                 id: currentProduct.id,
@@ -240,6 +397,9 @@ endforeach; ?>
                 image: currentProduct.image,
                 price: currentProduct.price,
                 size: selectedSize,
+                color: selectedColor,
+                allColors: currentProduct.allColors,
+                allSizes: currentProduct.allSizes,
                 quantity: currentQty
             });
         }

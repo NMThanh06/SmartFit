@@ -4,16 +4,6 @@ window.app = {
         apiKey: '2cb97f62395b42556d493874d4486859', // Key của bạn
         apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
 
-        videos: {
-            Clear: './assets/video/sunny.mp4',
-            Clouds: './assets/video/cloudy.mp4',
-            Rain: './assets/video/rainy.mp4',
-            Drizzle: './assets/video/rainy.mp4',
-            Thunderstorm: './assets/video/rainy.mp4',
-            Snow: './assets/video/snowy.mp4',
-            Default: './assets/video/cloudy.mp4'
-        },
-
         // Bảng dịch mã thời tiết WMO (Open-Meteo) sang tiếng Việt
         weatherCodeMap: {
             0: 'Trời quang',
@@ -40,6 +30,7 @@ window.app = {
         this.startClock();
         this.initFormEvent();
         this.initForecastDropdown();
+        this.initScrollBtn();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -213,34 +204,6 @@ window.app = {
             }
             descElement.innerHTML = descMsg;
         }
-
-        // 5. Thay đổi Video nền
-        const videoElement = document.querySelector('.web__background');
-        if (videoElement) {
-            const videoSrc = this.config.videos[condition] || this.config.videos.Default;
-            if (videoElement.src && !videoElement.src.includes(videoSrc.substring(2))) {
-                videoElement.src = videoSrc;
-            }
-        }
-    },
-
-    // Copy mail
-    copyToClipboard: function (element) {
-        const emailText = element.querySelector('span').innerText;
-        const tooltip = element.querySelector('.copy-tooltip');
-
-        navigator.clipboard.writeText(emailText)
-            .then(() => {
-                tooltip.classList.add("show");
-
-                setTimeout(() => {
-                    tooltip.classList.remove("show");
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Lỗi khi copy: ', err);
-                alert("Không thể copy email này!");
-            });
     },
 
     //Auth
@@ -287,6 +250,108 @@ window.app = {
         };
     },
 
+    // Xử lý gửi form Đăng nhập/Đăng ký qua AJAX
+    initAuthFormSubmit: function () {
+        const loginForm = document.querySelector('#loginForm form');
+        const registerForm = document.querySelector('#registerForm form');
+        const self = this;
+
+        const handleAuthSubmit = async (e, formType) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const action = form.getAttribute('action');
+
+            try {
+                const response = await fetch(action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    self.showNotification(data.message, 'success');
+                    document.getElementById('authOverlay').style.display = 'none';
+                    form.reset();
+
+                    if (formType === 'login') {
+                        // Cập nhật Navbar sau khi đăng nhập thành công
+                        self.updateNavbarAfterLogin(data.user_name);
+                    }
+                } else {
+                    self.showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Auth Error:', error);
+                self.showNotification('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+            }
+        };
+
+        if (loginForm) loginForm.addEventListener('submit', (e) => handleAuthSubmit(e, 'login'));
+        if (registerForm) registerForm.addEventListener('submit', (e) => handleAuthSubmit(e, 'register'));
+    },
+
+    // Cập nhật Navbar dynamic mà không reload trang
+    updateNavbarAfterLogin: function (userName) {
+        const authContainer = document.querySelector('.navbar__auth');
+        if (!authContainer) return;
+
+        // Nội dung HTML mới cho phần User (thay thế nút Đăng nhập)
+        // Lưu ý: Root path ở đây là tương đối, nên dùng window.location.origin hoặc tương đương nếu phức tạp hơn
+        // Tuy nhiên dựa trên header.php, chúng ta sẽ xây dựng cấu trúc tương tự.
+        const userHtml = `
+            <div id="userInfoToggle" class="user-info">
+                <div class="user-info__trigger">
+                    <span class="user-info__name"> Xin chào, <b>${userName}</b></span>
+                    <i class="fa-solid fa-caret-down user-info__arrow"></i>
+                </div>
+                <div id="userDropdown" class="user-dropdown">
+                    <a href="pages/personal_info.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Thông tin cá nhân</span>
+                    </a>
+                    <a href="pages/order_history.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Lịch sử đơn hàng</span>
+                    </a>
+                    <a href="pages/add-outfit.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Thêm trang phục</span>
+                    </a>
+                    <div class="user-dropdown__divider"></div>
+                    <a href="includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        authContainer.innerHTML = userHtml;
+
+        // Khởi tạo lại sự kiện cho menu user mới tạo
+        this.initUserMenu();
+        
+        // Tự động khôi phục dữ liệu lên nút "Lưu set đồ" nếu đang có kết quả
+        const savedData = localStorage.getItem('smartfit_last_outfit');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+            if (btnSave) {
+                btnSave.setAttribute('data-top', data.topId);
+                btnSave.setAttribute('data-bottom', data.bottomId);
+                btnSave.setAttribute('data-shoes', data.shoesId);
+                btnSave.setAttribute('data-acc', data.accId || 'null');
+                btnSave.setAttribute('data-style', data.style);
+            }
+        }
+    },
+
     // Submenu User
     initUserMenu: function () {
         const userInfo = document.getElementById('userInfoToggle');
@@ -308,44 +373,30 @@ window.app = {
         }
     },
 
-    initFormEvent: function () {
-        const configForm = document.querySelector('.config-form');
-        const resultSection = document.getElementById('result');
-
-        if (configForm) {
-            configForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-
-                if (resultSection) {
-                    resultSection.style.display = 'flex';
-
-                    resultSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        }
-    },
 
     resetForm: function () {
         const resultSection = document.getElementById('result');
         const configForm = document.querySelector('.config-form');
 
         if (resultSection) resultSection.style.display = 'none';
+
         if (configForm) {
             configForm.reset();
             configForm.scrollIntoView({ behavior: 'smooth' });
         }
+        // Xóa kết quả lưu trữ
+        localStorage.removeItem('smartfit_last_outfit');
     },
 
-    // Xử lý nút bấm 
     initFormEvent: function () {
         const submitBtn = document.querySelector('.confirm__button');
         const configForm = document.getElementById('configForm');
 
         if (!submitBtn || !configForm) {
-            console.error("❌ Không tìm thấy Form hoặc Nút bấm");
+            // Chỉ log nếu đang ở trang có form (index.php)
+            if (window.location.pathname.includes('index.php')) {
+                console.warn("⚠️ Không tìm thấy Form hoặc Nút bấm cấu hình.");
+            }
             return;
         }
 
@@ -363,11 +414,16 @@ window.app = {
             const resultContainer = document.querySelector('.result__container');
 
             // Ẩn kết quả cũ, hiện loading
-            if (resultSection) resultSection.style.display = 'flex';
+            const footer = document.querySelector('.footer');
+            if (resultSection) {
+                resultSection.style.display = 'flex';
+                resultSection.classList.add('is-loading');
+                if (footer) footer.style.display = 'none'; // Ẩn footer khi đang chờ
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
             if (resultContainer) resultContainer.style.display = 'none';
             if (loadingProgress) {
                 loadingProgress.style.display = 'flex';
-                loadingProgress.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
             //Gọi API thật
@@ -395,6 +451,7 @@ window.app = {
                 console.log("✅ Kết quả trả về:", data);
 
                 if (loadingProgress) loadingProgress.style.display = 'none';
+                if (resultSection) resultSection.classList.remove('is-loading');
 
                 if (data.success) {
                     self.displayResult(data.data);
@@ -434,6 +491,9 @@ window.app = {
             } catch (error) {
                 console.error("❌ Lỗi:", error);
                 if (loadingProgress) loadingProgress.style.display = 'none';
+                if (resultSection) resultSection.classList.remove('is-loading');
+                const footer = document.querySelector('.footer');
+                if (footer) footer.style.display = 'block'; // Hiện lại footer nế lỗi
                 self.showNotification(error.message, 'error');
             }
 
@@ -469,9 +529,45 @@ window.app = {
 
         // 4. Hiển thị Section kết quả
         const resultSection = document.getElementById('result');
+        const footer = document.querySelector('.footer');
         if (resultSection) {
             resultSection.style.display = 'flex';
-            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (footer) footer.style.display = 'block'; // Hiện lại footer khi có kết quả
+            // Chỉ scroll nếu không phải đang khôi phục từ localStorage
+            if (!data.isRestored) {
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 5. Lưu vào localStorage
+        if (!data.isRestored) {
+            localStorage.setItem('smartfit_last_outfit', JSON.stringify(data));
+        }
+    },
+
+    // Khôi phục kết quả từ localStorage
+    restoreOutfit: function () {
+        const savedData = localStorage.getItem('smartfit_last_outfit');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                console.log("🔄 Đang khôi phục kết quả phối đồ từ localStorage...");
+                data.isRestored = true;
+                this.displayResult(data);
+                
+                // Cập nhật dữ liệu cho nút lưu (quan trọng nếu người dùng đăng nhập sau khi khôi phục)
+                const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+                if (btnSave) {
+                    btnSave.setAttribute('data-top', data.topId);
+                    btnSave.setAttribute('data-bottom', data.bottomId);
+                    btnSave.setAttribute('data-shoes', data.shoesId);
+                    btnSave.setAttribute('data-acc', data.accId || 'null');
+                    btnSave.setAttribute('data-style', data.style);
+                }
+            } catch (e) {
+                console.error("Lỗi khi khôi phục outfit:", e);
+                localStorage.removeItem('smartfit_last_outfit');
+            }
         }
     },
 
@@ -520,8 +616,10 @@ window.app = {
     resetForm: function () {
         const configForm = document.getElementById('configForm');
         const resultSection = document.getElementById('result');
+
         if (configForm) configForm.reset();
         if (resultSection) resultSection.style.display = 'none';
+
         document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
     },
 
@@ -626,7 +724,7 @@ window.app = {
             });
     },
 
-    // Hàm tạo hiệu ứng bay
+    // Hiệu ứng bay tới giỏ hàng (giả lập)
     flyToCart: function (imgElement, cartIconElement) {
         if (!imgElement || !cartIconElement) return;
 
@@ -801,6 +899,61 @@ window.app = {
                     self.updateUI(self.currentWeatherData);
                 }
                 self.selectedDateContext = null;
+            }
+        });
+    },
+
+      // ---------------------------------------------------------
+    // Nút cuộn trang (Scroll Button)
+    // ---------------------------------------------------------
+    initScrollBtn: function () {
+        const scrollBtn = document.getElementById('scrollBtn');
+        const heroSection = document.getElementById('hero');
+        const featuresSection = document.querySelector('.features');
+
+        if (!scrollBtn) return;
+
+        console.log("🖱️ Khởi tạo Nút cuộn trang...");
+
+        // Xử lý xoay mũi tên: Xoay lên khi ra khỏi Hero
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Nếu Hero KHÔNG còn thấy được (đã cuộn xuống qua khỏi nó)
+                if (!entry.isIntersecting) {
+                    scrollBtn.classList.add('up');
+                } else {
+                    // Nếu đang ở Hero
+                    scrollBtn.classList.remove('up');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '-80px 0px 0px 0px' // Bỏ qua phần navbar sticky
+        });
+
+        observer.observe(heroSection);
+
+        // Xử lý sự kiện click
+        scrollBtn.addEventListener('click', () => {
+            if (scrollBtn.classList.contains('up')) {
+                // Quay lên đầu trang
+                heroSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            } else {
+                // Cuộn xuống
+                if (featuresSection) {
+                    featuresSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    window.scrollBy({
+                        top: window.innerHeight,
+                        behavior: 'smooth'
+                    });
+                }
             }
         });
     },

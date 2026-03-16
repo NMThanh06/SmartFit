@@ -33,27 +33,29 @@ try {
 
     foreach ($wardrobeData as $item) {
         // Kiểm tra isset trước khi truy xuất
-        if (!is_array($item)) continue;
-        if (!isset($item['gender']) || !is_array($item['gender'])) continue;
+        if (!is_array($item))
+            continue;
+        if (!isset($item['gender']) || !is_array($item['gender']))
+            continue;
 
         $inputGender = $input['gender'] ?? 'male';
         if (in_array($inputGender, $item['gender'])) {
-            $itemId     = $item['id'] ?? '??';
-            $itemType   = $item['type'] ?? '??';
-            $itemName   = $item['name'] ?? '??';
+            $itemId = $item['id'] ?? '??';
+            $itemType = $item['type'] ?? '??';
+            $itemName = $item['name'] ?? '??';
             $sellerNote = !empty($item['seller_note']) ? $item['seller_note'] : 'Không có';
-            $itemAge    = !empty($item['age']) ? $item['age'] : 'All';
+            $itemAge = !empty($item['age']) ? $item['age'] : 'All';
             $wardrobeBrief .= "- ID: {$itemId} | Loại: {$itemType} | Tên: {$itemName} | Age: {$itemAge} | Seller note: {$sellerNote}\n";
         }
     }
 
     // 4. CHUẨN BỊ CONTEXT CHO AI PROMPT
-    $age          = $input['age'] ?? 'Không rõ';
-    $location     = $input['location'] ?? 'Không rõ';
-    $weatherTemp  = $input['weather']['temp'] ?? 25;
-    $weatherCond  = $input['weather']['condition'] ?? '';
-    $weatherStr   = $weatherTemp . '°C, ' . $weatherCond;
-    $targetDate   = $input['targetDate'] ?? 'Hôm nay';
+    $age = $input['age'] ?? 'Không rõ';
+    $location = $input['location'] ?? 'Không rõ';
+    $weatherTemp = $input['weather']['temp'] ?? 25;
+    $weatherCond = $input['weather']['condition'] ?? '';
+    $weatherStr = $weatherTemp . '°C, ' . $weatherCond;
+    $targetDate = $input['targetDate'] ?? 'Hôm nay';
 
     date_default_timezone_set('Asia/Ho_Chi_Minh');
     $currentTime = date('Y-m-d H:i:s');
@@ -93,9 +95,9 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); 
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-    
+
     $response = curl_exec($ch);
     $curlError = curl_error($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -122,35 +124,41 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
     }
 
     $rawText = $aiResult['candidates'][0]['content']['parts'][0]['text'];
-    
+
     preg_match('/\{.*\}/s', $rawText, $matches);
     $cleanJson = json_decode($matches[0] ?? '', true);
 
-    if (!$cleanJson) throw new Exception("AI không trả về JSON hợp lệ");
+    if (!$cleanJson)
+        throw new Exception("AI không trả về JSON hợp lệ");
 
     // 7. Lấy ĐẦY ĐỦ 4 món đồ từ file outfits.json
-    function findItem($id, $list) {
-        if (!$id) return null;
+    function findItem($id, $list)
+    {
+        if (!$id)
+            return null;
         foreach ($list as $i) {
-            if (!is_array($i)) continue;
-            if (isset($i['id']) && $i['id'] == $id) return $i;
+            if (!is_array($i))
+                continue;
+            if (isset($i['id']) && $i['id'] == $id)
+                return $i;
         }
         return null;
     }
 
-    $top    = findItem($cleanJson['ids']['top'] ?? null, $wardrobeData);
+    $top = findItem($cleanJson['ids']['top'] ?? null, $wardrobeData);
     $bottom = findItem($cleanJson['ids']['bottom'] ?? null, $wardrobeData);
-    $shoes  = findItem($cleanJson['ids']['shoes'] ?? null, $wardrobeData);
-    $acc    = findItem($cleanJson['ids']['acc'] ?? null, $wardrobeData);
+    $shoes = findItem($cleanJson['ids']['shoes'] ?? null, $wardrobeData);
+    $acc = findItem($cleanJson['ids']['acc'] ?? null, $wardrobeData);
 
     // 8. Thiết lập ảnh mặc định dựa trên giới tính (lấy từ JSON input, không phải $_POST)
     $gender = $input['gender'] ?? 'male';
 
     if ($gender === 'female') {
-        $defaultTop    = './assets/img/female-default-top.jpg';
+        $defaultTop = './assets/img/female-default-top.jpg';
         $defaultBottom = './assets/img/female-default-bottom.jpg';
-    } else {
-        $defaultTop    = './assets/img/default-top.jpg';
+    }
+    else {
+        $defaultTop = './assets/img/default-top.jpg';
         $defaultBottom = './assets/img/default-bottom.jpg';
     }
 
@@ -159,25 +167,26 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
         'success' => true,
         'data' => [
             // lấy ID
-            'topId'       => $top['id'] ?? null,
-            'bottomId'    => $bottom['id'] ?? null,
-            'shoesId'     => $shoes['id'] ?? null,
-            'accId'       => $acc['id'] ?? null,
+            'topId' => $top['id'] ?? null,
+            'bottomId' => $bottom['id'] ?? null,
+            'shoesId' => $shoes['id'] ?? null,
+            'accId' => $acc['id'] ?? null,
             // trả về giao diện gợi ý
-            'top'         => $top['name'] ?? 'Chưa xác định',
-            'topImage'    => $top['image'] ?? $defaultTop,
-            'bottom'      => $bottom['name'] ?? 'Chưa xác định',
+            'top' => $top['name'] ?? 'Chưa xác định',
+            'topImage' => $top['image'] ?? $defaultTop,
+            'bottom' => $bottom['name'] ?? 'Chưa xác định',
             'bottomImage' => $bottom['image'] ?? $defaultBottom,
-            'shoes'       => $shoes['name'] ?? 'Chưa xác định',
-            'shoesImage'  => $shoes['image'] ?? '',
+            'shoes' => $shoes['name'] ?? 'Chưa xác định',
+            'shoesImage' => $shoes['image'] ?? '',
             'accessories' => $acc['name'] ?? 'Không có',
-            'accImage'    => $acc['image'] ?? '',
-            'style'       => $cleanJson['styleName'] ?? 'Basic',
+            'accImage' => $acc['image'] ?? '',
+            'style' => $cleanJson['styleName'] ?? 'Basic',
             'explanation' => $cleanJson['caption'] ?? 'Set đồ thoải mái, phù hợp thời tiết.'
         ]
     ]);
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['success' => false, 'error' => $e->getMessage()]);
 }
