@@ -295,6 +295,7 @@ include $base_dir . 'includes/header.php';
                 <table class="manage-table">
                     <thead>
                         <tr>
+                            <th style="width: 40px;"></th> <!-- Column for Expand Chevron -->
                             <th>ID</th>
                             <th>Ảnh</th>
                             <th>Tên sản phẩm</th>
@@ -312,7 +313,12 @@ include $base_dir . 'includes/header.php';
                         $list_result = mysqli_query($conn, $list_sql);
                         while ($p = mysqli_fetch_assoc($list_result)):
                         ?>
-                        <tr id="row_<?= $p['id'] ?>">
+                        <tr id="row_<?= $p['id'] ?>" class="manage-table__row">
+                            <td>
+                                <button type="button" class="btn-expand-variants" onclick="toggleProductVariants(<?= $p['id'] ?>, this)">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </td>
                             <td>#<?= $p['id'] ?></td>
                             <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>" class="manage-table__img"></td>
                             <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
@@ -320,11 +326,60 @@ include $base_dir . 'includes/header.php';
                             <td><?= ucfirst($p['type']) ?></td>
                             <td class="manage-table__actions">
                                 <button type="button" class="btn-edit" onclick="editProduct(<?= $p['id'] ?>)">
-                                    <i class="fa-solid fa-pen-to-square"></i> Sửa
+                                    <i class="fa-solid fa-pen-to-square"></i>
                                 </button>
                                 <button type="button" class="btn-delete" onclick="deleteProduct(<?= $p['id'] ?>)">
-                                    <i class="fa-solid fa-trash"></i> Xóa
+                                    <i class="fa-solid fa-trash"></i>
                                 </button>
+                            </td>
+                        </tr>
+                        <!-- Chi tiết Biến thể (Màu & Size) -->
+                        <tr id="variants_<?= $p['id'] ?>" class="variants-detail-row" style="display: none;">
+                            <td colspan="7">
+                                <div class="variants-detail-wrapper">
+                                    <table class="variants-subtable">
+                                        <thead>
+                                            <tr>
+                                                <th>Ảnh màu</th>
+                                                <th>Tên màu & Mã HEX</th>
+                                                <th>Kích cỡ & Tồn kho</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $color_sql = "SELECT id, color_name, hex_code, image FROM outfit_colors WHERE outfit_id = " . $p['id'];
+                                            $color_res = mysqli_query($conn, $color_sql);
+                                            while ($c = mysqli_fetch_assoc($color_res)):
+                                            ?>
+                                            <tr>
+                                                <td style="width: 80px;">
+                                                    <img src="<?= $c['image'] ?>" class="variants-subtable__img">
+                                                </td>
+                                                <td style="width: 150px;">
+                                                    <div class="color-preview-item">
+                                                        <span class="color-preview-box" style="background-color: <?= $c['hex_code'] ?>;"></span>
+                                                        <strong><?= htmlspecialchars($c['color_name']) ?></strong>
+                                                        <small><?= strtoupper($c['hex_code']) ?></small>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="variant-sizes-list">
+                                                        <?php
+                                                        $size_sql = "SELECT size_name, quantity FROM outfit_sizes WHERE color_id = " . $c['id'];
+                                                        $size_res = mysqli_query($conn, $size_sql);
+                                                        while ($s = mysqli_fetch_assoc($size_res)):
+                                                        ?>
+                                                        <span class="size-badge">
+                                                            <strong><?= $s['size_name'] ?></strong>: <?= $s['quantity'] ?>
+                                                        </span>
+                                                        <?php endwhile; ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <?php endwhile; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </td>
                         </tr>
                         <?php endwhile; ?>
@@ -674,6 +729,93 @@ include $base_dir . 'includes/header.php';
     .btn-edit:hover { background: #c7d2fe; }
     .btn-delete:hover { background: #fecaca; }
 
+    /* Dropdown Biến thể (Variants) */
+    .btn-expand-variants {
+        background: none;
+        border: none;
+        color: var(--apple-grey);
+        cursor: pointer;
+        padding: 8px;
+        transition: 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-expand-variants:hover { color: var(--apple-black); }
+    .btn-expand-variants.active { transform: rotate(180deg); color: var(--primary-purple); }
+
+    .variants-detail-row {
+        background: #fdfdfd;
+    }
+    .variants-detail-wrapper {
+        padding: 0 40px 20px 60px;
+        overflow: hidden;
+        animation: slideDown 0.3s ease;
+    }
+    .variants-subtable {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: #fff;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        font-size: 1.3rem;
+    }
+    .variants-subtable th {
+        background: #fafafa;
+        padding: 10px 15px;
+        font-size: 1.2rem;
+        color: #999;
+        font-weight: 600;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .variants-subtable td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #f9f9f9;
+        vertical-align: middle;
+    }
+    .variants-subtable tr:last-child td { border-bottom: none; }
+    
+    .variants-subtable__img {
+        width: 45px;
+        height: 45px;
+        border-radius: 6px;
+        object-fit: cover;
+        border: 1px solid #eee;
+    }
+
+    .color-preview-item {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .color-preview-box {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid rgba(0,0,0,0.1);
+        margin-bottom: 2px;
+    }
+
+    .variant-sizes-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .size-badge {
+        background: #f3f3f3;
+        color: #555;
+        padding: 4px 10px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+    }
+    .size-badge strong { color: var(--apple-black); }
+
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     /* Trạng thái sửa */
     .edit-mode .add-product__title { color: var(--primary-purple); }
     .edit-mode .btn-primary { background: var(--apple-black); }
@@ -998,6 +1140,23 @@ include $base_dir . 'includes/header.php';
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
         app.showNotification('Đã quay lại chế độ thêm mới', 'info');
+    }
+
+    function toggleProductVariants(productId, btn) {
+        const detailRow = document.getElementById(`variants_${productId}`);
+        const isHidden = detailRow.style.display === 'none';
+        
+        // Đóng các hàng khác (optional, để giao diện gọn gàng)
+        // document.querySelectorAll('.variants-detail-row').forEach(row => row.style.display = 'none');
+        // document.querySelectorAll('.btn-expand-variants').forEach(b => b.classList.remove('active'));
+
+        if (isHidden) {
+            detailRow.style.display = 'table-row';
+            btn.classList.add('active');
+        } else {
+            detailRow.style.display = 'none';
+            btn.classList.remove('active');
+        }
     }
 
     // Khởi chạy khi trang sẵn sàng
