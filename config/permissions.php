@@ -8,6 +8,7 @@ $acl = [
     // [Trang] => [Danh sách Role được phép]
     'manage_products.php' => ['admin', 'sales'],
     'manage_orders.php' => ['admin', 'sales'],
+    'manage_users.php' => ['admin'],
     
     // Mặc định: Nếu trang không có trong danh sách này, mọi role đều được vào (Public/Common)
 ];

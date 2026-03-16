@@ -132,6 +132,16 @@ require_once __DIR__ . '/config.php';
                                 </a>
                                 <?php endif; ?>
 
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_users.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_users.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-users-gear"></i>
+                                    <span>Quản lý người dùng</span>
+                                </a>
+                                <?php endif; ?>
+
                                 <div class="user-dropdown__divider"></div>
 
                                 <a href="<?php echo $root; ?>includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">

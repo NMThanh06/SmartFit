@@ -328,6 +328,10 @@ window.app = {
                         <i class="fa-solid fa-list-check"></i>
                         <span>Quản lý sản phẩm</span>
                     </a>
+                    <a href="pages/manage_users.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-users-gear"></i>
+                        <span>Quản lý người dùng</span>
+                    </a>
                     <div class="user-dropdown__divider"></div>
                     <a href="includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
                         <i class="fa-solid fa-right-from-bracket"></i>
