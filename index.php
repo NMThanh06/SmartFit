@@ -314,7 +314,7 @@ if (isset($_SESSION['user_id'])) {
 
     /* --- Modal --- */
     .map-modal {
-        display: none;                /* ẩn mặc định */
+        display: none;
         position: fixed;
         inset: 0;
         z-index: 10000;
@@ -328,8 +328,8 @@ if (isset($_SESSION['user_id'])) {
     .map-modal__overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
     }
 
     .map-modal__content {
@@ -339,13 +339,15 @@ if (isset($_SESSION['user_id'])) {
         background: #ffffff;
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-        animation: mapModalIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: mapModalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
     }
+
     @keyframes mapModalIn {
-        from { opacity: 0; transform: scale(0.95) translateY(20px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
+        from { opacity: 0; transform: translateY(30px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .map-modal__header {
@@ -353,21 +355,31 @@ if (isset($_SESSION['user_id'])) {
         justify-content: space-between;
         align-items: center;
         padding: 20px 25px;
-        background: var(--primary-blue);
+        background: #fff;
+        border-bottom: 1px solid #f0f0f2;
     }
+
     .map-modal__title {
-        color: #fff;
+        color: var(--apple-black);
         font-size: 1.8rem;
         font-weight: 700;
         margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
+
+    .map-modal__title i {
+        color: var(--primary-blue);
+    }
+
     .map-modal__close {
-        background: rgba(255,255,255,0.15);
+        background: #f5f5f7;
         border: none;
-        color: #fff;
-        font-size: 2.4rem;
-        width: 32px;
-        height: 32px;
+        color: var(--apple-grey);
+        font-size: 2.2rem;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         cursor: pointer;
         display: flex;
@@ -376,53 +388,70 @@ if (isset($_SESSION['user_id'])) {
         transition: all 0.2s;
         line-height: 1;
     }
+
     .map-modal__close:hover { 
-        background: rgba(255,255,255,0.3);
-        transform: rotate(90deg);
+        background: #e1e1e6;
+        color: var(--apple-black);
     }
 
     /* Bản đồ */
     .map-modal__searchbox {
         display: flex;
-        gap: 8px;
-        padding: 12px 20px;
-        background: #16213e;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        gap: 12px;
+        padding: 15px 25px;
+        background: #fff;
+        border-bottom: 1px solid #f0f0f2;
     }
+
     .map-modal__searchbox input {
         flex: 1;
-        padding: 10px 16px;
-        border-radius: 8px;
-        border: 1px solid rgba(102, 126, 234, 0.5);
-        background: #1a1a2e;
-        color: #fff;
+        padding: 10px 18px;
+        border-radius: 12px;
+        border: 1px solid #e1e1e1;
+        background: #f5f5f7;
+        color: var(--apple-black);
         font-size: 1.4rem;
         outline: none;
-        transition: border-color 0.2s;
+        transition: all 0.2s;
     }
+
     .map-modal__searchbox input:focus {
-        border-color: #667eea;
+        background: #fff;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 118, 255, 0.1);
     }
+
     .map-modal__searchbox button {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: var(--primary-blue);
         color: white;
         border: none;
-        border-radius: 8px;
+        border-radius: 12px;
         width: 44px;
+        height: 44px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.6rem;
-        transition: transform 0.2s;
+        transition: all 0.2s;
     }
+
+    #btnMyLocation {
+        background: #f5f5f7;
+        color: var(--apple-black);
+        border: 1px solid #e1e1e1;
+    }
+
     .map-modal__searchbox button:hover {
         transform: translateY(-2px);
+        opacity: 0.9;
     }
+
     .map-modal__map {
         width: 100%;
         height: 450px;
         background: #f8f9fa;
+        z-index: 1;
     }
 
     /* Footer modal */
@@ -430,35 +459,42 @@ if (isset($_SESSION['user_id'])) {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 25px;
+        padding: 20px 25px;
         background: #ffffff;
-        border-top: 1px solid #f0f0f0;
+        border-top: 1px solid #f0f0f2;
     }
+
     .map-modal__coords {
         color: var(--apple-grey);
         font-size: 1.4rem;
         font-weight: 500;
+        background: #f5f5f7;
+        padding: 8px 15px;
+        border-radius: 8px;
     }
+
     .map-modal__confirm {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 12px 28px;
+        padding: 12px 30px;
         border: none;
-        border-radius: 12px;
+        border-radius: 14px;
         background: var(--primary-blue);
         color: #fff;
         font-size: 1.5rem;
-        font-weight: 700;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 12px rgba(33, 118, 255, 0.2);
     }
+
     .map-modal__confirm:hover {
         background: var(--primary-blue-dark);
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(33, 118, 255, 0.35);
     }
+
     .map-modal__confirm:disabled {
         background: #e9ecef;
         color: #adb5bd;
