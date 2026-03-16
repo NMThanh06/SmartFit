@@ -112,10 +112,25 @@ require_once __DIR__ . '/config.php';
                                     <span>Lịch sử đơn hàng</span>
                                 </a>
 
-                                <a href="<?php echo $root; ?>pages/add-outfit.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Thêm trang phục</span>
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_orders.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_orders.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-clipboard-list"></i>
+                                    <span>Quản lý đơn hàng</span>
                                 </a>
+                                <?php endif; ?>
+
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_products.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_products.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <span>Quản lý sản phẩm</span>
+                                </a>
+                                <?php endif; ?>
 
                                 <div class="user-dropdown__divider"></div>
 

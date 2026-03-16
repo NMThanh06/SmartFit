@@ -112,6 +112,15 @@
                     <input type="password" placeholder="Nhập lại mật khẩu" class="auth-card__input"
                         name="psw-repeat" required>
                 </div>
+                <div class="auth-card__group">
+                    <h4 class="auth-card__heading">Vai trò (Dành cho BGK)</h4>
+                    <select name="role" class="auth-card__input" style="background-color: #f0f0f0; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
+                        <option value="customer" selected>Khách hàng (customer)</option>
+                        <option value="support">Nhân viên CSKH (support)</option>
+                        <option value="sales">Nhân viên Bán hàng (sales)</option>
+                        <option value="admin">Quản trị viên (admin)</option>
+                    </select>
+                </div>
                 <button type="submit" class="auth-card__button button">Đăng ký</button>
             </form>
             <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>

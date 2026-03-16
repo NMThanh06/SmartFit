@@ -51,8 +51,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     $hashed = password_hash($password, PASSWORD_DEFAULT);
-    $insert = mysqli_prepare($conn, "INSERT INTO users (name, email, password) VALUES (?, ?, ?)");
-    mysqli_stmt_bind_param($insert, 'sss', $name, $email, $hashed);
+    $role = $_POST['role'] ?? 'customer';
+    $valid_roles = ['customer', 'support', 'sales', 'admin'];
+    if (!in_array($role, $valid_roles)) $role = 'customer';
+
+    $insert = mysqli_prepare($conn, "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)");
+    mysqli_stmt_bind_param($insert, 'ssss', $name, $email, $hashed, $role);
 
     if (mysqli_stmt_execute($insert)) {
         sendResponse(true, 'Đăng ký thành công! Vui lòng đăng nhập.');

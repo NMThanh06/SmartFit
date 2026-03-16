@@ -320,9 +320,13 @@ window.app = {
                         <i class="fa-solid fa-receipt"></i>
                         <span>Lịch sử đơn hàng</span>
                     </a>
-                    <a href="pages/add-outfit.php" class="user-dropdown__item">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Thêm trang phục</span>
+                    <a href="pages/manage_orders.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Quản lý đơn hàng</span>
+                    </a>
+                    <a href="pages/manage_products.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Quản lý sản phẩm</span>
                     </a>
                     <div class="user-dropdown__divider"></div>
                     <a href="includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">

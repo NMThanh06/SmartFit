@@ -1,4 +1,5 @@
 <?php
+require_once '../middleware.php'; // Kích hoạt RBAC Middleware
 $base_dir = '../';
 require_once $base_dir . 'includes/config.php';
 require_once $base_dir . 'includes/functions.php';
@@ -80,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                 }
 
                 $sql_color = "INSERT INTO outfit_colors (outfit_id, color_name, hex_code, image) 
-                              VALUES ($outfit_id, '$color_name', '$hex_code', '$image_path')";
+                               VALUES ($outfit_id, '$color_name', '$hex_code', '$image_path')";
                 mysqli_query($conn, $sql_color);
                 $color_id = mysqli_insert_id($conn);
 
@@ -124,11 +125,11 @@ include $base_dir . 'includes/header.php';
 
     <div class="add-product">
         <div class="add-product__header">
-            <h1 class="add-product__title">Thêm Sản Phẩm Mới</h1>
+            <h1 class="add-product__title">Quản Lý Sản Phẩm</h1>
             <p class="add-product__subtitle">Hệ thống quản lý thời trang SmartFit AI</p>
         </div>
 
-        <form id="addProductForm" action="add-outfit.php" method="POST" enctype="multipart/form-data"
+        <form id="addProductForm" action="manage_products.php" method="POST" enctype="multipart/form-data"
             class="add-product__form">
 
             <!-- KHỐI 1: THÔNG TIN CHUNG -->

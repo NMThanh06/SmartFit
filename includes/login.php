@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         sendResponse(false, 'Vui lòng nhập thông tin đăng nhập và mật khẩu');
     }
 
-    $stmt = mysqli_prepare($conn, "SELECT id, name, email, password FROM users WHERE email = ? OR name = ?");
+    $stmt = mysqli_prepare($conn, "SELECT id, name, email, password, role FROM users WHERE email = ? OR name = ?");
     mysqli_stmt_bind_param($stmt, 'ss', $email, $email);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -41,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_email'] = $user['email'];
+        $_SESSION['role'] = $user['role'];
 
         if (isset($_POST['remember'])) {
             $token = bin2hex(random_bytes(32));
