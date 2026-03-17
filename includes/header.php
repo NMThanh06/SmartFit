@@ -71,7 +71,7 @@ require_once __DIR__ . '/config.php';
             </a>
 
             <div class="navbar__menu">
-                <a href="<?php echo $root; ?>index.php" class="navbar__menu-item">
+                <a href="<?php echo $root; ?>style_outfits.php" class="navbar__menu-item">
                     <i class="fa-solid fa-shirt"></i>
                     <span>Phối đồ</span>
                 </a>

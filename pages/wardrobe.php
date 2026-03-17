@@ -54,7 +54,7 @@ include '../includes/header.php';
                     <div class="wardrobe-empty">
                         <i class="fa-solid fa-shirt"></i>
                         <p>Bạn chưa lưu bộ trang phục nào.</p>
-                        <a href="../index.php" class="btn-primary">Phối đồ ngay</a>
+                        <a href="../style_outfits.php" class="btn-primary">Phối đồ ngay</a>
                     </div>
                 </div>
             <?php else: ?>

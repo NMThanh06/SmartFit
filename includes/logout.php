@@ -9,6 +9,6 @@ unset($_SESSION['user_email']);
 // Thiết lập thông báo thành công
 $_SESSION['success'] = 'Đăng xuất thành công! Hẹn gặp lại bạn.';
 
-header('Location: ../index.php');
+header('Location: ../style_outfits.php');
 exit;
 ?>

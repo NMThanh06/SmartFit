@@ -7,7 +7,7 @@
         <p class="hero__subtitle">Giải pháp quản lý tủ đồ thông minh và gợi ý trang phục cá nhân hóa dựa trên thời tiết
             và phong cách của riêng bạn.</p>
         <div class="hero__actions">
-            <a href="../index.php" class="button hero__btn">Trải nghiệm phối đồ ngay</a>
+            <a href="../style_outfits.php" class="button hero__btn">Trải nghiệm phối đồ ngay</a>
         </div>
     </div>
 

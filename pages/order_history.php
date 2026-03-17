@@ -6,7 +6,7 @@ require_once '../includes/config.php';
 // Kiểm tra đăng nhập
 $userId = $_SESSION['user_id'] ?? 0;
 if ($userId == 0) {
-    header("Location: ../index.php");
+    header("Location: ../style_outfits.php");
     exit;
 }
 

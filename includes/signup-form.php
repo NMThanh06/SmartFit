@@ -18,7 +18,7 @@ function sendResponse($success, $message, $data = []) {
         } else {
             $_SESSION['error'] = $message;
         }
-        header('Location: ../index.php');
+        header('Location: ../style_outfits.php');
         exit;
     }
 }
@@ -66,5 +66,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-header('Location: ../index.php');
+header('Location: ../style_outfits.php');
 exit;

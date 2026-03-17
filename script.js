@@ -402,8 +402,8 @@ window.app = {
         const configForm = document.getElementById('configForm');
 
         if (!submitBtn || !configForm) {
-            // Chỉ log nếu đang ở trang có form (index.php)
-            if (window.location.pathname.includes('index.php')) {
+            // Chỉ log nếu đang ở trang có form (style_outfits.php)
+            if (window.location.pathname.includes('style_outfits.php')) {
                 console.warn("⚠️ Không tìm thấy Form hoặc Nút bấm cấu hình.");
             }
             return;

@@ -115,7 +115,7 @@
     </style>
 </head>
 <body>
-    <a href="/SmartFit/index.php" class="btn-back">⬅ Quay lại Trang chủ</a>
+    <a href="/SmartFit/style_outfits.php" class="btn-back">⬅ Quay lại Trang chủ</a>
     <div class="cart-icon-container" id="cart-icon" onclick="window.location.href='cart.html'">
         🛒
         <span class="cart-badge" id="cart-count">0</span>

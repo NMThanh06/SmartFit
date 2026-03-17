@@ -26,7 +26,7 @@
                     <h3 class="footer__heading">Tính năng</h3>
                     <ul class="footer__list">
                         <li class="footer__item">
-                            <a href="<?php echo $root; ?>index.php" class="footer__link">Phối đồ AI<span>Gợi ý trang
+                            <a href="<?php echo $root; ?>style_outfits.php" class="footer__link">Phối đồ AI<span>Gợi ý trang
                                     phục thông minh theo thời tiết.</span></a>
                         </li>
                         <li class="footer__item">
