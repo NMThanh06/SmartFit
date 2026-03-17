@@ -40,8 +40,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
     }
 }
 
-// 3. Truy vấn danh sách người dùng
-$sql = "SELECT id, name, fullname, email, role FROM users ORDER BY id DESC";
+// 3. Truy vấn danh sách người dùng (Hỗ trợ Tìm kiếm và Lọc Role)
+$searchQuery = $_GET['search'] ?? '';
+$roleFilter = $_GET['role_filter'] ?? '';
+
+$sql = "SELECT id, name, fullname, email, role FROM users WHERE 1=1 ";
+
+if (!empty($searchQuery)) {
+    $searchParam = mysqli_real_escape_string($conn, $searchQuery);
+    $sql .= " AND (id LIKE '%$searchParam%' OR name LIKE '%$searchParam%' OR fullname LIKE '%$searchParam%' OR email LIKE '%$searchParam%') ";
+}
+
+if (!empty($roleFilter)) {
+    $roleParam = mysqli_real_escape_string($conn, $roleFilter);
+    $sql .= " AND role = '$roleParam' ";
+}
+
+$sql .= " ORDER BY id DESC";
 $users_result = mysqli_query($conn, $sql);
 
 include $base_dir . 'includes/header.php';
@@ -66,6 +81,27 @@ include $base_dir . 'includes/header.php';
         </div>
 
         <div class="manage-users__card">
+            <!-- Thanh tìm kiếm và lọc Role -->
+            <div class="order-toolbar" style="margin-top: 0; margin-bottom: 25px; border-radius: 12px;">
+                <form action="" method="GET" class="order-search">
+                    <i class="fa-solid fa-magnifying-glass order-search__icon"></i>
+                    <input type="text" name="search" class="order-search__input" 
+                           placeholder="ID, Tên, Username, Email..." 
+                           value="<?= htmlspecialchars($searchQuery) ?>">
+                </form>
+
+                <div class="order-filter">
+                    <span class="order-filter__label">Vai trò:</span>
+                    <select class="order-filter__select" onchange="window.location.href='?search=<?= urlencode($searchQuery) ?>&role_filter=' + this.value">
+                        <option value="" <?= $roleFilter === '' ? 'selected' : '' ?>>Tất cả vai trò</option>
+                        <option value="customer" <?= $roleFilter === 'customer' ? 'selected' : '' ?>>Khách hàng</option>
+                        <option value="support" <?= $roleFilter === 'support' ? 'selected' : '' ?>>Hỗ trợ (Support)</option>
+                        <option value="sales" <?= $roleFilter === 'sales' ? 'selected' : '' ?>>Bán hàng (Sales)</option>
+                        <option value="admin" <?= $roleFilter === 'admin' ? 'selected' : '' ?>>Quản trị viên</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="manage-table-wrapper">
                 <table class="manage-table">
                     <thead>
