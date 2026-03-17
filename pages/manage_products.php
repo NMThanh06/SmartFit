@@ -48,9 +48,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $outfit_id = $edit_id;
 
             // Xóa các biến thể cũ (colors & sizes) để chèn lại cái mới từ form
-            // Lưu ý: Trong thực tế nên xóa ảnh cũ trong folder, nhưng để an toàn tôi sẽ giữ lại hoặc xử lý sau
             mysqli_query($conn, "DELETE FROM outfit_sizes WHERE outfit_id = $outfit_id");
             mysqli_query($conn, "DELETE FROM outfit_colors WHERE outfit_id = $outfit_id");
+        } else {
             // TRƯỜNG HỢP: THÊM MỚI (INSERT) - Mặc định là sản phẩm của Shop (is_commercial = 1)
             $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial) 
                            VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1)";
@@ -962,15 +962,26 @@ include $base_dir . 'includes/header.php';
         row.id = `sizeRow_${cIdx}_${sIdx}`;
 
         const productType = document.getElementById('productType').value;
-        let sizeInputHtml = '';
+        let defaultValue = "";
 
-        // Kiểm tra loại sản phẩm để render input phù hợp
-        if (productType === 'accessory') {
-            sizeInputHtml = `<input type="text" name="colors[${cIdx}][sizes][${sIdx}][name]" value="Oversize" class="config-form__input--text" readonly>`;
+        // Logic tự động tăng size
+        if (sIdx > 0) {
+            const prevRow = sContainer.children[sIdx - 1];
+            const prevInput = prevRow.querySelector('input[name*="[name]"]');
+            if (prevInput && !isNaN(prevInput.value) && prevInput.value !== "") {
+                defaultValue = parseInt(prevInput.value) + 1;
+            }
         } else if (productType === 'shoes') {
-            sizeInputHtml = `<input type="number" name="colors[${cIdx}][sizes][${sIdx}][name]" value="38" min="36" max="44" class="config-form__input--text">`;
+            defaultValue = "38";
+        } else if (productType === 'accessory') {
+            defaultValue = "Oversize";
+        }
+
+        let sizeInputHtml = '';
+        if (productType === 'shoes') {
+            sizeInputHtml = `<input type="number" name="colors[${cIdx}][sizes][${sIdx}][name]" value="${defaultValue}" min="1" class="config-form__input--text">`;
         } else {
-            sizeInputHtml = `<input type="text" name="colors[${cIdx}][sizes][${sIdx}][name]" placeholder="S, M, L..." class="config-form__input--text">`;
+            sizeInputHtml = `<input type="text" name="colors[${cIdx}][sizes][${sIdx}][name]" value="${defaultValue}" placeholder="S, M, L, XL, 1, 2..." class="config-form__input--text">`;
         }
 
         row.innerHTML = `
@@ -982,7 +993,7 @@ include $base_dir . 'includes/header.php';
             <label class="add-product__label" style="font-size:1.1rem">Số lượng kho</label>
             <input type="number" name="colors[${cIdx}][sizes][${sIdx}][qty]" value="" min="0" class="config-form__input--text">
         </div>
-        ${productType !== 'accessory' ? `<button type="button" class="btn-remove" style="margin-bottom:10px" onclick="removeBlock('sizeRow_${cIdx}_${sIdx}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+        ${(productType === 'accessory' || productType !== 'accessory') ? `<button type="button" class="btn-remove" style="margin-bottom:10px" onclick="removeBlock('sizeRow_${cIdx}_${sIdx}')"><i class="fa-solid fa-trash"></i></button>` : ''}
     `;
 
         sContainer.appendChild(row);
@@ -1017,20 +1028,12 @@ include $base_dir . 'includes/header.php';
 
                 if (type === 'accessory') {
                     input.type = 'text';
-                    input.value = 'Oversize';
-                    input.readOnly = true;
-                    if (btnAddSize) btnAddSize.style.display = 'none';
-
-                    // Phụ kiện chỉ cho phép 1 dòng size
-                    const sContainer = document.getElementById(`sizeContainer_${cIdx}`);
-                    while (sContainer.children.length > 1) {
-                        sContainer.lastChild.remove();
-                    }
+                    input.readOnly = false;
+                    input.placeholder = "S, M, L, XL, 1, 2...";
+                    if (btnAddSize) btnAddSize.style.display = 'inline-block';
                 } else if (type === 'shoes') {
                     input.type = 'number';
-                    input.min = "36";
-                    input.max = "44";
-                    if (!input.value || isNaN(input.value)) input.value = "38";
+                    input.min = "1";
                     input.readOnly = false;
                     if (btnAddSize) btnAddSize.style.display = 'inline-block';
                 } else {
@@ -1066,9 +1069,8 @@ include $base_dir . 'includes/header.php';
     }
 
     async function editProduct(id) {
-        // Cuộn lên form
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-        app.showNotification('Đang tải dữ liệu sản phẩm...', 'info');
+        // Cuộn lên đầu trang (thấy được title)
+        document.querySelector('.add-product').scrollIntoView({ behavior: 'smooth', block: 'start' });
 
         try {
             const response = await fetch(`../includes/api_manage_outfit.php?action=get_details&id=${id}`);
@@ -1169,6 +1171,7 @@ include $base_dir . 'includes/header.php';
         addColorBlock();
         
         window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Hoặc có thể dùng: document.querySelector('.add-product').scrollIntoView({ behavior: 'smooth', block: 'start' });
         app.showNotification('Đã quay lại chế độ thêm mới', 'info');
     }
 

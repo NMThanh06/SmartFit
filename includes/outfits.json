@@ -1,45 +1,6 @@
 {
     "items": [
         {
-            "id": "6",
-            "type": "shoes",
-            "name": "Giày Nike Air Force 1",
-            "gender": [
-                "male",
-                "female"
-            ],
-            "occasion": [
-                "study",
-                "goout",
-                "date",
-                "event"
-            ],
-            "style": [
-                "basic",
-                "street"
-            ],
-            "color": "Trắng",
-            "fit": [
-                "regular"
-            ],
-            "weather": [
-                "hot",
-                "mild",
-                "cold"
-            ],
-            "image": "/SmartFit/assets/img/1773752318_outfit_6_color_1.avif",
-            "price": 1000000,
-            "sizes": {
-                "38": 4,
-                "39": 7,
-                "40": 6,
-                "41": 1,
-                "42": 2
-            },
-            "age": "All",
-            "seller_note": ""
-        },
-        {
             "id": "5",
             "type": "bottom",
             "name": "Quần short ",
@@ -152,7 +113,7 @@
                 "basic",
                 "street"
             ],
-            "color": "neutral",
+            "color": "Trắng",
             "fit": [
                 "regular"
             ],
@@ -161,9 +122,13 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/default-placeholder.jpg",
+            "image": "/SmartFit/assets/img/1773753186_outfit_2_color_1.avif",
             "price": 1000000,
-            "sizes": [],
+            "sizes": {
+                "38": 12,
+                "39": 5,
+                "44": 10
+            },
             "age": "All",
             "seller_note": ""
         },
