@@ -165,10 +165,15 @@ require_once __DIR__ . '/config.php';
 else: ?>
                         <div id="loginBtn">
                             <i class="fa-solid fa-circle-user"></i>
-                            Đăng nhập
+                            <span>Đăng nhập</span>
                         </div>
                     <?php
 endif; ?>
+                </div>
+
+                <!-- Hamburger Toggle Button -->
+                <div class="navbar__toggle" id="mobileMenuToggle">
+                    <i class="fa-solid fa-bars"></i>
                 </div>
 
             </div>

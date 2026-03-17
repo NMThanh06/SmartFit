@@ -31,6 +31,7 @@ window.app = {
         this.initFormEvent();
         this.initForecastDropdown();
         this.initScrollBtn();
+        this.initMobileMenu();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -377,6 +378,41 @@ window.app = {
                 if (!userInfo.contains(e.target)) {
                     userDropdown.classList.remove('show');
                     userInfo.classList.remove('active');
+                }
+            });
+        }
+    },
+
+    // Mobile Menu Toggle
+    initMobileMenu: function () {
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+        const navbarMenu = document.querySelector('.navbar__menu');
+
+        if (toggleBtn && navbarMenu) {
+            toggleBtn.onclick = (e) => {
+                e.stopPropagation();
+                navbarMenu.classList.toggle('active');
+                
+                // Đổi icon bars <-> xmark
+                const icon = toggleBtn.querySelector('i');
+                if (navbarMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-xmark');
+                } else {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                }
+            };
+
+            // Đóng menu khi click ra ngoài
+            document.addEventListener('click', (e) => {
+                if (!navbarMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    navbarMenu.classList.remove('active');
+                    const icon = toggleBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-xmark');
+                        icon.classList.add('fa-bars');
+                    }
                 }
             });
         }

@@ -1,272 +1,270 @@
 /* =======================================================
-   1. MOBILE & TABLET CHUNG (Dưới 1024px)
-   (Reset lại chiều cao hộp kính mờ cho cả Mobile & Tablet)
+   DỰ ÁN SMARTFIT - RESPONSIVE STYLES (VER 2026)
+   Chiến lược: Desktop-First kết hợp Fluid Typography
+   Breakpoints: 576px, 768px, 992px, 1200px
 ======================================================= */
-@media (max-width: 1023px) {
-    .hero__info, .config-form {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
 
-    .info__greeting {
-        line-height: 1.6; /* Giãn dòng ra 1.6 lần cho thoáng */
-        margin-bottom: 10px;
-    }
+:root {
+    /* Fluid Typography & Spacing using clamp() */
+    --fluid-h1: clamp(2.4rem, 5vw, 4.5rem);
+    --fluid-h2: clamp(2rem, 4vw, 3.5rem);
+    --fluid-p: clamp(1.4rem, 2vw, 1.6rem);
+    --container-padding: clamp(15px, 3vw, 30px);
+}
 
-    /* ĐÂY LÀ DÒNG TRỊ LỖI TRÀN NÚT: Bắt buộc hộp kính mờ tự giãn chiều cao */
-    .config-form__group {
-        height: auto; 
-        min-height: max-content;
-        padding-bottom: 15px; /* Tạo khoảng trống ở đáy hộp để ôm trọn nút */
-        display: block; /* Bỏ flex chiều dọc nếu có */
-    }
-
-    .config-form__group:nth-child(5) {
-        margin-left: auto;
-        margin-right: auto;
-    }
-
-    /* Trang chi tiết sản phẩm */
-    .detail-page {
-        margin-bottom: 50px;
-    }
-
-    #productDetailWrapper {
-        flex-direction: column;
-    }
-
-    .detail__image {
-        margin-bottom: 25px; /* Tạo khoảng trống giữa ảnh và chữ */
-    }
-    
+/* Base Responsive Fixes */
+.navbar__toggle {
+    display: none; /* Ẩn mặc định trên desktop */
 }
 
 /* =======================================================
-   2. TABLET CHUYÊN BIỆT (Từ 740px đến 1023px)
-   (Chia form thành 2 cột so le)
+   1. LARGE DESKTOP (Trên 1200px)
 ======================================================= */
-@media (min-width: 740px) and (max-width: 1023px) {
-    .config-form {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
+@media (min-width: 1200px) {
+    .grid.wide {
+        max-width: 1200px;
+    }
+}
+
+/* =======================================================
+   2. DESKTOP (992px - 1199px)
+======================================================= */
+@media (max-width: 1199px) {
+    .grid.wide {
+        max-width: 960px;
+    }
+}
+
+/* =======================================================
+   3. TABLET LANDSCAPE (768px - 991px)
+======================================================= */
+@media (max-width: 991px) {
+    .grid.wide {
+        max-width: 720px;
     }
 
-    .config-form__group {
-        width: calc(50% - 10px); /* Mỗi hộp chiếm 1 nửa màn hình */
+    .navbar__menu {
+        display: flex;
+        position: fixed;
+        top: var(--navbar-height);
+        left: 0;
+        right: 0;
+        background: #fff;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        z-index: 100;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .navbar__menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .navbar__toggle {
+        display: block; /* Hiện trên tablet/mobile */
+        font-size: 2.4rem;
+        cursor: pointer;
+        padding: 10px;
+        margin-left: 10px;
+        order: 3; /* Đưa về cuối cùng trong flex container của shop/auth group */
+    }
+
+    .navbar__menu-item {
+        width: 100%;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* Product Grid Overrides (2 columns) */
+    .shop-grid .col,
+    .shop__products .col,
+    .feature-products .col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+
+    /* Admin Table Scroll */
+    .manage-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         margin-bottom: 20px;
+        border: 1px solid #eee;
+        border-radius: 8px;
     }
 
-    /* Ô Ghi chú cuối cùng cho chiếm trọn 1 hàng (100%) */
-    .config-form__group:last-child {
-        width: 100%; 
-    }
-
-    /* Bảng kết quả (Result) */
-    .result {
-        height: auto;
-        min-height: calc(100vh - var(--navbar-height));
-        padding: 20px;
-        display: none;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .result__container {
-        flex-direction: column;
-        width: 100%;
-        max-width: 600px;
-        height: auto;
-        max-height: none;
-        padding: 20px;
-        gap: 20px;
-    }
-
-    .result__title {
-        line-height: 1.5;
-        margin-top: 10px;
-        margin-bottom: 15px;
-    }
-
-    /* Trang chi tiết sản phẩm */
-    #productDetailWrapper {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        flex-direction: column;
-        align-items: center; /* Trọng tâm: Tự động đưa mọi thứ bên trong ra giữa */
-    }
-
-    #productDetailWrapper > .col {
-        flex: 0 0 100% !important;
-        max-width: 650px !important; /* Bạn có thể tăng giảm số này nếu muốn to/nhỏ hơn */
-        padding: 0 !important; /* Bỏ khoảng cách thừa */
-    }
-
-    .detail__info {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr; /* 2 cột chia đôi màn hình */
-        gap: 20px 40px; /* Khoảng cách hàng dọc 20px, hàng ngang 40px */
-        
-        /* Bản đồ quy hoạch vị trí: Trái là Thông tin - Phải là Thao tác */
-        grid-template-areas: 
-            "name size"
-            "price qty"
-            "desc buy";
-    }
-
-    /* Gắn thẻ các phần tử vào đúng bản đồ quy hoạch ở trên */
-    .detail__name { grid-area: name; margin: 0; }
-    .detail__price { grid-area: price; margin: 0; }
-    .detail__desc { grid-area: desc; margin: 0; }
-    
-    .detail__size { grid-area: size; margin: 0; }
-    .detail__qty { grid-area: qty; margin: 0; align-self: center; }
-    .detail__buy-btn { 
-        grid-area: buy; 
-        align-self: end; /* Neo nút mua xuống đáy cột bên phải */
-        margin: 0; 
-        padding: 16px; 
+    .manage-table {
+        min-width: 800px; /* Force scroll on small tables */
     }
 }
 
 /* =======================================================
-   3. MOBILE CHUYÊN BIỆT (Dưới 740px)
-   (Chuyển tất cả thành 1 cột dọc)
+   4. MOBILE LARGE / TABLET PORTRAIT (576px - 767px)
 ======================================================= */
-@media (max-width: 739px) {
-    .info__greeting {
-        font-size: 2.2rem;
-        line-height: 1.6;
-    }
-    .info__weather__text, .info__desc {
-        font-size: 1.4rem;
+@media (max-width: 767px) {
+    .grid.wide {
+        max-width: 540px;
     }
 
-    /* 1. ÉP HỘP KÍNH MỜ TỰ GIÃN */
+    /* Hero Section */
+    .hero__title {
+        font-size: var(--fluid-h1);
+        line-height: 1.2;
+    }
+
+    /* Form transition to 1 column */
+    .checkout-form .form-row,
+    .auth-card__group--row,
+    .config-form {
+        flex-direction: column !important;
+    }
+
     .config-form__group {
-        width: 100%;
-        height: auto; 
-        min-height: 10px; /* Xóa bỏ min-height cũ */
-        display: block;
-        padding-bottom: 15px;
-        margin-bottom: 15px;
-        overflow: visible; /* Cho phép nội dung bung ra nếu cần */
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100px;
     }
-    
+
     .config-form__group:last-of-type {
-        width: 100%;
+        width: 100% !important;
     }
 
-    /* 2. CHẶN THỦ PHẠM: ÉP KHU VỰC CHỨA NÚT BẤM TỰ GIÃN */
-    .config-form__options {
-        display: flex;
-        flex-wrap: wrap;
-        height: auto; /* ĐÂY CHÍNH LÀ CHÌA KHÓA: Phá vỡ height cố định của PC */
-        justify-content: center;
-        gap: 12px;
+    .col-half, .col-6, .col-4 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
     }
 
-    /* 3. Nắn lại các nút bấm */
-    .config-form__label {
-        flex: 1 1 calc(50% - 12px);
-        text-align: center;
-        padding: 12px 5px;
-        margin: 0; 
-        font-size: 1.3rem;
-        height: auto; 
-    }
-
-    /* Trả lại hình tròn cho các nút chọn màu sắc */
-    .config-form__label--color {
-        flex: 0 0 auto;
-        width: 42px;
-        height: 42px;
-    }
-
-    /* Nút Phối đồ ngay */
-    .confirm__button {
-        width: calc(100% - 30px);
-        margin: 10px 15px 40px;
-    }
-
-    /* Trang kết quả */
-    .result {
-        height: auto;
-        min-height: calc(100vh - var(--navbar-height));
-        padding: 15px;
-    }
-
+    /* AI Result Stacking */
     .result__container {
-        flex-direction: column;
-        width: 100%;
-        height: auto;
-        max-height: none;
-        gap: 20px;
-        padding: 15px;
+        flex-direction: column !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 20px !important;
     }
 
     .result__visual {
-        flex: 0 0 auto;
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    .visual-item {
+        flex: 0 0 200px !important;
+        height: 250px !important;
+    }
+
+    .result__content {
+        padding-left: 0 !important;
         width: 100%;
     }
+}
 
-    .result__title {
-        font-size: 2rem;
-        text-align: center;
-    }
-
-    .result__desc {
-        font-size: 1.3rem;
-    }
-
-    /* Footer trên mobile */
-    .footer {
-        flex-direction: column;
-        gap: 20px;
-    }
-
-    .footer__author {
-        padding-top: 10px;
-    }
-
-    /* Trang wardrobe */
-    .wardrobe-page {
-        padding-top: 20px; 
-    }
-
-    /* Trang shop */
-    .shop-page {
-        padding-top: 20px; 
-    }
-
-    .shop__filters {
-        display: flex;
-        flex-wrap: wrap; /* Cho phép rớt xuống dòng nếu thiếu chỗ */
-        justify-content: center; /* Căn giữa các nút */
-        gap: 10px; /* Khoảng cách giữa các nút */
-        margin-top: 15px;
-    }
-
-    .filter-btn {
-        flex: 0 0 auto;
-        padding: 8px 16px;
-        font-size: 1.3rem;
-        margin: 0; /* Xóa margin cũ */
-    }
-
-    /* Trang chi tiết sản phảm */
-    .detail__image {
+/* =======================================================
+   5. MOBILE (Dưới 576px)
+======================================================= */
+@media (max-width: 575px) {
+    .grid.wide {
         width: 100%;
+        padding: 0 var(--container-padding);
     }
 
-    /* Thu nhỏ chữ cho phù hợp với màn hình điện thoại */
-    .detail__name {
-        font-size: 2.6rem; 
-        text-align: center; /* Đưa tên sản phẩm ra giữa */
+    /* Product Grid (1 column) */
+    .shop-grid .col,
+    .shop__products .col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
     }
 
-    .detail__price {
+    /* Action Buttons Full-width & Stacked */
+    .actions__button,
+    .btn-place-order,
+    .confirm__button,
+    .auth-card__button {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 10px;
+    }
+
+    .result__actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    /* Admin Buttons & Icons */
+    .manage-btn {
+        padding: 12px !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* Increase Input size for touch */
+    input, select, textarea, .button, .config-form__label {
+        min-height: 48px;
+        font-size: 1.6rem !important;
+    }
+
+    /* Header refinement for small mobile */
+    .navbar__auth div span,
+    #loginBtn span {
+        display: none !important;
+    }
+
+    /* Đảm bảo hiện tên người dùng và text dropdown */
+    .user-info__name {
+        display: block !important;
+        font-size: 1.2rem;
+    }
+
+    .user-dropdown__item span {
+        display: inline !important;
+    }
+
+    .navbar__auth i,
+    #loginBtn i {
         font-size: 2.2rem;
-        text-align: center; /* Đưa giá tiền ra giữa */
+    }
+
+    /* Modal Full-width */
+    .modal-content, 
+    .order-modal__content,
+    .auth-card,
+    .map-modal__content {
+        width: 95% !important;
+        margin: 10px auto !important;
+        padding: 20px !important;
+    }
+
+    /* Section Spacing & Typography */
+    section {
+        padding: 40px 15px !important;
+    }
+
+    .section-title {
+        font-size: 2.8rem !important;
+        line-height: 1.3 !important; /* Tăng khoảng cách dòng cho title */
+        margin-bottom: 15px !important;
+    }
+
+    .section-subtitle {
+        line-height: 1.8 !important; /* Tăng khoảng cách dòng cho subtitle */
+        margin-bottom: 30px !important;
+    }
+
+    /* Ẩn đường lượn sóng */
+    .how-it-works__line {
+        display: none !important;
+    }
+
+    /* Thêm khoảng cách giữa các feature-card */
+    .features .col {
+        margin-bottom: 20px;
     }
 }
