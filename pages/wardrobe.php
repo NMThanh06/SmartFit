@@ -18,12 +18,14 @@ if (isset($_SESSION['user_id'])) {
                    t.name as top_name, (SELECT image FROM outfit_colors WHERE outfit_id = t.id LIMIT 1) as top_img,
                    b.name as bottom_name, (SELECT image FROM outfit_colors WHERE outfit_id = b.id LIMIT 1) as bottom_img,
                    s.name as shoes_name, (SELECT image FROM outfit_colors WHERE outfit_id = s.id LIMIT 1) as shoes_img,
-                   a.name as acc_name, (SELECT image FROM outfit_colors WHERE outfit_id = a.id LIMIT 1) as acc_img
+                   a.name as acc_name, (SELECT image FROM outfit_colors WHERE outfit_id = a.id LIMIT 1) as acc_img,
+                   op.name as onepiece_name, (SELECT image FROM outfit_colors WHERE outfit_id = op.id LIMIT 1) as onepiece_img
             FROM saved_outfits so
-            JOIN outfits t ON so.top_id = t.id
-            JOIN outfits b ON so.bottom_id = b.id
+            LEFT JOIN outfits t ON so.top_id = t.id
+            LEFT JOIN outfits b ON so.bottom_id = b.id
             JOIN outfits s ON so.shoes_id = s.id
             LEFT JOIN outfits a ON so.acc_id = a.id
+            LEFT JOIN outfits op ON so.onepiece_id = op.id
             WHERE so.user_id = ?
             ORDER BY so.created_at DESC";
             
@@ -156,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
 $typeMap = [
     'top' => 'Áo',
     'bottom' => 'Quần',
+    'one-piece' => 'Trang phục nguyên bộ',
     'shoes' => 'Giày',
     'accessory' => 'Phụ kiện'
 ];
@@ -208,12 +211,18 @@ include '../includes/header.php';
                         <div class="col l-3 m-6 c-12">
                             <div class="wardrobe-card">
                                 <div class="wardrobe-card__gallery">
-                                    <div class="wardrobe-card__img">
-                                        <img src="<?php echo htmlspecialchars($outfit['top_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Áo" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
-                                    </div>
-                                    <div class="wardrobe-card__img">
-                                        <img src="<?php echo htmlspecialchars($outfit['bottom_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Quần" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
-                                    </div>
+                                    <?php if (!empty($outfit['onepiece_name'])): ?>
+                                        <div class="wardrobe-card__img" style="flex: 1;">
+                                            <img src="<?php echo htmlspecialchars($outfit['onepiece_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="One-piece" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="wardrobe-card__img">
+                                            <img src="<?php echo htmlspecialchars($outfit['top_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Áo" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                        </div>
+                                        <div class="wardrobe-card__img">
+                                            <img src="<?php echo htmlspecialchars($outfit['bottom_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Quần" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
 
                                 <div class="wardrobe-card__body">
@@ -222,8 +231,16 @@ include '../includes/header.php';
                                             <?php echo htmlspecialchars($outfit['style_name'] ?: 'Style của tôi'); ?>
                                         </h3>
                                         <div class="wardrobe-card__desc">
-                                            <p><span>Áo:</span> <?php echo htmlspecialchars($outfit['top_name']); ?></p>
-                                            <p><span>Quần:</span> <?php echo htmlspecialchars($outfit['bottom_name']); ?></p>
+                                            <?php if (!empty($outfit['onepiece_name'])): ?>
+                                                <p><span>Đồ bộ:</span> <?php echo htmlspecialchars($outfit['onepiece_name']); ?></p>
+                                            <?php else: ?>
+                                                <p><span>Áo:</span> <?php echo htmlspecialchars($outfit['top_name']); ?></p>
+                                                <p><span>Quần:</span> <?php echo htmlspecialchars($outfit['bottom_name']); ?></p>
+                                            <?php endif; ?>
+                                            <p><span>Giày:</span> <?php echo htmlspecialchars($outfit['shoes_name']); ?></p>
+                                            <?php if (!empty($outfit['acc_name'])): ?>
+                                                <p><span>Phụ kiện:</span> <?php echo htmlspecialchars($outfit['acc_name']); ?></p>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     <button class="wardrobe-card__btn-delete" 
@@ -290,6 +307,7 @@ include '../includes/header.php';
                         <select name="type" required>
                             <option value="top">Áo (Top)</option>
                             <option value="bottom">Quần (Bottom)</option>
+                            <option value="one-piece">Trang phục nguyên bộ (One-piece)</option>
                             <option value="shoes">Giày (Shoes)</option>
                             <option value="accessory">Phụ kiện (Accessory)</option>
                         </select>

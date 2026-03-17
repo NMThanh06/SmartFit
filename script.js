@@ -538,23 +538,55 @@ window.app = {
         if (styleEl) styleEl.innerText = data.style;
         if (descEl) descEl.innerHTML = data.explanation;
 
-        // 2. Cập nhật Hình ảnh (Chỉ Áo và Quần)
-        const setImg = (id, src) => {
-            const el = document.getElementById(id);
-            if (el) el.src = src;
-        };
-        setImg('imgTop', data.topImage);
-        setImg('imgBottom', data.bottomImage);
+        // 2. Xử lý hiển thị Hình ảnh và Danh sách món đồ theo loại Outfit
+        const boxTop = document.getElementById('boxTop');
+        const boxBottom = document.getElementById('boxBottom');
+        const boxOnePiece = document.getElementById('boxOnePiece');
+        const liTop = document.getElementById('liTop');
+        const liBottom = document.getElementById('liBottom');
+        const liOnePiece = document.getElementById('liOnePiece');
 
-        // 3. Cập nhật danh sách items
+        if (data.onepieceId && data.onepieceId !== 'null') {
+            // CASE: One-piece
+            if (boxTop) boxTop.style.display = 'none';
+            if (boxBottom) boxBottom.style.display = 'none';
+            if (boxOnePiece) boxOnePiece.style.display = 'block';
+            if (liTop) liTop.style.display = 'none';
+            if (liBottom) liBottom.style.display = 'none';
+            if (liOnePiece) liOnePiece.style.display = 'block';
+
+            const imgOP = document.getElementById('imgOnePiece');
+            if (imgOP) imgOP.src = data.onepieceImage || data.onePieceImage || '/SmartFit/assets/img/default-placeholder.jpg';
+            
+            const textOP = document.getElementById('itemOnePieceName');
+            if (textOP) textOP.innerText = data.onepiece || data.onePiece || 'Chưa xác định';
+        } else {
+            // CASE: Áo + Quần
+            if (boxTop) boxTop.style.display = 'block';
+            if (boxBottom) boxBottom.style.display = 'block';
+            if (boxOnePiece) boxOnePiece.style.display = 'none';
+            if (liTop) liTop.style.display = 'block';
+            if (liBottom) liBottom.style.display = 'block';
+            if (liOnePiece) liOnePiece.style.display = 'none';
+
+            const imgT = document.getElementById('imgTop');
+            if (imgT) imgT.src = data.topImage || './assets/img/default-top.jpg';
+            const imgB = document.getElementById('imgBottom');
+            if (imgB) imgB.src = data.bottomImage || './assets/img/default-bottom.jpg';
+            
+            const textT = document.getElementById('itemTopName');
+            if (textT) textT.innerText = data.top || 'Chưa xác định';
+            const textB = document.getElementById('itemBottomName');
+            if (textB) textB.innerText = data.bottom || 'Chưa xác định';
+        }
+
+        // 3. Cập nhật Giày và Phụ kiện (Chỉ cập nhật text tên, ảnh đã được ẩn ở UI mới)
         const setText = (id, text) => {
             const el = document.getElementById(id);
             if (el) el.innerText = text;
         };
-        setText('itemTopName', data.top);
-        setText('itemBottomName', data.bottom);
-        setText('itemShoes', data.shoes);
-        setText('itemHead', data.accessories);
+        setText('itemShoes', data.shoes || 'Chưa xác định');
+        setText('itemHead', data.accessories || 'Không có');
 
         // 3.1 Cập nhật Link chi tiết sản phẩm
         const updateItemLink = (linkId, productId) => {
@@ -569,6 +601,7 @@ window.app = {
                 }
             }
         };
+        updateItemLink('itemOnePieceLink', data.onepieceId);
         updateItemLink('itemTopLink', data.topId);
         updateItemLink('itemBottomLink', data.bottomId);
         updateItemLink('itemShoesLink', data.shoesId);
@@ -579,7 +612,7 @@ window.app = {
         const footer = document.querySelector('.footer');
         if (resultSection) {
             resultSection.style.display = 'flex';
-            if (footer) footer.style.display = 'block'; // Hiện lại footer khi có kết quả
+            if (footer) footer.style.display = 'block';
             resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
@@ -606,6 +639,7 @@ window.app = {
             }
 
             // Gán dữ liệu cho nút lưu
+            btnSave.setAttribute('data-onepiece', data.onepieceId || '');
             btnSave.setAttribute('data-top', data.topId || '');
             btnSave.setAttribute('data-bottom', data.bottomId || '');
             btnSave.setAttribute('data-shoes', data.shoesId || '');
@@ -631,6 +665,7 @@ window.app = {
                 // Cập nhật dữ liệu cho nút lưu (Quan trọng)
                 const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
                 if (btnSave) {
+                    btnSave.setAttribute('data-onepiece', data.onepieceId || '');
                     btnSave.setAttribute('data-top', data.topId || '');
                     btnSave.setAttribute('data-bottom', data.bottomId || '');
                     btnSave.setAttribute('data-shoes', data.shoesId || '');
@@ -728,6 +763,7 @@ window.app = {
         const isAlreadySaved = btnElement.classList.contains('is-saved');
 
         // 1. CHỈ ĐỌC dữ liệu từ các thuộc tính data-* của nút bấm
+        const onepieceId = btnElement.getAttribute('data-onepiece');
         const topId = btnElement.getAttribute('data-top');
         const bottomId = btnElement.getAttribute('data-bottom');
         const shoesId = btnElement.getAttribute('data-shoes');
@@ -739,8 +775,9 @@ window.app = {
 
         // 2. Gom dữ liệu gửi đi 
         const dataToSend = {
-            top_id: topId,
-            bottom_id: bottomId,
+            onepiece_id: (onepieceId && onepieceId !== 'null' && onepieceId !== '') ? onepieceId : null,
+            top_id: (topId && topId !== 'null' && topId !== '') ? topId : null,
+            bottom_id: (bottomId && bottomId !== 'null' && bottomId !== '') ? bottomId : null,
             shoes_id: shoesId,
             acc_id: (accId && accId !== 'null' && accId !== '') ? accId : null,
             style_name: styleName || "Phong cách gợi ý"

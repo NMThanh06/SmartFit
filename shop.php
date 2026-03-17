@@ -19,6 +19,7 @@ include 'includes/header.php';
                                 <li class="shop-filter__item active" data-type="all">Tất cả sản phẩm</li>
                                 <li class="shop-filter__item" data-type="top">Áo</li>
                                 <li class="shop-filter__item" data-type="bottom">Quần</li>
+                                <li class="shop-filter__item" data-type="one-piece">Trang phục nguyên bộ</li>
                                 <li class="shop-filter__item" data-type="accessory_shoes">Giày & Phụ kiện</li>
                             </ul>
                         </div>

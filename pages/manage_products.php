@@ -186,6 +186,7 @@ include $base_dir . 'includes/header.php';
                                 <option value="" disabled selected>Chọn loại sản phẩm...</option>
                                 <option value="top">Áo (Top)</option>
                                 <option value="bottom">Quần (Bottom)</option>
+                                <option value="one-piece">Trang phục nguyên bộ (One-piece)</option>
                                 <option value="shoes">Giày (Shoes)</option>
                                 <option value="accessory">Phụ kiện (Accessory)</option>
                             </select>
