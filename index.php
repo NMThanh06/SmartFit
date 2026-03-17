@@ -7,7 +7,7 @@ include 'includes/header.php';
             <div class="hero__info">
                 <div class="info__greeting"></div> <!--Câu chào-->
                 <div class="info__weather">
-                    <div class="info__weather__icon"></div> <!-- Icon thời tiết-->
+                    <div class="info__weather__icon"><i class="fa-solid fa-cloud-sun"></i></div> <!-- Icon thời tiết-->
 
                     <div class="info__weather__text"></div> <!-- Thời tiết hiện tại-->
                     <div class="info__weather__temp"></div> <!-- Nhiệt độ -->

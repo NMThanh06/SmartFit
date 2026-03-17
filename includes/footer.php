@@ -409,3 +409,5 @@
         updateCartIconQty();
     });
 </script>
+
+<?php include 'chatbot.php'; ?>

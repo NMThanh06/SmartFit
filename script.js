@@ -169,11 +169,14 @@ window.app = {
         const tempEl = document.querySelector('.info__weather__temp');
         if (tempEl) tempEl.innerHTML = `${temp}<span>°C</span>`;
 
-        // 2. Thay đổi icon thời tiết (dùng icon từ OpenWeatherMap)
+        // 2. Thay đổi icon thời tiết
         const iconEl = document.querySelector('.info__weather__icon');
         if (iconEl) {
-            const iconCode = data.weather && data.weather[0].icon ? data.weather[0].icon : '03d';
-            iconEl.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="weather icon" style="width: 48px; height: 48px; vertical-align: middle;">`;
+            let weatherIconMsg = `☁️`;
+            if (condition === 'Rain' || condition === 'Drizzle' || condition === 'Thunderstorm') weatherIconMsg = "🌧️";
+            else if (condition === 'Clear') weatherIconMsg = "☀️";
+            else if (condition === 'Snow') weatherIconMsg = "🌨️";
+            iconEl.innerHTML = weatherIconMsg;
         }
 
         // 3. Thay đổi chữ thời tiết (dùng mô tả tiếng Việt từ OWM)
@@ -336,7 +339,7 @@ window.app = {
 
         // Khởi tạo lại sự kiện cho menu user mới tạo
         this.initUserMenu();
-        
+
         // Tự động khôi phục dữ liệu lên nút "Lưu set đồ" nếu đang có kết quả
         const savedData = localStorage.getItem('smartfit_last_outfit');
         if (savedData) {
@@ -554,7 +557,7 @@ window.app = {
                 console.log("🔄 Đang khôi phục kết quả phối đồ từ localStorage...");
                 data.isRestored = true;
                 this.displayResult(data);
-                
+
                 // Cập nhật dữ liệu cho nút lưu (quan trọng nếu người dùng đăng nhập sau khi khôi phục)
                 const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
                 if (btnSave) {
@@ -833,6 +836,7 @@ window.app = {
 
     // Map weather code from open-meteo to OpenWeatherMap icon code
     getOWMIconFromMeteoCode: function (code, isDay = true) {
+        if (code === null || code === undefined) code = 0;
         const d = isDay ? 'd' : 'n';
         const iconMap = {
             0: '01', 1: '02', 2: '03', 3: '04',
@@ -847,7 +851,7 @@ window.app = {
             95: '11', 96: '11', 99: '11'
         };
         const baseIcon = iconMap[code] || '03';
-        return `${baseIcon}${d}`;
+        return `https://openweathermap.org/img/wn/${baseIcon}${d}@2x.png`;
     },
 
     // Khởi tạo sự kiện change cho dropdown dự báo
@@ -876,8 +880,8 @@ window.app = {
 
                 const iconEl = document.querySelector('.info__weather__icon');
                 if (iconEl) {
-                    const iconCode = self.getOWMIconFromMeteoCode(data.weatherCode);
-                    iconEl.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="weather icon" style="width: 48px; height: 48px; vertical-align: middle;">`;
+                    const iconUrl = self.getOWMIconFromMeteoCode(data.weatherCode);
+                    iconEl.innerHTML = `<img src="${iconUrl}" alt="weather icon" style="width: 48px; height: 48px; vertical-align: middle; object-fit: contain;">`;
                 }
 
                 const descElement = document.querySelector('.info__desc');
@@ -903,7 +907,7 @@ window.app = {
         });
     },
 
-      // ---------------------------------------------------------
+    // ---------------------------------------------------------
     // Nút cuộn trang (Scroll Button)
     // ---------------------------------------------------------
     initScrollBtn: function () {
