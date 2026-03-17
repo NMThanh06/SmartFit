@@ -192,7 +192,7 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                                     <button class="qty-btn" onclick="changeQty(-1)">
                                         <i class="fa-solid fa-minus"></i>
                                     </button>
-                                    <input type="text" id="qtyDisplay" value="1" readonly class="qty-input">
+                                    <input type="number" id="qtyDisplay" value="1" class="qty-input" onchange="validateQty(this)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                     <button class="qty-btn" onclick="changeQty(1)">
                                         <i class="fa-solid fa-plus"></i>
                                     </button>
@@ -351,6 +351,25 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
         }
         currentQty = nextQty;
         document.getElementById('qtyDisplay').value = currentQty;
+    }
+
+    // 2.1 HÀM KIỂM TRA SỐ LƯỢNG KHI NHẬP THỦ CÔNG
+    function validateQty(input) {
+        if (!selectedSize) {
+            showToast('Vui lòng chọn kích cỡ trước!', 'error');
+            input.value = 1;
+            return;
+        }
+        let val = parseInt(input.value);
+        if (isNaN(val) || val < 1) {
+            val = 1;
+        }
+        if (val > maxStock) {
+            showToast('Chỉ còn ' + maxStock + ' sản phẩm trong kho!', 'error');
+            val = maxStock;
+        }
+        currentQty = val;
+        input.value = val;
     }
 
     // 3. HÀM THÊM VÀO GIỎ TỪ TRANG CHI TIẾT

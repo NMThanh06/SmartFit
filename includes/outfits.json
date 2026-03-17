@@ -1,6 +1,140 @@
 {
     "items": [
         {
+            "id": "10",
+            "type": "bottom",
+            "name": "Quần Jean slim fit",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "vintage"
+            ],
+            "color": "Đen",
+            "fit": [
+                "slim"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773768226_outfit_10_color_1.webp",
+            "price": 350000,
+            "sizes": {
+                "L": 56,
+                "M": 33,
+                "S": 28
+            },
+            "age": "30",
+            "seller_note": ""
+        },
+        {
+            "id": "9",
+            "type": "bottom",
+            "name": "Quần Kaki ống cong",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773767727_outfit_9_color_1.webp",
+            "price": 300000,
+            "sizes": {
+                "L": 99,
+                "M": 100,
+                "S": 48
+            },
+            "age": "25",
+            "seller_note": ""
+        },
+        {
+            "id": "8",
+            "type": "bottom",
+            "name": "Quần Parachute túi hộp",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773767357_outfit_8_color_1.webp",
+            "price": 200000,
+            "sizes": {
+                "L": 40,
+                "M": 30,
+                "S": 25,
+                "XL": 15
+            },
+            "age": "25",
+            "seller_note": ""
+        },
+        {
+            "id": "7",
+            "type": "top",
+            "name": "Áo polo hoa cúc",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
+            "color": "Xanh dương đậm",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/outfits/1773756073_user_3_closet.webp",
+            "price": 0,
+            "sizes": [],
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "5",
             "type": "bottom",
             "name": "Quần short ",

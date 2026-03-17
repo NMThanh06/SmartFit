@@ -19,6 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_info'])) {
     $phone    = mysqli_real_escape_string($conn, $_POST['phone']);
     $address  = mysqli_real_escape_string($conn, $_POST['address']);
     $age      = (int)$_POST['age'];
+    if ($age < 6) $age = 6; // Đảm bảo tuổi ít nhất là 6
     $gender   = mysqli_real_escape_string($conn, $_POST['gender']);
     
     // Xử lý Upload Avatar
@@ -162,7 +163,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Tuổi</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_age; ?></span>
-                            <input type="number" name="age" class="edit-mode info-input" value="<?php echo $user_data['age']; ?>" placeholder="Nhập tuổi">
+                            <input type="number" name="age" class="edit-mode info-input" value="<?php echo $user_data['age']; ?>" placeholder="Nhập tuổi" min="6" max="150">
                         </div>
                     </div>
 

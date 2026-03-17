@@ -448,7 +448,7 @@ include '../includes/header.php';
         'đen': '#000000', 'trắng': '#FFFFFF', 'đỏ': '#FF0000', 'vàng': '#FFFF00',
         'xanh lá': '#008000', 'xanh dương': '#0000FF', 'xanh lam': '#0000FF',
         'cam': '#FFA500', 'tím': '#800080', 'hồng': '#FFC0CB', 'xám': '#808080',
-        'nâu': '#A52A2A', 'kem': '#FFFDD0', 'be': '#F5F5DC'
+        'nâu': '#3f2929ff', 'kem': '#d8d7c7ff', 'be': '#F5F5DC'
     };
 
     function suggestHex(input) {

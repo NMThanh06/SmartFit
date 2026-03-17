@@ -115,7 +115,7 @@ include 'includes/header.php';
                             <button class="qty-btn" onclick="changeModalQty(-1)">
                                 <i class="fa-solid fa-minus"></i>
                             </button>
-                            <input type="text" id="modalQtyDisplay" value="1" readonly class="qty-input">
+                            <input type="number" id="modalQtyDisplay" value="1" class="qty-input" onchange="validateModalQty(this)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             <button class="qty-btn" onclick="changeModalQty(1)">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -157,7 +157,7 @@ include 'includes/header.php';
                 cursor: pointer;
                 transition: background 0.2s;
             }
-            .qty-btn:hover { background: #e9ecef; }
+            .qty-btn:hover { background: black; color: white; }
             .qty-input {
                 width: 40px;
                 height: 32px;
@@ -384,6 +384,25 @@ include 'includes/header.php';
             }
             modalCurrentQty = nextQty;
             document.getElementById('modalQtyDisplay').value = modalCurrentQty;
+        }
+
+        // --- HÀM VALIDATE SỐ LƯỢNG KHI NHẬP THỦ CÔNG TRÊN MODAL ---
+        function validateModalQty(input) {
+            if (!selectedConfigSize) {
+                showToast('Vui lòng chọn kích cỡ trước!', 'error');
+                input.value = 1;
+                return;
+            }
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) {
+                val = 1;
+            }
+            if (val > modalMaxStock) {
+                showToast('Chỉ còn ' + modalMaxStock + ' sản phẩm trong kho!', 'error');
+                val = modalMaxStock;
+            }
+            modalCurrentQty = val;
+            input.value = val;
         }
 
         // Hàm render size dựa trên màu sắc được chọn

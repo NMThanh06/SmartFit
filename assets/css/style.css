@@ -2589,7 +2589,8 @@ section.hero--home {
     color: #fff;
 }
 
-.qty-input {
+.qty-input, 
+.qty-control input[type=number] {
     width: 40px;
     text-align: center;
     border: none;
@@ -2597,6 +2598,16 @@ section.hero--home {
     font-size: 1.6rem;
     font-weight: 700;
     color: var(--apple-black);
+    appearance: none;
+    -moz-appearance: textfield; /* Firefox */
+}
+
+.qty-input::-webkit-inner-spin-button,
+.qty-input::-webkit-outer-spin-button,
+.qty-control input[type=number]::-webkit-inner-spin-button,
+.qty-control input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .product-detail__actions {

@@ -298,7 +298,7 @@
 
                     <div class="cart-item__qty">
                         <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity - 1})">-</button>
-                        <input type="text" value="${item.quantity}" readonly>
+                        <input type="number" class="qty-input" value="${item.quantity}" onchange="updateCartQty(${index}, parseInt(this.value))" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         <button class="qty-btn" onclick="updateCartQty(${index}, ${item.quantity + 1})">+</button>
                     </div>
                 </div>
@@ -379,9 +379,8 @@
 
     // --- Tăng/giảm số lượng item trong giỏ ---
     function updateCartQty(index, newQty) {
-        if (newQty < 1) {
-            removeItem(index);
-            return;
+        if (isNaN(newQty) || newQty < 1) {
+            newQty = 1;
         }
 
         const item = cart[index];
@@ -396,7 +395,7 @@
 
         if (newQty > stock) {
             showToast('Chỉ còn ' + stock + ' sản phẩm trong kho!', 'error');
-            return;
+            newQty = stock;
         }
 
         cart[index].quantity = newQty;
