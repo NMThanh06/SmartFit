@@ -1,5 +1,6 @@
 <?php
-include 'includes/header.php';
+// Di chuyển logic xử lý lên đầu để tránh lỗi "Headers already sent"
+require_once 'includes/config.php';
 
 $productId = isset($_GET['id']) ? intval($_GET['id']) : 0;
 if ($productId <= 0) {
@@ -17,23 +18,25 @@ mysqli_stmt_execute($stmt);
 $product = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
 // Nếu ảnh chính trong bảng outfits trống, dùng ảnh từ outfit_colors
-if (empty($product['image']) && !empty($product['color_image'])) {
+if ($product && empty($product['image']) && !empty($product['color_image'])) {
     $product['image'] = $product['color_image'];
 }
 
+// Nếu không tìm thấy sản phẩm, chuyển hướng sang trang 404
 if (!$product) {
-    die("Không tìm thấy sản phẩm!");
+    header("Location: pages/404.php");
+    exit;
 }
 
 // Kiểm tra quyền riêng tư cho đồ cá nhân (is_commercial = 0)
-// Chỉ chủ sở hữu (owner_id) mới được xem
+// Chặn hoàn toàn không cho xem chi tiết đối với đồ cá nhân
 if (isset($product['is_commercial']) && $product['is_commercial'] == 0) {
-    if (!isset($_SESSION['user_id']) || $product['owner_id'] != $_SESSION['user_id']) {
-        // Nếu không phải chủ sở hữu, chuyển hướng về shop hoặc báo lỗi
-        header("Location: shop.php");
-        exit;
-    }
+    header("Location: pages/404.php");
+    exit;
 }
+
+include 'includes/header.php';
+
 
 // Lấy Size và số lượng từ bảng outfit_sizes
 $sqlSizes = "SELECT color_id, size_name, quantity FROM outfit_sizes WHERE outfit_id = ?";
