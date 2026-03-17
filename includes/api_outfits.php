@@ -18,8 +18,14 @@ $min_price = isset($_GET['min_price']) ? (int)$_GET['min_price'] : 0;
 $max_price = isset($_GET['max_price']) ? (int)$_GET['max_price'] : 0;
 $q = isset($_GET['q']) ? mysqli_real_escape_string($conn, $_GET['q']) : '';
 
+$owner_id = isset($_GET['owner_id']) ? intval($_GET['owner_id']) : 0;
+
 // --- 3. XÂY DỰNG SQL QUERY ĐỘNG ---
 $where_clauses = ["is_commercial = 1"];
+
+if ($owner_id > 0) {
+    $where_clauses[] = "owner_id = $owner_id";
+}
 
 if ($q !== '') {
     $where_clauses[] = "(name LIKE '%$q%' OR description LIKE '%$q%' OR seller_note LIKE '%$q%')";

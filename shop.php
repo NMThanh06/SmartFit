@@ -504,41 +504,51 @@ include 'includes/header.php';
         }
 
         function performAddToCart(id, name, imageSrc, price, size, color, qty = 1) {
-            // Lấy tồn kho của biến thể này
-            const allSizes = currentSelectedItem.sizes || [];
-            const colorObj = (currentSelectedItem.colors || []).find(c => c.color_name === color);
-            const colorId = colorObj ? colorObj.id : null;
-            const sizeData = allSizes.find(s => s.size_name === size && s.color_id == colorId);
-            const stock = sizeData ? parseInt(sizeData.quantity) : 0;
-
+            // --- KIỂM TRA TỒN KHO TRƯỚC KHI THÊM ---
             const existingIndex = cart.findIndex(item => item.id === id && item.size === size && item.color === color);
-            
-            if (existingIndex !== -1) {
-                const nextQty = cart[existingIndex].quantity + qty;
-                if (nextQty > stock) {
+            const qtyInCart = existingIndex !== -1 ? cart[existingIndex].quantity : 0;
+            const totalExpected = qtyInCart + qty;
+
+            if (totalExpected > modalMaxStock) {
+                const remaining = modalMaxStock - qtyInCart;
+                if (remaining <= 0) {
                     showToast(`Sản phẩm ${name} (Size ${size}, ${color}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
-                    return;
+                } else {
+                    showToast('Chỉ có thể thêm tối đa ' + remaining + ' sản phẩm nữa!', 'error');
                 }
-                cart[existingIndex].quantity = nextQty;
-            } else {
-                if (stock < qty) {
-                    showToast('Sản phẩm này không đủ số lượng trong kho!', 'error');
-                    return;
-                }
-                cart.push({
-                    id: id,
-                    name: name,
-                    image: imageSrc,
-                    price: price,
+                return;
+            }
+
+            // Gửi xuống Database Cart API
+            fetch('includes/add_to_cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    outfit_id: id,
                     size: size,
                     color: color,
-                    allColors: currentSelectedItem.colors, 
-                    allSizes: currentSelectedItem.sizes,   
                     quantity: qty
-                });
-            }
-            saveCart();
-            if (window.showToast) showToast(`Đã thêm ${qty} ${name} vào giỏ hàng!`, 'success');
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    // Đồng bộ lại UI
+                    if (typeof syncCart === 'function') {
+                        syncCart();
+                    }
+                    if (typeof cartDrawerApp !== 'undefined' && cartDrawerApp.openCart) {
+                        cartDrawerApp.openCart();
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi thêm giỏ hàng:', err);
+                showToast('Lỗi kết nối máy chủ!', 'error');
+            });
         }
 
         function animateFly(targetImg) {

@@ -1,6 +1,42 @@
 {
     "items": [
         {
+            "id": "11",
+            "type": "bottom",
+            "name": "Quần Jeans basic",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "vintage"
+            ],
+            "color": "Đen",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773777084_outfit_11_color_1.webp",
+            "price": 400000,
+            "sizes": {
+                "L": 78,
+                "M": 58,
+                "S": 54
+            },
+            "age": "30",
+            "seller_note": ""
+        },
+        {
             "id": "10",
             "type": "bottom",
             "name": "Quần Jean slim fit",

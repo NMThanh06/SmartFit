@@ -1,7 +1,16 @@
 <?php
+session_start();
 header('Content-Type: application/json');
 require_once 'config.php';
 require_once 'functions.php';
+
+$current_user_id = $_SESSION['user_id'] ?? 0;
+$user_role = $_SESSION['role'] ?? 'guest';
+
+if ($current_user_id <= 0 || !in_array($user_role, ['admin', 'sales'])) {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized']);
+    exit;
+}
 
 $action = $_GET['action'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,6 +24,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if ($id <= 0) {
     echo json_encode(['success' => false, 'message' => 'ID không hợp lệ']);
     exit;
+}
+
+// Kiểm tra quyền sở hữu (trừ admin)
+if ($user_role !== 'admin') {
+    $chk_sql = "SELECT owner_id FROM outfits WHERE id = $id";
+    $chk_res = mysqli_query($conn, $chk_sql);
+    $chk_row = mysqli_fetch_assoc($chk_res);
+    if (!$chk_row || $chk_row['owner_id'] != $current_user_id) {
+        echo json_encode(['success' => false, 'message' => 'Bạn không có quyền thao tác trên sản phẩm này']);
+        exit;
+    }
 }
 
 // 1. LẤY CHI TIẾT SẢN PHẨM (Để sửa)

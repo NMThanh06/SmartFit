@@ -9,9 +9,11 @@ if ($productId <= 0) {
 }
 
 // Lấy thông tin sản phẩm
-$sql = "SELECT o.*, 
+$sql = "SELECT o.*, u.fullname as vendor_name, 
         (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as color_image 
-        FROM outfits o WHERE o.id = ?";
+        FROM outfits o 
+        LEFT JOIN users u ON o.owner_id = u.id
+        WHERE o.id = ?";
 $stmt = mysqli_prepare($conn, $sql);
 mysqli_stmt_bind_param($stmt, "i", $productId);
 mysqli_stmt_execute($stmt);
@@ -102,6 +104,17 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                                  alt="<?php echo htmlspecialchars($product['name']); ?>"
                                  onerror="this.src='./assets/img/default-placeholder.jpg'">
                         </div>
+
+                        <!-- Thông tin người bán nằm dưới ảnh -->
+                        <div class="product-vendor-box">
+                            <div class="product-vendor-info">
+                                <span class="vendor-label">Được cung cấp bởi</span>
+                                <span class="vendor-name"><?php echo htmlspecialchars($product['vendor_name'] ?? 'SmartFit Shop'); ?></span>
+                            </div>
+                            <a href="vendor_shop.php?id=<?php echo intval($product['owner_id']); ?>" class="btn-visit-shop">
+                                Truy cập <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -113,6 +126,8 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                         <div class="product-detail__price">
                             <?php echo number_format($product['price'], 0, ',', '.'); ?> đ
                         </div>
+
+
 
                         <div class="product-detail__meta">
                             <div class="product-detail__meta-item">
@@ -237,6 +252,8 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
         name: <?php echo json_encode($product['name']); ?>,
         image: <?php echo json_encode($product['image']); ?>,
         price: <?php echo intval($product['price']); ?>,
+        owner_id: <?php echo intval($product['owner_id']); ?>,
+        vendor_name: <?php echo json_encode($product['vendor_name'] ?? 'SmartFit Shop'); ?>,
         allColors: <?php echo json_encode($colorList); ?>,
         allSizes: <?php echo json_encode($sizeList); ?>
     };
@@ -426,30 +443,37 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
         }
         // --- Kết thúc hiệu ứng ---
 
-        // Push vào mảng cart toàn cục (đã khai báo ở footer.php)
-        if (existingIndex !== -1) {
-            cart[existingIndex].quantity += currentQty;
-        } else {
-            cart.push({
-                id: currentProduct.id,
-                name: currentProduct.name,
-                image: currentProduct.image,
-                price: currentProduct.price,
+        // Push vào DB thay vì localStorage
+        fetch('<?php echo $root; ?>includes/add_to_cart.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                outfit_id: currentProduct.id,
                 size: selectedSize,
                 color: selectedColor,
-                allColors: currentProduct.allColors,
-                allSizes: currentProduct.allSizes,
                 quantity: currentQty
-            });
-        }
-
-        // GỌI HÀM DÙNG CHUNG: lưu localStorage + render lại
-        saveCart();
-
-        // Tự động mở thanh trượt giỏ hàng
-        if (typeof app !== 'undefined' && app.openCart) {
-            app.openCart();
-        }
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                // Đồng bộ lại giỏ hàng trong drawer
+                if (typeof syncCart === 'function') {
+                    syncCart();
+                }
+                // Tự động mở thanh trượt giỏ hàng
+                if (typeof cartDrawerApp !== 'undefined' && cartDrawerApp.openCart) {
+                    cartDrawerApp.openCart();
+                }
+            } else {
+                showToast(data.message, 'error');
+            }
+        })
+        .catch(err => {
+            console.error('Lỗi thêm giỏ hàng:', err);
+            showToast('Lỗi kết nối máy chủ!', 'error');
+        });
     }
 </script>
 
