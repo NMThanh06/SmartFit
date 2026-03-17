@@ -102,6 +102,16 @@ require_once __DIR__ . '/config.php';
                             </div>
 
                             <div id="userDropdown" class="user-dropdown">
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('admin_dashboard.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/admin_dashboard.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                    <span>Bảng điều khiển</span>
+                                </a>
+                                <?php endif; ?>
+
                                 <a href="<?php echo $root; ?>pages/personal_info.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-id-card"></i>
                                     <span>Thông tin cá nhân</span>
@@ -112,10 +122,35 @@ require_once __DIR__ . '/config.php';
                                     <span>Lịch sử đơn hàng</span>
                                 </a>
 
-                                <a href="<?php echo $root; ?>pages/add-outfit.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Thêm trang phục</span>
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_orders.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_orders.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-clipboard-list"></i>
+                                    <span>Quản lý đơn hàng</span>
                                 </a>
+                                <?php endif; ?>
+
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_products.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_products.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <span>Quản lý sản phẩm</span>
+                                </a>
+                                <?php endif; ?>
+
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_users.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_users.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-users-gear"></i>
+                                    <span>Quản lý người dùng</span>
+                                </a>
+                                <?php endif; ?>
 
                                 <div class="user-dropdown__divider"></div>
 

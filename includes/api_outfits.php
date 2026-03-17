@@ -10,7 +10,50 @@ header('Content-Type: application/json; charset=utf-8');
  * - Ta sẽ lấy ảnh ĐẦU TIÊN tìm thấy trong bảng outfit_colors để làm ảnh đại diện.
  * - GROUP_CONCAT để lấy tất cả các size của sản phẩm đó.
  */
-$sql = "SELECT id, name, price, type FROM outfits ORDER BY id DESC";
+// --- 2. XỬ LÝ THAM SỐ LỌC ---
+$type = isset($_GET['type']) ? mysqli_real_escape_string($conn, $_GET['type']) : 'all';
+$sort = isset($_GET['sort']) ? mysqli_real_escape_string($conn, $_GET['sort']) : 'newest';
+$size = isset($_GET['size']) ? mysqli_real_escape_string($conn, $_GET['size']) : '';
+$min_price = isset($_GET['min_price']) ? (int)$_GET['min_price'] : 0;
+$max_price = isset($_GET['max_price']) ? (int)$_GET['max_price'] : 0;
+$q = isset($_GET['q']) ? mysqli_real_escape_string($conn, $_GET['q']) : '';
+
+// --- 3. XÂY DỰNG SQL QUERY ĐỘNG ---
+$where_clauses = ["1=1"];
+
+if ($q !== '') {
+    $where_clauses[] = "(name LIKE '%$q%' OR description LIKE '%$q%' OR seller_note LIKE '%$q%')";
+}
+
+if ($type !== 'all') {
+    if ($type === 'accessory_shoes') {
+        $where_clauses[] = "(type = 'accessory' OR type = 'shoes')";
+    } else {
+        $where_clauses[] = "type = '$type'";
+    }
+}
+
+if ($size !== '') {
+    // Lọc theo size: Sản phẩm phải có ít nhất một màu có size này và số lượng > 0
+    $where_clauses[] = "id IN (SELECT DISTINCT outfit_id FROM outfit_sizes WHERE size_name = '$size' AND quantity > 0)";
+}
+
+if ($min_price > 0) {
+    $where_clauses[] = "price >= $min_price";
+}
+if ($max_price > 0) {
+    $where_clauses[] = "price <= $max_price";
+}
+
+$where_str = implode(" AND ", $where_clauses);
+
+// Sắp xếp
+$order_by = "id DESC"; // Mặc định: Mới nhất (Newest)
+if ($sort === 'price-asc') $order_by = "price ASC";
+elseif ($sort === 'price-desc') $order_by = "price DESC";
+elseif ($sort === 'oldest') $order_by = "created_at ASC"; // Tùy chọn thêm
+
+$sql = "SELECT id, name, price, type FROM outfits WHERE $where_str ORDER BY $order_by";
 $result = mysqli_query($conn, $sql);
 
 $items = [];

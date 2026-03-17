@@ -41,6 +41,11 @@ window.app = {
             alert("Trình duyệt không hỗ trợ định vị.");
             this.handleLocationError({ message: "Not supported" });
         }
+
+        // Khôi phục bộ đồ nếu vừa mới đăng nhập xong (Redirect case)
+        if (window.smartfit_just_logged_in === true) {
+            this.restoreOutfit();
+        }
     },
 
     startClock: function () {
@@ -314,6 +319,10 @@ window.app = {
                     <i class="fa-solid fa-caret-down user-info__arrow"></i>
                 </div>
                 <div id="userDropdown" class="user-dropdown">
+                    <a href="pages/admin_dashboard.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Bảng điều khiển</span>
+                    </a>
                     <a href="pages/personal_info.php" class="user-dropdown__item">
                         <i class="fa-solid fa-id-card"></i>
                         <span>Thông tin cá nhân</span>
@@ -322,9 +331,17 @@ window.app = {
                         <i class="fa-solid fa-receipt"></i>
                         <span>Lịch sử đơn hàng</span>
                     </a>
-                    <a href="pages/add-outfit.php" class="user-dropdown__item">
-                        <i class="fa-solid fa-plus"></i>
-                        <span>Thêm trang phục</span>
+                    <a href="pages/manage_orders.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Quản lý đơn hàng</span>
+                    </a>
+                    <a href="pages/manage_products.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Quản lý sản phẩm</span>
+                    </a>
+                    <a href="pages/manage_users.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-users-gear"></i>
+                        <span>Quản lý người dùng</span>
                     </a>
                     <div class="user-dropdown__divider"></div>
                     <a href="includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
@@ -340,19 +357,8 @@ window.app = {
         // Khởi tạo lại sự kiện cho menu user mới tạo
         this.initUserMenu();
 
-        // Tự động khôi phục dữ liệu lên nút "Lưu set đồ" nếu đang có kết quả
-        const savedData = localStorage.getItem('smartfit_last_outfit');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
-            if (btnSave) {
-                btnSave.setAttribute('data-top', data.topId);
-                btnSave.setAttribute('data-bottom', data.bottomId);
-                btnSave.setAttribute('data-shoes', data.shoesId);
-                btnSave.setAttribute('data-acc', data.accId || 'null');
-                btnSave.setAttribute('data-style', data.style);
-            }
-        }
+        // Tự động khôi phục kết quả phối đồ lên UI sau khi đăng nhập
+        this.restoreOutfit();
     },
 
     // Submenu User
@@ -473,22 +479,6 @@ window.app = {
                     self.showNotification('Đã phối đồ xong!', 'success');
 
                     if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                    //================ save ofits
-                    const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
-                    if (btnSave && data.data) {
-                        btnSave.setAttribute('data-top', data.data.topId);
-                        btnSave.setAttribute('data-bottom', data.data.bottomId);
-                        btnSave.setAttribute('data-shoes', data.data.shoesId);
-                        btnSave.setAttribute('data-acc', data.data.accId || 'null');
-                        btnSave.setAttribute('data-style', data.data.style);
-
-                        // Reset icon về rỗng
-                        const icon = btnSave.querySelector('i');
-                        icon.classList.remove('fa-solid');
-                        icon.classList.add('fa-regular');
-                        btnSave.querySelector('span').innerText = 'Lưu set đồ';
-                    }
                 }
 
             } catch (error) {
@@ -530,49 +520,99 @@ window.app = {
         setText('itemShoes', data.shoes);
         setText('itemHead', data.accessories);
 
+        // 3.1 Cập nhật Link chi tiết sản phẩm
+        const updateItemLink = (linkId, productId) => {
+            const el = document.getElementById(linkId);
+            if (el) {
+                if (productId && productId !== 'null') {
+                    el.href = `detail.php?id=${productId}`;
+                    el.classList.add('is-clickable');
+                } else {
+                    el.href = "javascript:void(0)";
+                    el.classList.remove('is-clickable');
+                }
+            }
+        };
+        updateItemLink('itemTopLink', data.topId);
+        updateItemLink('itemBottomLink', data.bottomId);
+        updateItemLink('itemShoesLink', data.shoesId);
+        updateItemLink('itemHeadLink', data.accId);
+
         // 4. Hiển thị Section kết quả
         const resultSection = document.getElementById('result');
         const footer = document.querySelector('.footer');
         if (resultSection) {
             resultSection.style.display = 'flex';
             if (footer) footer.style.display = 'block'; // Hiện lại footer khi có kết quả
-            // Chỉ scroll nếu không phải đang khôi phục từ localStorage
-            if (!data.isRestored) {
-                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // 5. Lưu vào localStorage
-        if (!data.isRestored) {
-            localStorage.setItem('smartfit_last_outfit', JSON.stringify(data));
+        // 5. Cập nhật trạng thái nút Lưu (isSaved từ AI trả về)
+        const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+        if (btnSave) {
+            const icon = btnSave.querySelector('i');
+            const span = btnSave.querySelector('span');
+
+            if (data.isSaved) {
+                btnSave.classList.add('is-saved');
+                if (icon) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                }
+                if (span) span.innerText = 'Đã lưu';
+            } else {
+                btnSave.classList.remove('is-saved');
+                if (icon) {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                }
+                if (span) span.innerText = 'Lưu set đồ';
+            }
+
+            // Gán dữ liệu cho nút lưu
+            btnSave.setAttribute('data-top', data.topId || '');
+            btnSave.setAttribute('data-bottom', data.bottomId || '');
+            btnSave.setAttribute('data-shoes', data.shoesId || '');
+            btnSave.setAttribute('data-acc', data.accId || 'null');
+            btnSave.setAttribute('data-style', data.style || '');
         }
+
+        // 6. Lưu vào sessionStorage (Tạm thời cho phiên làm việc, tồn tại qua reload/login)
+        sessionStorage.setItem('smartfit_temp_outfit', JSON.stringify(data));
     },
 
-    // Khôi phục kết quả từ localStorage
+    // Khôi phục kết quả từ sessionStorage (Dùng cho quá trình đăng nhập)
     restoreOutfit: function () {
-        const savedData = localStorage.getItem('smartfit_last_outfit');
+        const savedData = sessionStorage.getItem('smartfit_temp_outfit');
         if (savedData) {
             try {
                 const data = JSON.parse(savedData);
-                console.log("🔄 Đang khôi phục kết quả phối đồ từ localStorage...");
-                data.isRestored = true;
+                console.log("🔄 Đang khôi phục kết quả phối đồ sau khi đăng nhập...");
+
+                // Hiển thị lại kết quả
                 this.displayResult(data);
 
-                // Cập nhật dữ liệu cho nút lưu (quan trọng nếu người dùng đăng nhập sau khi khôi phục)
+                // Cập nhật dữ liệu cho nút lưu (Quan trọng)
                 const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
                 if (btnSave) {
-                    btnSave.setAttribute('data-top', data.topId);
-                    btnSave.setAttribute('data-bottom', data.bottomId);
-                    btnSave.setAttribute('data-shoes', data.shoesId);
+                    btnSave.setAttribute('data-top', data.topId || '');
+                    btnSave.setAttribute('data-bottom', data.bottomId || '');
+                    btnSave.setAttribute('data-shoes', data.shoesId || '');
                     btnSave.setAttribute('data-acc', data.accId || 'null');
-                    btnSave.setAttribute('data-style', data.style);
+                    btnSave.setAttribute('data-style', data.style || '');
                 }
+
+                // QUAN TRỌNG: Xóa khỏi sessionStorage ngay sau khi khôi phục
+                // Để đảm bảo nếu nhấn F5 lần nữa (không phải login) thì nó sẽ biến mất
+                sessionStorage.removeItem('smartfit_temp_outfit');
+
             } catch (e) {
                 console.error("Lỗi khi khôi phục outfit:", e);
-                localStorage.removeItem('smartfit_last_outfit');
+                sessionStorage.removeItem('smartfit_temp_outfit');
             }
         }
     },
+
 
     // Lấy thông tin 
     collectFormData: function () {

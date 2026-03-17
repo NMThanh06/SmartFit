@@ -1,6 +1,40 @@
 {
     "items": [
         {
+            "id": "4",
+            "type": "top",
+            "name": "Áo Hoodie",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773688867_outfit_4_color_1.webp",
+            "price": 370000,
+            "sizes": {
+                "L": 7,
+                "M": 2,
+                "S": 5,
+                "XL": 10
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "3",
             "type": "bottom",
             "name": "Quần jean ống rộng",
@@ -28,8 +62,8 @@
             "image": "/SmartFit/assets/img/1773675502_outfit_3_color_1.jpg",
             "price": 199000,
             "sizes": {
-                "XL": 12,
-                "XXL": 33
+                "XL": 9,
+                "XXL": 31
             },
             "age": "All",
             "seller_note": ""
@@ -65,7 +99,7 @@
             "price": 1000000,
             "sizes": {
                 "38": 4,
-                "39": 8,
+                "39": 7,
                 "40": 6,
                 "41": 1,
                 "42": 2

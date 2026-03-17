@@ -15,36 +15,42 @@ include 'includes/header.php';
                     <aside class="shop-sidebar">
                         <div class="shop-filter">
                             <h3 class="shop-filter__title">Danh mục</h3>
-                            <ul class="shop-filter__list">
+                            <ul class="shop-filter__list" id="categoryFilter">
                                 <li class="shop-filter__item active" data-type="all">Tất cả sản phẩm</li>
                                 <li class="shop-filter__item" data-type="top">Áo</li>
                                 <li class="shop-filter__item" data-type="bottom">Quần</li>
-                                <li class="shop-filter__item" data-type="accessory">Giày & Phụ kiện</li>
+                                <li class="shop-filter__item" data-type="accessory_shoes">Giày & Phụ kiện</li>
                             </ul>
                         </div>
 
                         <div class="shop-filter">
-                            <h3 class="shop-filter__title">Kích cỡ</h3>
-                            <div class="shop-filter__sizes">
-                                <span class="shop-filter__size">S</span>
-                                <span class="shop-filter__size">M</span>
-                                <span class="shop-filter__size">L</span>
-                                <span class="shop-filter__size">XL</span>
-                                <span class="shop-filter__size">Oversize</span>
+                            <div class="shop-filter__header">
+                                <h3 class="shop-filter__title">Kích cỡ</h3>
+                                <button class="shop-filter__clear" onclick="resetSizeFilter()" title="Xóa bộ lọc kích cỡ">Xóa</button>
+                            </div>
+                            <div class="shop-filter__sizes" id="sizeFilter">
+                                <span class="shop-filter__size" data-size="S">S</span>
+                                <span class="shop-filter__size" data-size="M">M</span>
+                                <span class="shop-filter__size" data-size="L">L</span>
+                                <span class="shop-filter__size" data-size="XL">XL</span>
+                                <span class="shop-filter__size" data-size="Oversize">Oversize</span>
                             </div>
                         </div>
 
                         <div class="shop-filter">
                             <h3 class="shop-filter__title">Khoảng giá</h3>
-                            <div class="shop-filter__price">
+                            <div class="shop-filter__price" id="priceFilter">
                                 <label class="shop-filter__checkbox">
-                                    <input type="checkbox"> 0đ - 200.000đ
+                                    <input type="radio" name="price_range" data-min="0" data-max="0" checked> Tất cả giá
                                 </label>
                                 <label class="shop-filter__checkbox">
-                                    <input type="checkbox"> 200.000đ - 500.000đ
+                                    <input type="radio" name="price_range" data-min="0" data-max="200000"> 0đ - 200.000đ
                                 </label>
                                 <label class="shop-filter__checkbox">
-                                    <input type="checkbox"> Trên 500.000đ
+                                    <input type="radio" name="price_range" data-min="200000" data-max="500000"> 200.000đ - 500.000đ
+                                </label>
+                                <label class="shop-filter__checkbox">
+                                    <input type="radio" name="price_range" data-min="500000" data-max="9999999"> Trên 500.000đ
                                 </label>
                             </div>
                         </div>
@@ -57,10 +63,11 @@ include 'includes/header.php';
                                 <input type="text" class="shop-search__input" placeholder="Tìm kiếm sản phẩm...">
                             </div>
                             <div class="shop-sort">
-                                <select class="shop-sort__select">
+                                <select class="shop-sort__select" id="sortFilter">
                                     <option value="newest">Mới nhất</option>
                                     <option value="price-asc">Giá tăng dần</option>
                                     <option value="price-desc">Giá giảm dần</option>
+                                    <option value="oldest">Cũ nhất</option>
                                 </select>
                             </div>
                         </div>
@@ -101,11 +108,67 @@ include 'includes/header.php';
                     </div>
                 </div>
 
+                <div class="config-modal__group">
+                    <span class="config-modal__label">Số lượng</span>
+                    <div class="config-modal__qty">
+                        <div class="qty-control">
+                            <button class="qty-btn" onclick="changeModalQty(-1)">
+                                <i class="fa-solid fa-minus"></i>
+                            </button>
+                            <input type="text" id="modalQtyDisplay" value="1" readonly class="qty-input">
+                            <button class="qty-btn" onclick="changeModalQty(1)">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                        <span id="modalStockInfo" class="config-modal__stock">Vui lòng chọn size</span>
+                    </div>
+                </div>
+
                 <button id="btnConfirmAdd" class="config-modal__btn-confirm">Xác nhận thêm vào giỏ</button>
             </div>
         </div>
 
         <?php include 'includes/footer.php'; ?>
+        
+        <style>
+            .config-modal__qty {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .config-modal__stock {
+                font-size: 1.2rem;
+                color: #888;
+            }
+            /* Tái sử dụng hoặc định nghĩa lại qty-control cho modal shop */
+            .qty-control {
+                display: flex;
+                align-items: center;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                overflow: hidden;
+                width: fit-content;
+            }
+            .qty-btn {
+                background: #f8f9fa;
+                border: none;
+                width: 32px;
+                height: 32px;
+                cursor: pointer;
+                transition: background 0.2s;
+            }
+            .qty-btn:hover { background: #e9ecef; }
+            .qty-input {
+                width: 40px;
+                height: 32px;
+                text-align: center;
+                border: none;
+                border-left: 1px solid #ddd;
+                border-right: 1px solid #ddd;
+                font-weight: 600;
+                background: #fff;
+            }
+        </style>
 
     <!-- Backend cho trang cửa hàng -->
     <script>
@@ -115,13 +178,19 @@ include 'includes/header.php';
 
 
         // 2. Tải danh sách sản phẩm trang Shop
-        async function loadProducts() {
+        // 2. Tải danh sách sản phẩm trang Shop
+        async function loadProducts(params = '') {
             try {
-                const response = await fetch('includes/api_outfits.php');
+                const response = await fetch(`includes/api_outfits.php${params}`);
                 const data = await response.json();
                 const grid = document.getElementById('productGrid');
                 if (!grid) return;
                 grid.innerHTML = '';
+
+                if (data.items.length === 0) {
+                    grid.innerHTML = '<div class="col l-12" style="text-align:center; padding: 40px; font-size:1.6rem; color:#888;">Không tìm thấy sản phẩm nào phù hợp.</div>';
+                    return;
+                }
 
                 data.items.forEach(item => {
                     // Đảm bảo item.sizes luôn là mảng
@@ -149,6 +218,74 @@ include 'includes/header.php';
                     </div>`;
                 });
             } catch (error) { console.error("Lỗi tải sản phẩm:", error); }
+        }
+
+        // --- HÀM LỌC TỔNG HỢP ---
+        function applyFilters() {
+            const type = document.querySelector('#categoryFilter .shop-filter__item.active')?.dataset.type || 'all';
+            const size = document.querySelector('#sizeFilter .shop-filter__size.active')?.dataset.size || '';
+            const sort = document.getElementById('sortFilter').value;
+            const query = document.querySelector('.shop-search__input').value.trim();
+            
+            const selectedPrice = document.querySelector('input[name="price_range"]:checked');
+            const minPrice = selectedPrice?.dataset.min || 0;
+            const maxPrice = selectedPrice?.dataset.max || 0;
+
+            const params = new URLSearchParams({
+                type: type,
+                sort: sort,
+                size: size,
+                min_price: minPrice,
+                max_price: maxPrice,
+                q: query
+            });
+
+            loadProducts(`?${params.toString()}`);
+        }
+
+        // --- HÀM RESET RIÊNG CHO SIZE ---
+        function resetSizeFilter() {
+            document.querySelectorAll('#sizeFilter .shop-filter__size').forEach(i => i.classList.remove('active'));
+            applyFilters();
+        }
+
+        // --- KHỞI TẠO SỰ KIỆN LỌC ---
+        function initShopFilters() {
+            // 0. Tìm kiếm theo từ khóa (Debounce 300ms)
+            let searchTimeout;
+            document.querySelector('.shop-search__input').addEventListener('input', (e) => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 300);
+            });
+            // 1. Lọc theo Danh mục
+            document.querySelectorAll('#categoryFilter .shop-filter__item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('#categoryFilter .shop-filter__item').forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    applyFilters();
+                });
+            });
+
+            // 2. Lọc theo Kích cỡ
+            document.querySelectorAll('#sizeFilter .shop-filter__size').forEach(item => {
+                item.addEventListener('click', () => {
+                    if (item.classList.contains('active')) {
+                        item.classList.remove('active'); // Bỏ chọn
+                    } else {
+                        document.querySelectorAll('#sizeFilter .shop-filter__size').forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                    }
+                    applyFilters();
+                });
+            });
+
+            // 3. Sắp xếp
+            document.getElementById('sortFilter').addEventListener('change', applyFilters);
+
+            // 4. Lọc theo Giá
+            document.querySelectorAll('input[name="price_range"]').forEach(input => {
+                input.addEventListener('change', applyFilters);
+            });
         }
 
         // ========================================
@@ -230,11 +367,35 @@ include 'includes/header.php';
             document.getElementById('btnConfirmAdd').onclick = () => confirmAddToCart();
         }
 
+        let modalCurrentQty = 1;
+        let modalMaxStock = 0;
+
+        function changeModalQty(amount) {
+            if (!selectedConfigSize) {
+                showToast('Vui lòng chọn kích cỡ trước!', 'error');
+                return;
+            }
+            let nextQty = modalCurrentQty + amount;
+            if (nextQty < 1) nextQty = 1;
+            if (nextQty > modalMaxStock) {
+                showToast('Chỉ còn ' + modalMaxStock + ' sản phẩm trong kho!', 'error');
+                nextQty = modalMaxStock;
+            }
+            modalCurrentQty = nextQty;
+            document.getElementById('modalQtyDisplay').value = modalCurrentQty;
+        }
+
         // Hàm render size dựa trên màu sắc được chọn
         function renderSizesForColor(colorId) {
             const sizeContainer = document.getElementById('modalSizeOptions');
+            const stockInfo = document.getElementById('modalStockInfo');
             sizeContainer.innerHTML = '';
             selectedConfigSize = null;
+            modalMaxStock = 0;
+            modalCurrentQty = 1;
+            document.getElementById('modalQtyDisplay').value = 1;
+            stockInfo.textContent = 'Vui lòng chọn size';
+            stockInfo.style.color = '#999';
 
             // Lấy danh sách tất cả các tên size duy nhất của sản phẩm này (để hiện đầy đủ)
             const allSizes = currentSelectedItem.sizes || [];
@@ -257,8 +418,9 @@ include 'includes/header.php';
 
                     // Kiểm tra xem size này có tồn kho cho màu đang chọn không
                     const sizeData = allSizes.find(s => s.size_name === sizeName && s.color_id == colorId);
-                    
-                    if (!sizeData || parseInt(sizeData.quantity) <= 0) {
+                    const qty = sizeData ? parseInt(sizeData.quantity) : 0;
+
+                    if (!sizeData || qty <= 0) {
                         btn.classList.add('out-of-stock');
                         btn.title = "Hết hàng";
                     } else {
@@ -266,6 +428,11 @@ include 'includes/header.php';
                             document.querySelectorAll('.config-size-btn').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
                             selectedConfigSize = sizeName;
+                            modalMaxStock = qty;
+                            modalCurrentQty = 1;
+                            document.getElementById('modalQtyDisplay').value = 1;
+                            stockInfo.textContent = `Còn ${qty} sản phẩm`;
+                            stockInfo.style.color = 'var(--success)';
                         };
                     }
                     sizeContainer.appendChild(btn);
@@ -297,8 +464,16 @@ include 'includes/header.php';
                 return;
             }
             
-            // Gọi logic thêm vào giỏ hàng thực sự
-            performAddToCart(currentSelectedItem.id, currentSelectedItem.name, currentSelectedItem.image, currentSelectedItem.price, selectedConfigSize, selectedConfigColor);
+            // Gọi logic thêm vào giỏ hàng thực sự với số lượng chọn
+            performAddToCart(
+                currentSelectedItem.id, 
+                currentSelectedItem.name, 
+                currentSelectedItem.image, 
+                currentSelectedItem.price, 
+                selectedConfigSize, 
+                selectedConfigColor,
+                modalCurrentQty
+            );
             
             closeConfigModal();
             
@@ -307,7 +482,7 @@ include 'includes/header.php';
             animateFly(modalImg);
         }
 
-        function performAddToCart(id, name, imageSrc, price, size, color) {
+        function performAddToCart(id, name, imageSrc, price, size, color, qty = 1) {
             // Lấy tồn kho của biến thể này
             const allSizes = currentSelectedItem.sizes || [];
             const colorObj = (currentSelectedItem.colors || []).find(c => c.color_name === color);
@@ -318,15 +493,15 @@ include 'includes/header.php';
             const existingIndex = cart.findIndex(item => item.id === id && item.size === size && item.color === color);
             
             if (existingIndex !== -1) {
-                const nextQty = cart[existingIndex].quantity + 1;
+                const nextQty = cart[existingIndex].quantity + qty;
                 if (nextQty > stock) {
                     showToast(`Sản phẩm ${name} (Size ${size}, ${color}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
                     return;
                 }
                 cart[existingIndex].quantity = nextQty;
             } else {
-                if (stock < 1) {
-                    showToast('Sản phẩm này hiện đã hết hàng!', 'error');
+                if (stock < qty) {
+                    showToast('Sản phẩm này không đủ số lượng trong kho!', 'error');
                     return;
                 }
                 cart.push({
@@ -338,11 +513,11 @@ include 'includes/header.php';
                     color: color,
                     allColors: currentSelectedItem.colors, 
                     allSizes: currentSelectedItem.sizes,   
-                    quantity: 1
+                    quantity: qty
                 });
             }
             saveCart();
-            if (window.showToast) showToast(`Đã thêm ${name} vào giỏ hàng!`, 'success');
+            if (window.showToast) showToast(`Đã thêm ${qty} ${name} vào giỏ hàng!`, 'success');
         }
 
         function animateFly(targetImg) {
@@ -375,6 +550,7 @@ include 'includes/header.php';
         // Khởi động khi tải trang xong
         window.addEventListener('DOMContentLoaded', () => {
             loadProducts();
+            initShopFilters();
             
             // Close modal when clicking outside container
             window.onclick = (event) => {

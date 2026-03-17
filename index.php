@@ -1,6 +1,35 @@
 <?php
 include 'includes/header.php';
+
+// Khởi tạo các biến chứa thông tin người dùng (mặc định trống)
+$user_gender = '';
+$user_age = '';
+
+// Nếu đã đăng nhập, lấy dữ liệu thực tế từ DB
+if (isset($_SESSION['user_id'])) {
+    $u_id = $_SESSION['user_id'];
+    $sql = "SELECT gender, age FROM users WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    mysqli_stmt_bind_param($stmt, 'i', $u_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    if ($u_info = mysqli_fetch_assoc($res)) {
+        $user_gender = $u_info['gender'] ?: '';
+        $user_age = $u_info['age'] ?: '';
+    }
+}
+
+// Kiểm tra xem có vừa mới đăng nhập xong không (để khôi phục phối đồ)
+$just_logged_in = false;
+if (isset($_SESSION['smartfit_just_logged_in'])) {
+    $just_logged_in = true;
+    unset($_SESSION['smartfit_just_logged_in']);
+}
 ?>
+
+<script>
+    window.smartfit_just_logged_in = <?php echo $just_logged_in ? 'true' : 'false'; ?>;
+</script>
 
         <!-- Hero Section -->
         <section class="hero hero--index" id="hero">
@@ -50,10 +79,10 @@ include 'includes/header.php';
                     <h3 class="config-form__heading">Bạn là ?</h3>
 
                     <div class="config-form__options">
-                        <input class="config-form__input" type="radio" id="male" name="gender" value="male">
+                        <input class="config-form__input" type="radio" id="male" name="gender" value="male" <?php echo ($user_gender === 'male') ? 'checked' : ''; ?>>
                         <label class="config-form__label" for="male">Nam</label>
 
-                        <input class="config-form__input" type="radio" id="female" name="gender" value="female">
+                        <input class="config-form__input" type="radio" id="female" name="gender" value="female" <?php echo ($user_gender === 'female') ? 'checked' : ''; ?>>
                         <label class="config-form__label" for="female">Nữ</label>
                     </div>
                 </div>
@@ -61,7 +90,7 @@ include 'includes/header.php';
                 <div class="config-form__group">
                     <h3 class="config-form__heading">Độ tuổi của bạn ?</h3>
                     <div class="config-form__options">
-                        <input class="config-form__input--age" type="number" id="age" name="age" min="1" max="100" placeholder="Số tuổi">
+                        <input class="config-form__input--age" type="number" id="age" name="age" min="1" max="100" placeholder="Số tuổi" value="<?php echo htmlspecialchars($user_age); ?>">
                     </div>
                 </div>
 
@@ -112,7 +141,7 @@ include 'includes/header.php';
                     <h3 class="config-form__heading">Độ rộng (Fit) ?</h3>
                     <div class="config-form__options">
                         <input class="config-form__input" type="radio" id="fit-oversize" name="fit" value="oversized">
-                        <label class="config-form__label" for="fit-oversize">Oversized</label>
+                        <label class="config-form__label" for="fit-oversize">Oversize</label>
 
                         <input class="config-form__input" type="radio" id="fit-regular" name="fit" value="regular">
                         <label class="config-form__label" for="fit-regular">Vừa vặn</label>
@@ -194,22 +223,30 @@ include 'includes/header.php';
                     <div class="result__items">
                         <div class="item-box">
                             <i class="fa-brands fa-redhat item-icon"></i>
-                            <span id="itemHead">Mũ lưỡi trai đen</span>
+                            <a href="javascript:void(0)" id="itemHeadLink" class="item-link" target="_blank">
+                                <span id="itemHead">Mũ lưỡi trai đen</span>
+                            </a>
                         </div>
 
                         <div class="item-box">
                             <i class="fa-solid fa-shirt item-icon"></i>
-                            <span id="itemTopName">Hoodie Oversized xám</span>
+                            <a href="javascript:void(0)" id="itemTopLink" class="item-link" target="_blank">
+                                <span id="itemTopName">Hoodie Oversized xám</span>
+                            </a>
                         </div>
 
                         <div class="item-box">
                             <i class="fa-solid fa-vials item-icon"></i>
-                            <span id="itemBottomName">Quần Cargo túi hộp</span>
+                            <a href="javascript:void(0)" id="itemBottomLink" class="item-link" target="_blank">
+                                <span id="itemBottomName">Quần Cargo túi hộp</span>
+                            </a>
                         </div>
 
                         <div class="item-box">
                             <i class="fa-solid fa-shoe-prints item-icon"></i>
-                            <span id="itemShoes">Sneaker Jordan 1 High</span>
+                            <a href="javascript:void(0)" id="itemShoesLink" class="item-link" target="_blank">
+                                <span id="itemShoes">Sneaker Jordan 1 High</span>
+                            </a>
                         </div>
                     </div>
 
@@ -296,7 +333,7 @@ include 'includes/header.php';
 
     /* --- Modal --- */
     .map-modal {
-        display: none;                /* ẩn mặc định */
+        display: none;
         position: fixed;
         inset: 0;
         z-index: 10000;
@@ -310,8 +347,8 @@ include 'includes/header.php';
     .map-modal__overlay {
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        backdrop-filter: blur(8px);
+        background: rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(5px);
     }
 
     .map-modal__content {
@@ -321,13 +358,15 @@ include 'includes/header.php';
         background: #ffffff;
         border-radius: 24px;
         overflow: hidden;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-        animation: mapModalIn 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        animation: mapModalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
     }
+
     @keyframes mapModalIn {
-        from { opacity: 0; transform: scale(0.95) translateY(20px); }
-        to   { opacity: 1; transform: scale(1) translateY(0); }
+        from { opacity: 0; transform: translateY(30px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .map-modal__header {
@@ -335,21 +374,31 @@ include 'includes/header.php';
         justify-content: space-between;
         align-items: center;
         padding: 20px 25px;
-        background: var(--primary-blue);
+        background: #fff;
+        border-bottom: 1px solid #f0f0f2;
     }
+
     .map-modal__title {
-        color: #fff;
+        color: var(--apple-black);
         font-size: 1.8rem;
         font-weight: 700;
         margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
     }
+
+    .map-modal__title i {
+        color: var(--primary-blue);
+    }
+
     .map-modal__close {
-        background: rgba(255,255,255,0.15);
+        background: #f5f5f7;
         border: none;
-        color: #fff;
-        font-size: 2.4rem;
-        width: 32px;
-        height: 32px;
+        color: var(--apple-grey);
+        font-size: 2.2rem;
+        width: 36px;
+        height: 36px;
         border-radius: 50%;
         cursor: pointer;
         display: flex;
@@ -358,53 +407,70 @@ include 'includes/header.php';
         transition: all 0.2s;
         line-height: 1;
     }
+
     .map-modal__close:hover { 
-        background: rgba(255,255,255,0.3);
-        transform: rotate(90deg);
+        background: #e1e1e6;
+        color: var(--apple-black);
     }
 
     /* Bản đồ */
     .map-modal__searchbox {
         display: flex;
-        gap: 8px;
-        padding: 12px 20px;
-        background: #16213e;
-        border-bottom: 1px solid rgba(255,255,255,0.05);
+        gap: 12px;
+        padding: 15px 25px;
+        background: #fff;
+        border-bottom: 1px solid #f0f0f2;
     }
+
     .map-modal__searchbox input {
         flex: 1;
-        padding: 10px 16px;
-        border-radius: 8px;
-        border: 1px solid rgba(102, 126, 234, 0.5);
-        background: #1a1a2e;
-        color: #fff;
+        padding: 10px 18px;
+        border-radius: 12px;
+        border: 1px solid #e1e1e1;
+        background: #f5f5f7;
+        color: var(--apple-black);
         font-size: 1.4rem;
         outline: none;
-        transition: border-color 0.2s;
+        transition: all 0.2s;
     }
+
     .map-modal__searchbox input:focus {
-        border-color: #667eea;
+        background: #fff;
+        border-color: var(--primary-blue);
+        box-shadow: 0 0 0 3px rgba(33, 118, 255, 0.1);
     }
+
     .map-modal__searchbox button {
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: var(--primary-blue);
         color: white;
         border: none;
-        border-radius: 8px;
+        border-radius: 12px;
         width: 44px;
+        height: 44px;
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 1.6rem;
-        transition: transform 0.2s;
+        transition: all 0.2s;
     }
+
+    #btnMyLocation {
+        background: #f5f5f7;
+        color: var(--apple-black);
+        border: 1px solid #e1e1e1;
+    }
+
     .map-modal__searchbox button:hover {
         transform: translateY(-2px);
+        opacity: 0.9;
     }
+
     .map-modal__map {
         width: 100%;
         height: 450px;
         background: #f8f9fa;
+        z-index: 1;
     }
 
     /* Footer modal */
@@ -412,35 +478,42 @@ include 'includes/header.php';
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 25px;
+        padding: 20px 25px;
         background: #ffffff;
-        border-top: 1px solid #f0f0f0;
+        border-top: 1px solid #f0f0f2;
     }
+
     .map-modal__coords {
         color: var(--apple-grey);
         font-size: 1.4rem;
         font-weight: 500;
+        background: #f5f5f7;
+        padding: 8px 15px;
+        border-radius: 8px;
     }
+
     .map-modal__confirm {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 12px 28px;
+        padding: 12px 30px;
         border: none;
-        border-radius: 12px;
+        border-radius: 14px;
         background: var(--primary-blue);
         color: #fff;
         font-size: 1.5rem;
-        font-weight: 700;
+        font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
         box-shadow: 0 4px 12px rgba(33, 118, 255, 0.2);
     }
+
     .map-modal__confirm:hover {
         background: var(--primary-blue-dark);
         transform: translateY(-2px);
         box-shadow: 0 8px 20px rgba(33, 118, 255, 0.35);
     }
+
     .map-modal__confirm:disabled {
         background: #e9ecef;
         color: #adb5bd;

@@ -5,6 +5,8 @@ error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 try {
+    session_start();
+    require_once __DIR__ . '/config.php';
     require_once __DIR__ . '/gemini-config.php';
 
     // 1. LÀM SẠCH KEY
@@ -162,7 +164,33 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
         $defaultBottom = './assets/img/default-bottom.jpg';
     }
 
-    // 9. Trả về JSON với các biến mặc định đã được phân loại
+// 9. Kiểm tra xem bộ đồ này đã được người dùng lưu chưa
+    $isSaved = false;
+    $topId    = isset($top['id']) ? (int)$top['id'] : null;
+    $bottomId = isset($bottom['id']) ? (int)$bottom['id'] : null;
+    $shoesId  = isset($shoes['id']) ? (int)$shoes['id'] : null;
+    $accId    = isset($acc['id']) ? (int)$acc['id'] : null;
+
+    if (isset($_SESSION['user_id']) && $topId && $bottomId && $shoesId) {
+        $userId = $_SESSION['user_id'];
+        
+        // Logic so sánh chính xác kể cả trường hợp acc_id là NULL
+        $checkSql = "SELECT COUNT(*) as cnt FROM saved_outfits 
+                     WHERE user_id = ? AND top_id = ? AND bottom_id = ? AND shoes_id = ? 
+                     AND (acc_id = ? OR (acc_id IS NULL AND ? IS NULL))";
+                     
+        $checkStmt = mysqli_prepare($conn, $checkSql);
+        if ($checkStmt) {
+            mysqli_stmt_bind_param($checkStmt, "iiiiii", $userId, $topId, $bottomId, $shoesId, $accId, $accId);
+            mysqli_stmt_execute($checkStmt);
+            $checkRes = mysqli_stmt_get_result($checkStmt);
+            $checkData = mysqli_fetch_assoc($checkRes);
+            $isSaved = ($checkData['cnt'] > 0);
+            mysqli_stmt_close($checkStmt);
+        }
+    }
+
+    // 10. Trả về JSON với các biến mặc định đã được phân loại
     echo json_encode([
         'success' => true,
         'data' => [
@@ -171,6 +199,8 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
             'bottomId' => $bottom['id'] ?? null,
             'shoesId' => $shoes['id'] ?? null,
             'accId' => $acc['id'] ?? null,
+            // trạng thái đã lưu
+            'isSaved' => $isSaved,
             // trả về giao diện gợi ý
             'top' => $top['name'] ?? 'Chưa xác định',
             'topImage' => $top['image'] ?? $defaultTop,
