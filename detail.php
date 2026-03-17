@@ -199,10 +199,17 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
 
                         <!-- Nút hành động -->
                         <div class="product-detail__actions">
+                            <?php if (isset($_SESSION['user_id'])): ?>
                             <button onclick="addToCartFromDetail()" class="btn-add-cart">
                                 <i class="fa-solid fa-cart-plus"></i>
                                 Thêm vào giỏ hàng
                             </button>
+                            <?php else: ?>
+                            <button onclick="showToast('Vui lòng đăng nhập để mua hàng!', 'info')" class="btn-add-cart" style="background: var(--apple-grey); border-radius: 40px; width: 100%; justify-content: center;">
+                                <i class="fa-solid fa-circle-user"></i>
+                                Đăng nhập để mua hàng
+                            </button>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>

@@ -131,6 +131,7 @@
 </section>
 
 <!-- Giỏ hàng -->
+<?php if (isset($_SESSION['user_id'])): ?>
 <div class="cart-overlay" id="cartOverlay" onclick="app.closeCart()"></div>
 
 <div class="cart-drawer" id="cartDrawer">
@@ -164,6 +165,7 @@
     </div>
 
 </div>
+<?php endif; ?>
 
 <!-- ========== SHARED CART JS (Single Source of Truth: localStorage) ========== -->
 <script>

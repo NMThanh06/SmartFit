@@ -58,6 +58,9 @@ require_once __DIR__ . '/config.php';
     <style>
 
     </style>
+    <script>
+        const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+    </script>
 </head>
 
 <body>
@@ -88,10 +91,12 @@ require_once __DIR__ . '/config.php';
             </div>
 
             <div class="navbar__shop">
+                <?php if (isset($_SESSION['user_id'])): ?>
                 <div class="navbar__cart" onclick="app.openCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
                 </div>
+                <?php endif; ?>
 
                 <div class="navbar__auth">
                     <?php if (isset($_SESSION['user_name'])): ?>

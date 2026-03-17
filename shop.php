@@ -210,8 +210,9 @@ include 'includes/header.php';
                                 </h3>
                                 <div class="product-card__price">${formatPrice(item.price)}</div>
                                 
-                                <div class="product-card__buy" onclick='openConfigModal(${JSON.stringify(item).replace(/'/g, "\\'")})'>
-                                    <i class="fa-solid fa-cart-shopping"></i> Thêm vào giỏ
+                                <div class="product-card__buy" onclick='${isLoggedIn ? `openConfigModal(${JSON.stringify(item).replace(/'/g, "\\'")})` : "window.location.href=\"#\"; showToast(\"Vui lòng đăng nhập để mua hàng!\", \"info\");"}'>
+                                    <i class="fa-solid ${isLoggedIn ? 'fa-cart-shopping' : 'fa-circle-user'}"></i> 
+                                    ${isLoggedIn ? 'Thêm vào giỏ' : 'Đăng nhập để mua'}
                                 </div>
                             </div>
                         </div>
