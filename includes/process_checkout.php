@@ -13,11 +13,23 @@ if ($userId == 0) {
 
 // Lấy thông tin từ form khách hàng gửi lên
 $fullname = $data['fullname'] ?? '';
+$email = $data['email'] ?? '';
 $phone = $data['phone'] ?? '';
 $address = $data['address'] ?? '';
 $note = $data['note'] ?? '';
 $payment_method = $data['payment_method'] ?? 'cod';
 $cartItems = $data['cart_items'] ?? []; // Giỏ hàng gửi từ localStorage
+
+// Nếu email trống và đã đăng nhập, tự động lấy từ DB
+if (empty($email) && $userId > 0) {
+    $emailStmt = mysqli_prepare($conn, "SELECT email FROM users WHERE id = ?");
+    mysqli_stmt_bind_param($emailStmt, 'i', $userId);
+    mysqli_stmt_execute($emailStmt);
+    $emailResult = mysqli_stmt_get_result($emailStmt);
+    if ($emailRow = mysqli_fetch_assoc($emailResult)) {
+        $email = $emailRow['email'];
+    }
+}
 
 if (empty($fullname) || empty($phone) || empty($address)) {
     echo json_encode(['status' => 'error', 'message' => 'Vui lòng điền đầy đủ thông tin bắt buộc!']);
@@ -92,13 +104,14 @@ try {
     // ========================================
     // BƯỚC 2: TẠO HÓA ĐƠN CHÍNH (Bảng orders)
     // ========================================
+    // Tạo mã đơn hàng tùy chỉnh: YYYYMMDDHHmmss + 3 số ngẫu nhiên
+    $orderId = date('YmdHis') . rand(100, 999);
+
     $payment_status = 'pending';
-    $orderSql = "INSERT INTO orders (user_id, fullname, phone, address, note, payment_method, payment_status, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $orderSql = "INSERT INTO orders (id, user_id, fullname, phone, address, note, payment_method, payment_status, total_amount) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
     $orderStmt = mysqli_prepare($conn, $orderSql);
-    mysqli_stmt_bind_param($orderStmt, "issssssi", $userId, $fullname, $phone, $address, $note, $payment_method, $payment_status, $totalAmount);
+    mysqli_stmt_bind_param($orderStmt, "sissssssi", $orderId, $userId, $fullname, $phone, $address, $note, $payment_method, $payment_status, $totalAmount);
     mysqli_stmt_execute($orderStmt);
-    
-    $orderId = mysqli_insert_id($conn);
 
     // ========================================
     // BƯỚC 3: LƯU CHI TIẾT ĐƠN HÀNG + TRỪ TỒN KHO
@@ -111,7 +124,7 @@ try {
 
     foreach ($validatedItems as $item) {
         // 3a. Lưu chi tiết đơn hàng
-        mysqli_stmt_bind_param($detailStmt, "iisii", $orderId, $item['outfit_id'], $item['size_name'], $item['quantity'], $item['price']);
+        mysqli_stmt_bind_param($detailStmt, "sisii", $orderId, $item['outfit_id'], $item['size_name'], $item['quantity'], $item['price']);
         mysqli_stmt_execute($detailStmt);
 
         // 3b. TRỪ TỒN KHO — Đây là bước quan trọng nhất!
@@ -134,21 +147,49 @@ try {
     // ========================================
     switch ($payment_method) {
         case 'cod':
+            // ========================================
+            // COD: Gửi webhook email hóa đơn NGAY vì không cần chờ cổng thanh toán
+            // ========================================
+            $webhookUrl = 'http://localhost:5678/webhook-test/order-email';
+            $webhookData = json_encode([
+                'order_id'       => $orderId,
+                'email'          => $email,
+                'fullname'       => $fullname,
+                'total_amount'   => $totalAmount,
+                'payment_method' => 'cod',
+                'address'        => $address
+            ]);
+
+            $ch = curl_init($webhookUrl);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $webhookData);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+            curl_exec($ch);
+            curl_close($ch);
+
             echo json_encode([
                 'status' => 'success', 
                 'message' => 'Đặt hàng thành công! Mã đơn: #' . $orderId,
                 'order_id' => $orderId,
-                'redirect_url' => 'order_history.php' // Hoặc success.php tùy hệ thống frontend redirect
+                'redirect_url' => 'order_history.php'
             ]);
             break;
             
         case 'vnpay':
-            // Bắt đầu session cho VNPAY nếu chưa start
+            // VNPay/MoMo: KHÔNG gửi webhook ở đây.
+            // Webhook sẽ được gửi từ vnpay_return.php SAU KHI cổng thanh toán xác nhận thành công.
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
             $_SESSION['order_id'] = $orderId;
             $_SESSION['total_amount'] = $totalAmount;
+            // Lưu thông tin đơn hàng vào session để vnpay_return.php dùng gửi webhook
+            $_SESSION['order_email'] = $email;
+            $_SESSION['order_fullname'] = $fullname;
+            $_SESSION['order_address'] = $address;
+            $_SESSION['order_payment_method'] = $payment_method;
             
             // File này sẽ phụ trách tạo VNPAY URL và echo JSON để frontend redirect tới VNPay
             require_once 'vnpay_create.php';

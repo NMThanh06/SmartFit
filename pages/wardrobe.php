@@ -12,7 +12,7 @@ $my_items = [];
 
 if (isset($_SESSION['user_id'])) {
     $userId = $_SESSION['user_id'];
-    
+
     // 1. SQL lấy bộ đồ đã phối (saved_outfits)
     $sql = "SELECT so.id as saved_id, so.style_name,
                    t.name as top_name, (SELECT image FROM outfit_colors WHERE outfit_id = t.id LIMIT 1) as top_img,
@@ -26,7 +26,7 @@ if (isset($_SESSION['user_id'])) {
             LEFT JOIN outfits a ON so.acc_id = a.id
             WHERE so.user_id = ?
             ORDER BY so.created_at DESC";
-            
+
     $stmt = mysqli_prepare($conn, $sql);
     if ($stmt) {
         mysqli_stmt_bind_param($stmt, "i", $userId);
@@ -59,7 +59,8 @@ if (isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])) {
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['error'] = "Bạn cần đăng nhập để thực hiện tính năng này!";
-    } else {
+    }
+    else {
         $userId = $_SESSION['user_id'];
         $itemId = isset($_POST['item_id']) ? (int)$_POST['item_id'] : 0;
         $name = mysqli_real_escape_string($conn, $_POST['name']);
@@ -90,7 +91,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                 $sql_upd = "UPDATE outfits SET name = ?, type = ?, gender = ?, occasion = ?, style = ?, weather = ?, fit = ? WHERE id = ?";
                 $stmt_upd = mysqli_prepare($conn, $sql_upd);
                 mysqli_stmt_bind_param($stmt_upd, "sssssssi", $name, $type, $gender, $occasion, $style, $weather, $fit, $itemId);
-                if (!mysqli_stmt_execute($stmt_upd)) throw new Exception("Lỗi cập nhật thông tin: " . mysqli_error($conn));
+                if (!mysqli_stmt_execute($stmt_upd))
+                    throw new Exception("Lỗi cập nhật thông tin: " . mysqli_error($conn));
 
                 // Cập nhật bảng outfit_colors (Tên màu và Hex)
                 $sql_col_upd = "UPDATE outfit_colors SET color_name = ?, hex_code = ? WHERE outfit_id = ?";
@@ -103,8 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                     $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
                     $upload_dir = "../assets/img/outfits/";
-                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
-                    
+                    if (!is_dir($upload_dir))
+                        mkdir($upload_dir, 0777, true);
+
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
                         $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
                         $sql_img = "UPDATE outfit_colors SET image = ? WHERE outfit_id = ?";
@@ -114,13 +117,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     }
                 }
                 $msg = "Đã cập nhật thông tin món đồ!";
-            } else {
+            }
+            else {
                 // INSERT mới
                 $sql_ins = "INSERT INTO outfits (name, type, gender, occasion, style, weather, fit, price, is_commercial, owner_id, created_at) 
                             VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, NOW())";
                 $stmt_ins = mysqli_prepare($conn, $sql_ins);
                 mysqli_stmt_bind_param($stmt_ins, "sssssssi", $name, $type, $gender, $occasion, $style, $weather, $fit, $userId);
-                if (!mysqli_stmt_execute($stmt_ins)) throw new Exception("Lỗi lưu thông tin: " . mysqli_error($conn));
+                if (!mysqli_stmt_execute($stmt_ins))
+                    throw new Exception("Lỗi lưu thông tin: " . mysqli_error($conn));
                 $outfit_id = mysqli_insert_id($conn);
 
                 $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
@@ -128,7 +133,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                     $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
                     $upload_dir = "../assets/img/outfits/";
-                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                    if (!is_dir($upload_dir))
+                        mkdir($upload_dir, 0777, true);
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
                         $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
                     }
@@ -145,7 +151,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
             $_SESSION['success'] = $msg;
             header("Location: wardrobe.php");
             exit;
-        } catch (Exception $e) {
+        }
+        catch (Exception $e) {
             mysqli_rollback($conn);
             $_SESSION['error'] = "Có lỗi xảy ra: " . $e->getMessage();
         }
@@ -188,7 +195,7 @@ include '../includes/header.php';
                 <i class="fa-solid fa-layer-group"></i> Bộ đồ đã phối
             </div>
             <div class="wardrobe-tab" onclick="switchTab(this, 'personal-section')">
-                <i class="fa-solid fa-shirt"></i> Món đồ cá nhân
+                <i class="fa-solid fa-shirt"></i> Tủ đồ cá nhân
             </div>
         </div>
 
@@ -203,7 +210,8 @@ include '../includes/header.php';
                             <a href="../style_outfits.php" class="btn-primary">Thử phối đồ ngay</a>
                         </div>
                     </div>
-                <?php else: ?>
+                <?php
+else: ?>
                     <?php foreach ($saved_outfits as $outfit): ?>
                         <div class="col l-3 m-6 c-12">
                             <div class="wardrobe-card">
@@ -234,8 +242,10 @@ include '../includes/header.php';
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    <?php
+    endforeach; ?>
+                <?php
+endif; ?>
             </div>
         </div>
 
@@ -250,7 +260,8 @@ include '../includes/header.php';
                             <button class="btn-primary" onclick="openAddModal()">Tải lên món đồ đầu tiên</button>
                         </div>
                     </div>
-                <?php else: ?>
+                <?php
+else: ?>
                     <?php foreach ($my_items as $item): ?>
                         <div class="col l-2-4 m-4 c-6">
                             <div class="personal-item-card" onclick='openEditModal(<?php echo json_encode($item); ?>)'>
@@ -263,8 +274,10 @@ include '../includes/header.php';
                                 </div>
                             </div>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    <?php
+    endforeach; ?>
+                <?php
+endif; ?>
             </div>
         </div>
     </div>

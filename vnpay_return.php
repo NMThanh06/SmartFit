@@ -71,6 +71,31 @@ $vnp_ResponseCode = $_GET['vnp_ResponseCode'];
                 mysqli_stmt_bind_param($updateStmt, "i", $orderId);
                 mysqli_stmt_execute($updateStmt);
 
+                // ========================================
+                // GỬI WEBHOOK EMAIL HÓA ĐƠN SAU KHI VNPAY XÁC NHẬN THÀNH CÔNG
+                // ========================================
+                $webhookUrl = 'http://localhost:5678/webhook-test/order-email';
+                $webhookData = json_encode([
+                    'order_id'       => $orderId,
+                    'email'          => $_SESSION['order_email'] ?? '',
+                    'fullname'       => $_SESSION['order_fullname'] ?? '',
+                    'total_amount'   => $_SESSION['total_amount'] ?? $vnp_Amount,
+                    'payment_method' => $_SESSION['order_payment_method'] ?? 'vnpay',
+                    'address'        => $_SESSION['order_address'] ?? ''
+                ]);
+
+                $ch = curl_init($webhookUrl);
+                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $webhookData);
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 2);
+                curl_exec($ch);
+                curl_close($ch);
+
+                // Dọn dẹp session đơn hàng
+                unset($_SESSION['order_email'], $_SESSION['order_fullname'], $_SESSION['order_address'], $_SESSION['order_payment_method']);
+
                 echo "<h1 class='success'>Thanh Toán Thành Công! 🎉</h1>";
                 echo "<p>Cảm ơn bạn đã mua sắm tại SmartFit. Đơn hàng của bạn đã được thanh toán.</p>";
             } else {

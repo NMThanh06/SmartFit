@@ -3,19 +3,22 @@ include '../includes/header.php';
 
 // Khởi tạo các biến chứa thông tin người dùng (mặc định trống)
 $user_fullname = '';
+$user_email = '';
 $user_phone = '';
 $user_address = '';
+$is_logged_in = isset($_SESSION['user_id']);
 
 // Nếu đã đăng nhập, lấy dữ liệu thực tế từ DB
-if (isset($_SESSION['user_id'])) {
+if ($is_logged_in) {
     $u_id = $_SESSION['user_id'];
-    $sql = "SELECT fullname, phone, address FROM users WHERE id = ?";
+    $sql = "SELECT name, email, fullname, phone, address FROM users WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
     mysqli_stmt_bind_param($stmt, 'i', $u_id);
     mysqli_stmt_execute($stmt);
     $res = mysqli_stmt_get_result($stmt);
     if ($u_info = mysqli_fetch_assoc($res)) {
-        $user_fullname = $u_info['fullname'] ?: '';
+        $user_fullname = $u_info['fullname'] ?: ($u_info['name'] ?: '');
+        $user_email = $u_info['email'] ?: '';
         $user_phone = $u_info['phone'] ?: '';
         $user_address = $u_info['address'] ?: '';
     }
@@ -40,6 +43,12 @@ if (isset($_SESSION['user_id'])) {
                                 <label for="fullname">Họ và Tên người nhận <span class="required">*</span></label>
                                 <input type="text" id="fullname" required placeholder="Nhập tên người nhận" value="<?php echo htmlspecialchars($user_fullname); ?>">
                             </div>
+                            <div class="form-group col-half">
+                                <label for="email">Email <span class="required">*</span></label>
+                                <input type="email" id="email" required placeholder="example@email.com" value="<?php echo htmlspecialchars($user_email); ?>" <?php echo $is_logged_in && !empty($user_email) ? 'readonly style="background:#e9e9ed;cursor:not-allowed;"' : ''; ?>>
+                            </div>
+                        </div>
+                        <div class="form-row">
                             <div class="form-group col-half">
                                 <label for="phone">Số điện thoại <span class="required">*</span></label>
                                 <input type="tel" id="phone" required placeholder="09xxxxxxxxx" value="<?php echo htmlspecialchars($user_phone); ?>">
@@ -521,6 +530,7 @@ if (isset($_SESSION['user_id'])) {
 
         const orderData = {
             fullname: document.getElementById('fullname').value,
+            email: document.getElementById('email').value,
             phone: document.getElementById('phone').value,
             address: document.getElementById('address').value,
             note: document.getElementById('note').value,
