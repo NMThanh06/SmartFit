@@ -5,7 +5,7 @@ require_once '../includes/config.php';
 
 // Kiểm tra nếu chưa đăng nhập thì chuyển hướng về home
 if (!isset($_SESSION['user_id'])) {
-    header("Location: ../home.php");
+    header("Location: ../index.php");
     exit();
 }
 

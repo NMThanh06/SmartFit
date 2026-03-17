@@ -24,6 +24,6 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : 'guest';
 if (!can_access($current_page, $user_role)) {
     // Nếu bị chặn, đuổi về trang chủ hoặc trang thông báo lỗi
     // Lưu ý: Dùng đường dẫn tương đối từ vị trí các trang trong /pages/
-    header("Location: home.php"); 
+    header("Location: index.php"); 
     exit();
 }

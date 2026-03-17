@@ -1,4 +1,4 @@
-<?php include '../includes/header.php'; ?>
+<?php include 'includes/header.php'; ?>
 
 <!-- Hero Section -->
 <section id="hero" class="hero hero--home">
@@ -7,7 +7,7 @@
         <p class="hero__subtitle">Giải pháp quản lý tủ đồ thông minh và gợi ý trang phục cá nhân hóa dựa trên thời tiết
             và phong cách của riêng bạn.</p>
         <div class="hero__actions">
-            <a href="../style_outfits.php" class="button hero__btn">Trải nghiệm phối đồ ngay</a>
+            <a href="style_outfits.php" class="button hero__btn">Trải nghiệm phối đồ ngay</a>
         </div>
     </div>
 
@@ -137,7 +137,7 @@
             <i class="fa-solid fa-arrow-down"></i>
         </div>
 
-<?php include '../includes/footer.php'; ?>
+<?php include 'includes/footer.php'; ?>
 </body>
 
 </html>

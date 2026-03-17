@@ -66,7 +66,7 @@ include $root . 'includes/header.php';
 
                 <div class="terms-footer-note">
                     <p>Nếu bạn có bất kỳ câu hỏi nào về các điều khoản này, vui lòng liên hệ với chúng tôi qua email hỗ trợ.</p>
-                    <a href="<?php echo $root; ?>pages/home.php" class="button back-home-btn">Quay lại Trang chủ</a>
+                    <a href="<?php echo $root; ?>index.php" class="button back-home-btn">Quay lại Trang chủ</a>
                 </div>
             </div>
         </div>

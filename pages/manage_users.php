@@ -11,7 +11,7 @@ require_once $base_dir . 'includes/functions.php';
 
 // 1. Kiểm tra quyền Admin tối cao
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: home.php");
+    header("Location: ../index.php");
     exit();
 }
 

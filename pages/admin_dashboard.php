@@ -11,7 +11,7 @@ require_once $base_dir . 'includes/functions.php';
 
 // 1. Bảo mật: Chỉ cho phép admin và sales
 if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'sales'])) {
-    header("Location: home.php");
+    header("Location: ../index.php");
     exit();
 }
 
