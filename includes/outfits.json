@@ -1,6 +1,309 @@
 {
     "items": [
         {
+            "id": "15",
+            "type": "one-piece",
+            "name": "ĐỒ BỘ LỤA",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "goout"
+            ],
+            "style": [
+                "basic",
+                "street",
+                "vintage"
+            ],
+            "color": "vàng",
+            "fit": [
+                "regular",
+                "slim",
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773788014_outfit_15_color_1.png",
+            "price": 149000,
+            "sizes": {
+                "L": 934,
+                "M": 369,
+                "XL": 555
+            },
+            "age": "25-45",
+            "seller_note": "đồ này thích hợp cho người thuộc lứa tuổi trung niên"
+        },
+        {
+            "id": "14",
+            "type": "shoes",
+            "name": "Sandal cao gót nữ",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "vintage"
+            ],
+            "color": "đen",
+            "fit": [],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773787278_outfit_14_color_1.png",
+            "price": 299000,
+            "sizes": {
+                "38": 283,
+                "39": 1646,
+                "40": 126,
+                "41": 223
+            },
+            "age": "All",
+            "seller_note": "món này phù hợp với trang phục lịch sự , tránh những việc liên quan đến thể thao đặc biệt lao dốc , núi."
+        },
+        {
+            "id": "13",
+            "type": "one-piece",
+            "name": "Set Đồ Bộ Nữ Quần Lửng Chất Thun Gân Áo Cotton",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
+            "color": "đen",
+            "fit": [
+                "regular",
+                "slim",
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/1773787206_outfit_13_color_1.png",
+            "price": 199000,
+            "sizes": {
+                "L": 400,
+                "M": 210,
+                "XL": 563
+            },
+            "age": "All",
+            "seller_note": "bộ này thích hợp khi đi ngủ "
+        },
+        {
+            "id": "12",
+            "type": "one-piece",
+            "name": "Áo Dài Hạc Vũ",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "goout",
+                "event"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "hồng",
+            "fit": [
+                "regular",
+                "slim"
+            ],
+            "weather": [
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/1773785844_outfit_12_color_1.png",
+            "price": 699000,
+            "sizes": {
+                "L": 250,
+                "XL": 232
+            },
+            "age": "15-25",
+            "seller_note": "bộ này phù hợp cho dịp tết"
+        },
+        {
+            "id": "11",
+            "type": "bottom",
+            "name": "Quần Jeans basic",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "vintage"
+            ],
+            "color": "Đen",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773777084_outfit_11_color_1.webp",
+            "price": 400000,
+            "sizes": {
+                "L": 78,
+                "M": 56,
+                "S": 54
+            },
+            "age": "30",
+            "seller_note": ""
+        },
+        {
+            "id": "10",
+            "type": "bottom",
+            "name": "Quần Jean slim fit",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "vintage"
+            ],
+            "color": "Đen",
+            "fit": [
+                "slim"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773768226_outfit_10_color_1.webp",
+            "price": 350000,
+            "sizes": {
+                "L": 54,
+                "M": 33,
+                "S": 28
+            },
+            "age": "30",
+            "seller_note": ""
+        },
+        {
+            "id": "9",
+            "type": "bottom",
+            "name": "Quần Kaki ống cong",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773767727_outfit_9_color_1.webp",
+            "price": 300000,
+            "sizes": {
+                "L": 99,
+                "M": 100,
+                "S": 48
+            },
+            "age": "25",
+            "seller_note": ""
+        },
+        {
+            "id": "8",
+            "type": "bottom",
+            "name": "Quần Parachute túi hộp",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773767357_outfit_8_color_1.webp",
+            "price": 200000,
+            "sizes": {
+                "L": 40,
+                "M": 30,
+                "S": 25,
+                "XL": 15
+            },
+            "age": "25",
+            "seller_note": ""
+        },
+        {
+            "id": "7",
+            "type": "top",
+            "name": "Áo polo hoa cúc",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
+            "color": "Xanh dương đậm",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/outfits/1773756073_user_3_closet.webp",
+            "price": 0,
+            "sizes": [],
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "5",
             "type": "bottom",
             "name": "Quần short ",

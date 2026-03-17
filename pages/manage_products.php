@@ -12,6 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
     try {
         $edit_id = isset($_POST['edit_id']) ? (int)$_POST['edit_id'] : 0;
+        $current_user_id = $_SESSION['user_id'];
+        $is_admin = ($_SESSION['role'] === 'admin');
         
         // 1. Thu thập thông tin chung
         $name = mysqli_real_escape_string($conn, $_POST['name']);
@@ -37,7 +39,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         }
 
         if ($edit_id > 0) {
-            // TRƯỜNG HỢP: CẬP NHẬT (UPDATE)
+            // Kiểm tra quyền sở hữu trước khi cập nhật
+            if (!$is_admin) {
+                $check_owner = mysqli_query($conn, "SELECT owner_id FROM outfits WHERE id = $edit_id");
+                $owner_data = mysqli_fetch_assoc($check_owner);
+                if ($owner_data['owner_id'] != $current_user_id) {
+                    throw new Exception("Bạn không có quyền chỉnh sửa sản phẩm này!");
+                }
+            }
+
             $sql_outfit = "UPDATE outfits SET 
                             name='$name', price=$price, type='$type', 
                             gender='$gender', occasion='$occasion', style='$style', 
@@ -52,8 +62,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             mysqli_query($conn, "DELETE FROM outfit_colors WHERE outfit_id = $outfit_id");
         } else {
             // TRƯỜNG HỢP: THÊM MỚI (INSERT) - Mặc định là sản phẩm của Shop (is_commercial = 1)
-            $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial) 
-                           VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1)";
+            $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial, owner_id) 
+                           VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1, $current_user_id)";
             if (!mysqli_query($conn, $sql_outfit)) throw new Exception("Lỗi chèn bảng outfits: " . mysqli_error($conn));
             $outfit_id = mysqli_insert_id($conn);
         }
@@ -186,6 +196,7 @@ include $base_dir . 'includes/header.php';
                                 <option value="" disabled selected>Chọn loại sản phẩm...</option>
                                 <option value="top">Áo (Top)</option>
                                 <option value="bottom">Quần (Bottom)</option>
+                                <option value="one-piece">Trang phục nguyên bộ (One-piece)</option>
                                 <option value="shoes">Giày (Shoes)</option>
                                 <option value="accessory">Phụ kiện (Accessory)</option>
                             </select>
@@ -306,9 +317,18 @@ include $base_dir . 'includes/header.php';
                     <tbody id="manageProductList">
                         <?php
                         // Lấy danh sách sản phẩm thực tế từ DB - Chỉ lấy đồ của Shop (is_commercial = 1)
+                        $current_user_id = $_SESSION['user_id'];
+                        $is_admin = ($_SESSION['role'] === 'admin');
+                        
                         $list_sql = "SELECT o.id, o.name, o.price, o.type, 
                                     (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as image 
-                                    FROM outfits o WHERE o.is_commercial = 1 ORDER BY o.id DESC";
+                                    FROM outfits o WHERE o.is_commercial = 1 ";
+                        
+                        if (!$is_admin) {
+                            $list_sql .= " AND o.owner_id = $current_user_id ";
+                        }
+                        
+                        $list_sql .= " ORDER BY o.id DESC";
                         $list_result = mysqli_query($conn, $list_sql);
                         while ($p = mysqli_fetch_assoc($list_result)):
                         ?>
@@ -849,8 +869,8 @@ include $base_dir . 'includes/header.php';
         'hồng': '#FFC0CB',
         'xám': '#808080',
         'ghi': '#808080',
-        'nâu': '#A52A2A',
-        'kem': '#FFFDD0',
+        'nâu': '#3f2929ff',
+        'kem': '#d8d7c7ff',
         'be': '#F5F5DC',
         'xanh đen': '#000080',
         'than': '#36454F',

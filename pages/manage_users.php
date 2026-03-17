@@ -25,6 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
     // Khối an toàn: Không cho phép Admin tự sửa quyền của chính mình
     if ($user_id === intval($_SESSION['user_id'])) {
         $notification = ['type' => 'error', 'msg' => 'Bạn không thể tự thay đổi quyền hạn của chính mình!'];
+    } elseif (in_array($user_id, [2, 5])) {
+        // BẢO VỆ ĐẶC BIỆT: Chặn sửa role ID 2 và 5
+        $notification = ['type' => 'error', 'msg' => 'Tài khoản hệ thống quan trọng (#'. $user_id .') không thể thay đổi quyền hạn!'];
     } else {
         // Sử dụng Prepared Statement để bảo mật
         $update_sql = "UPDATE users SET role = ? WHERE id = ?";
@@ -35,6 +38,30 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_role'])) {
             $notification = ['type' => 'success', 'msg' => 'Cập nhật quyền hạn thành công!'];
         } else {
             $notification = ['type' => 'error', 'msg' => 'Lỗi hệ thống: ' . mysqli_error($conn)];
+        }
+        mysqli_stmt_close($stmt);
+    }
+}
+
+// 2.1 Xử lý Xóa Người dùng (POST)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
+    $user_id = intval($_POST['user_id']);
+
+    // Kiểm tra an toàn trước khi xóa
+    if ($user_id === intval($_SESSION['user_id'])) {
+        $notification = ['type' => 'error', 'msg' => 'Bạn không thể tự xóa tài khoản của chính mình!'];
+    } elseif (in_array($user_id, [2, 5])) {
+        // BẢO VỆ ĐẶC BIỆT: Tuyệt đối không xóa ID 2 và 5
+        $notification = ['type' => 'error', 'msg' => 'Đây là tài khoản hệ thống quan trọng (#'. $user_id .'), không thể xóa!'];
+    } else {
+        $delete_sql = "DELETE FROM users WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $delete_sql);
+        mysqli_stmt_bind_param($stmt, "i", $user_id);
+        
+        if (mysqli_stmt_execute($stmt)) {
+            $notification = ['type' => 'success', 'msg' => 'Đã xóa người dùng thành công!'];
+        } else {
+            $notification = ['type' => 'error', 'msg' => 'Lỗi khi xóa: ' . mysqli_error($conn)];
         }
         mysqli_stmt_close($stmt);
     }
@@ -117,10 +144,17 @@ include $base_dir . 'includes/header.php';
                     <tbody>
                         <?php while ($user = mysqli_fetch_assoc($users_result)): ?>
                             <?php 
-                                $isSelf = (intval($user['id']) === intval($_SESSION['user_id']));
+                                $uid = intval($user['id']);
+                                $isSelf = ($uid === intval($_SESSION['user_id']));
+                                $isProtected = in_array($uid, [2, 5]); // Tài khoản "Bất tử"
                             ?>
-                            <tr>
-                                <td><strong>#<?= $user['id'] ?></strong></td>
+                            <tr class="<?= $isProtected ? 'row--protected' : '' ?>">
+                                <td>
+                                    <?php if ($isProtected): ?>
+                                        <i class="fa-solid fa-shield-halved" style="color: var(--primary-purple); margin-right: 5px;" title="Tài khoản hệ thống"></i>
+                                    <?php endif; ?>
+                                    <strong>#<?= $user['id'] ?></strong>
+                                </td>
                                 <td><?= htmlspecialchars($user['name']) ?></td>
                                 <td><?= htmlspecialchars($user['fullname']) ?></td>
                                 <td><?= htmlspecialchars($user['email']) ?></td>
@@ -137,25 +171,38 @@ include $base_dir . 'includes/header.php';
                                     <span class="badge <?= $role_class ?>"><?= strtoupper($user['role']) ?></span>
                                 </td>
                                 <td>
-                                    <form method="POST" class="role-update-form">
-                                        <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
-                                        <div class="form-action-group">
-                                            <select name="new_role" class="role-select" <?= $isSelf ? 'disabled' : '' ?>>
-                                                <option value="customer" <?= ($user['role'] == 'customer') ? 'selected' : '' ?>>Khách hàng</option>
-                                                <option value="support" <?= ($user['role'] == 'support') ? 'selected' : '' ?>>Hỗ trợ (Support)</option>
-                                                <option value="sales" <?= ($user['role'] == 'sales') ? 'selected' : '' ?>>Bán hàng (Sales)</option>
-                                                <option value="admin" <?= ($user['role'] == 'admin') ? 'selected' : '' ?>>Quản trị viên</option>
-                                            </select>
-                                            
-                                            <?php if (!$isSelf): ?>
-                                            <button type="submit" name="update_role" class="btn-update-role">
-                                                <i class="fa-solid fa-user-shield"></i> Cập nhật
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <form method="POST" class="role-update-form" style="margin: 0;">
+                                            <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                            <div class="form-action-group">
+                                                <select name="new_role" class="role-select" <?= ($isSelf || $isProtected) ? 'disabled' : '' ?>>
+                                                    <option value="customer" <?= ($user['role'] == 'customer') ? 'selected' : '' ?>>Khách hàng</option>
+                                                    <option value="support" <?= ($user['role'] == 'support') ? 'selected' : '' ?>>Hỗ trợ (Support)</option>
+                                                    <option value="sales" <?= ($user['role'] == 'sales') ? 'selected' : '' ?>>Bán hàng (Sales)</option>
+                                                    <option value="admin" <?= ($user['role'] == 'admin') ? 'selected' : '' ?>>Quản trị viên</option>
+                                                </select>
+                                                
+                                                <?php if (!$isSelf && !$isProtected): ?>
+                                                <button type="submit" name="update_role" class="btn-update-role">
+                                                    <i class="fa-solid fa-user-shield"></i> Cập nhật
+                                                </button>
+                                                <?php elseif ($isProtected): ?>
+                                                    <span class="text-muted" style="white-space: nowrap;"><i class="fa-solid fa-lock"></i> Hệ thống</span>
+                                                <?php else: ?>
+                                                    <span class="text-muted" style="white-space: nowrap;"><i class="fa-solid fa-lock"></i> Bản thân</span>
+                                                <?php endif; ?>
+                                            </div>
+                                        </form>
+
+                                        <?php if (!$isSelf && !$isProtected): ?>
+                                        <form method="POST" style="margin: 0;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa vĩnh viễn người dùng này không?');">
+                                            <input type="hidden" name="user_id" value="<?= $user['id'] ?>">
+                                            <button type="submit" name="delete_user" class="btn-delete" style="padding: 0 20px; border-radius: 8px; font-size: 1.3rem; height: 42px; display: flex; align-items: center; gap: 6px; white-space: nowrap; background-color: #ff4d4d; color: white; border: none; font-weight: 700; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 10px rgba(255, 77, 77, 0.2);">
+                                                <i class="fa-solid fa-trash-can"></i> Xóa
                                             </button>
-                                            <?php else: ?>
-                                                <span class="text-muted"><i class="fa-solid fa-lock"></i> Tài khoản của bạn</span>
-                                            <?php endif; ?>
-                                        </div>
-                                    </form>
+                                        </form>
+                                        <?php endif; ?>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endwhile; ?>
@@ -250,6 +297,7 @@ include $base_dir . 'includes/header.php';
         outline: none;
         transition: 0.3s;
         cursor: pointer;
+        height: 42px; /* Đồng bộ chiều cao */
     }
     .role-select:focus { border-color: var(--primary-purple); }
     .role-select:disabled { background: #f5f5f5; cursor: not-allowed; color: #aaa; }
@@ -258,7 +306,7 @@ include $base_dir . 'includes/header.php';
         background: var(--apple-black);
         color: #fff;
         border: none;
-        padding: 10px 18px;
+        padding: 0 18px; /* Bỏ padding vertical vì đã có height */
         border-radius: 8px;
         font-weight: 700;
         font-size: 1.3rem;
@@ -267,10 +315,21 @@ include $base_dir . 'includes/header.php';
         display: flex;
         align-items: center;
         gap: 6px;
+        height: 42px; /* Đồng bộ chiều cao */
     }
     .btn-update-role:hover {
         background: var(--primary-purple);
         transform: translateY(-2px);
+    }
+
+    .btn-delete:hover {
+        background-color: #ff3333 !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(255, 51, 51, 0.3) !important;
+    }
+    
+    .btn-delete:active {
+        transform: translateY(0);
     }
 
     .text-muted { color: #aaa; font-size: 1.3rem; }
@@ -279,6 +338,14 @@ include $base_dir . 'includes/header.php';
     @media (max-width: 768px) {
         .manage-users__title { font-size: 2.8rem; }
         .form-action-group { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* Row highlight cho tài khoản bảo vệ */
+    .row--protected {
+        background-color: #fcfaff !important;
+    }
+    .row--protected:hover {
+        background-color: #f5f0ff !important;
     }
 </style>
 

@@ -19,6 +19,7 @@ include 'includes/header.php';
                                 <li class="shop-filter__item active" data-type="all">Tất cả sản phẩm</li>
                                 <li class="shop-filter__item" data-type="top">Áo</li>
                                 <li class="shop-filter__item" data-type="bottom">Quần</li>
+                                <li class="shop-filter__item" data-type="one-piece">Trang phục nguyên bộ</li>
                                 <li class="shop-filter__item" data-type="accessory_shoes">Giày & Phụ kiện</li>
                             </ul>
                         </div>
@@ -115,7 +116,7 @@ include 'includes/header.php';
                             <button class="qty-btn" onclick="changeModalQty(-1)">
                                 <i class="fa-solid fa-minus"></i>
                             </button>
-                            <input type="text" id="modalQtyDisplay" value="1" readonly class="qty-input">
+                            <input type="number" id="modalQtyDisplay" value="1" class="qty-input" onchange="validateModalQty(this)" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             <button class="qty-btn" onclick="changeModalQty(1)">
                                 <i class="fa-solid fa-plus"></i>
                             </button>
@@ -157,7 +158,7 @@ include 'includes/header.php';
                 cursor: pointer;
                 transition: background 0.2s;
             }
-            .qty-btn:hover { background: #e9ecef; }
+            .qty-btn:hover { background: black; color: white; }
             .qty-input {
                 width: 40px;
                 height: 32px;
@@ -386,6 +387,25 @@ include 'includes/header.php';
             document.getElementById('modalQtyDisplay').value = modalCurrentQty;
         }
 
+        // --- HÀM VALIDATE SỐ LƯỢNG KHI NHẬP THỦ CÔNG TRÊN MODAL ---
+        function validateModalQty(input) {
+            if (!selectedConfigSize) {
+                showToast('Vui lòng chọn kích cỡ trước!', 'error');
+                input.value = 1;
+                return;
+            }
+            let val = parseInt(input.value);
+            if (isNaN(val) || val < 1) {
+                val = 1;
+            }
+            if (val > modalMaxStock) {
+                showToast('Chỉ còn ' + modalMaxStock + ' sản phẩm trong kho!', 'error');
+                val = modalMaxStock;
+            }
+            modalCurrentQty = val;
+            input.value = val;
+        }
+
         // Hàm render size dựa trên màu sắc được chọn
         function renderSizesForColor(colorId) {
             const sizeContainer = document.getElementById('modalSizeOptions');
@@ -484,41 +504,51 @@ include 'includes/header.php';
         }
 
         function performAddToCart(id, name, imageSrc, price, size, color, qty = 1) {
-            // Lấy tồn kho của biến thể này
-            const allSizes = currentSelectedItem.sizes || [];
-            const colorObj = (currentSelectedItem.colors || []).find(c => c.color_name === color);
-            const colorId = colorObj ? colorObj.id : null;
-            const sizeData = allSizes.find(s => s.size_name === size && s.color_id == colorId);
-            const stock = sizeData ? parseInt(sizeData.quantity) : 0;
-
+            // --- KIỂM TRA TỒN KHO TRƯỚC KHI THÊM ---
             const existingIndex = cart.findIndex(item => item.id === id && item.size === size && item.color === color);
-            
-            if (existingIndex !== -1) {
-                const nextQty = cart[existingIndex].quantity + qty;
-                if (nextQty > stock) {
+            const qtyInCart = existingIndex !== -1 ? cart[existingIndex].quantity : 0;
+            const totalExpected = qtyInCart + qty;
+
+            if (totalExpected > modalMaxStock) {
+                const remaining = modalMaxStock - qtyInCart;
+                if (remaining <= 0) {
                     showToast(`Sản phẩm ${name} (Size ${size}, ${color}) đã đạt giới hạn tồn kho trong giỏ hàng!`, 'error');
-                    return;
+                } else {
+                    showToast('Chỉ có thể thêm tối đa ' + remaining + ' sản phẩm nữa!', 'error');
                 }
-                cart[existingIndex].quantity = nextQty;
-            } else {
-                if (stock < qty) {
-                    showToast('Sản phẩm này không đủ số lượng trong kho!', 'error');
-                    return;
-                }
-                cart.push({
-                    id: id,
-                    name: name,
-                    image: imageSrc,
-                    price: price,
+                return;
+            }
+
+            // Gửi xuống Database Cart API
+            fetch('includes/add_to_cart.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    outfit_id: id,
                     size: size,
                     color: color,
-                    allColors: currentSelectedItem.colors, 
-                    allSizes: currentSelectedItem.sizes,   
                     quantity: qty
-                });
-            }
-            saveCart();
-            if (window.showToast) showToast(`Đã thêm ${qty} ${name} vào giỏ hàng!`, 'success');
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    showToast(data.message, 'success');
+                    // Đồng bộ lại UI
+                    if (typeof syncCart === 'function') {
+                        syncCart();
+                    }
+                    if (typeof cartDrawerApp !== 'undefined' && cartDrawerApp.openCart) {
+                        cartDrawerApp.openCart();
+                    }
+                } else {
+                    showToast(data.message, 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Lỗi thêm giỏ hàng:', err);
+                showToast('Lỗi kết nối máy chủ!', 'error');
+            });
         }
 
         function animateFly(targetImg) {

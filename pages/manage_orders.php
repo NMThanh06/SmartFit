@@ -18,10 +18,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
     $order_id = intval($_POST['order_id']);
     $new_status = mysqli_real_escape_string($conn, $_POST['new_status']);
     
+    $user_id = $_SESSION['user_id'];
+    $role = $_SESSION['role'];
+
     // Sử dụng Prepared Statement để bảo mật
     $update_sql = "UPDATE orders SET status = ? WHERE id = ?";
+    
+    // Nếu là sales, chỉ cho phép update nế là shop của mình
+    if ($role === 'sales') {
+        $update_sql .= " AND shop_id = ?";
+    }
+
     $stmt = mysqli_prepare($conn, $update_sql);
-    mysqli_stmt_bind_param($stmt, "si", $new_status, $order_id);
+    
+    if ($role === 'sales') {
+        mysqli_stmt_bind_param($stmt, "sii", $new_status, $order_id, $user_id);
+    } else {
+        mysqli_stmt_bind_param($stmt, "si", $new_status, $order_id);
+    }
     
     if (mysqli_stmt_execute($stmt)) {
         $notification = ['type' => 'success', 'msg' => "Đã cập nhật trạng thái đơn hàng #$order_id thành công!"];
@@ -39,7 +53,16 @@ $sortOrder = $_GET['sort'] ?? 'desc';
 $allowedSort = ['asc', 'desc'];
 if (!in_array($sortOrder, $allowedSort)) $sortOrder = 'desc';
 
+$current_user_id = $_SESSION['user_id'];
+$user_role = $_SESSION['role'];
+
 $orders_sql = "SELECT * FROM orders WHERE 1=1 ";
+
+// Nếu là Sales, chỉ xem đơn của mình
+if ($user_role === 'sales') {
+    $orders_sql .= " AND shop_id = $current_user_id ";
+}
+
 if (!empty($searchQuery)) {
     $searchParam = mysqli_real_escape_string($conn, $searchQuery);
     $orders_sql .= " AND (id LIKE '%$searchParam%' OR fullname LIKE '%$searchParam%' OR phone LIKE '%$searchParam%') ";

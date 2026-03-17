@@ -22,8 +22,8 @@ $user_role = isset($_SESSION['role']) ? $_SESSION['role'] : 'guest';
 
 // 3. Kiểm tra quyền truy cập tập trung
 if (!can_access($current_page, $user_role)) {
-    // Nếu bị chặn, đuổi về trang chủ hoặc trang thông báo lỗi
-    // Lưu ý: Dùng đường dẫn tương đối từ vị trí các trang trong /pages/
-    header("Location: index.php"); 
+    // Xác định đường dẫn về trang chủ dựa trên vị trí file hiện tại
+    $redirect_path = (basename(dirname($_SERVER['PHP_SELF'])) === 'pages') ? '../index.php' : 'index.php';
+    header("Location: " . $redirect_path); 
     exit();
 }

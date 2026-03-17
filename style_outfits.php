@@ -200,12 +200,16 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
             <div class="result__container">
 
                 <div class="result__visual">
-                    <div class="visual-item">
+                    <div class="visual-item" id="boxTop">
                         <img src="./assets/img/default-top.jpg" alt="Áo" id="imgTop">
                     </div>
 
-                    <div class="visual-item">
+                    <div class="visual-item" id="boxBottom">
                         <img src="./assets/img/default-bottom.jpg" alt="Quần" id="imgBottom">
+                    </div>
+
+                    <div class="visual-item" id="boxOnePiece" style="display: none; flex: 1;">
+                        <img src="/SmartFit/assets/img/default-placeholder.jpg" alt="Đồ bộ" id="imgOnePiece">
                     </div>
                 </div>
 
@@ -221,21 +225,21 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
                     </p>
 
                     <div class="result__items">
-                        <div class="item-box">
-                            <i class="fa-brands fa-redhat item-icon"></i>
-                            <a href="javascript:void(0)" id="itemHeadLink" class="item-link" target="_blank">
-                                <span id="itemHead">Mũ lưỡi trai đen</span>
+                        <div class="item-box" id="liOnePiece" style="display: none;">
+                            <i class="fa-solid fa-shirt item-icon"></i>
+                            <a href="javascript:void(0)" id="itemOnePieceLink" class="item-link" target="_blank">
+                                <span id="itemOnePieceName">Đầm/Áo dài</span>
                             </a>
                         </div>
 
-                        <div class="item-box">
+                        <div class="item-box" id="liTop">
                             <i class="fa-solid fa-shirt item-icon"></i>
                             <a href="javascript:void(0)" id="itemTopLink" class="item-link" target="_blank">
                                 <span id="itemTopName">Hoodie Oversized xám</span>
                             </a>
                         </div>
 
-                        <div class="item-box">
+                        <div class="item-box" id="liBottom">
                             <i class="fa-solid fa-vials item-icon"></i>
                             <a href="javascript:void(0)" id="itemBottomLink" class="item-link" target="_blank">
                                 <span id="itemBottomName">Quần Cargo túi hộp</span>
@@ -246,6 +250,13 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
                             <i class="fa-solid fa-shoe-prints item-icon"></i>
                             <a href="javascript:void(0)" id="itemShoesLink" class="item-link" target="_blank">
                                 <span id="itemShoes">Sneaker Jordan 1 High</span>
+                            </a>
+                        </div>
+
+                        <div class="item-box">
+                            <i class="fa-brands fa-redhat item-icon"></i>
+                            <a href="javascript:void(0)" id="itemHeadLink" class="item-link" target="_blank">
+                                <span id="itemHead">Mũ lưỡi trai đen</span>
                             </a>
                         </div>
                     </div>
@@ -259,6 +270,7 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
                                 onclick="app.toggleSaveOutfit(this)"
                                 data-top=""
                                 data-bottom=""
+                                data-onepiece=""
                                 data-shoes=""
                                 data-acc=""
                                 data-style="">

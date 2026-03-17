@@ -1,8 +1,7 @@
 <?php
-// === Tắt hiển thị lỗi HTML rác, chỉ log lỗi vào server ===
-ini_set('display_errors', 0);
+header('Content-Type: application/json');
 error_reporting(E_ALL);
-header('Content-Type: application/json; charset=utf-8');
+ini_set('display_errors', 1);
 
 try {
     session_start();
@@ -12,12 +11,34 @@ try {
     // 1. LÀM SẠCH KEY
     $cleanApiKey = trim(GEMINI_API_KEY);
 
+    // 1. Nhận mọi dữ liệu đầu vào (dù là JSON hay Form Data)
     $inputJSON = file_get_contents('php://input');
     $input = json_decode($inputJSON, true);
 
-    if (!is_array($input)) {
-        throw new Exception("Dữ liệu đầu vào không hợp lệ.");
+    if (!$input) {
+        $input = $_POST; // Nếu không phải JSON thì lấy POST bình thường
     }
+
+    // 2. Chặn lại và in ra xem rốt cuộc JS gửi cái gì lên
+    if (empty($input)) {
+        echo json_encode([
+            "success" => false,
+            "error" => "JS chưa gửi dữ liệu gì lên cả!",
+            "raw_data" => $inputJSON
+        ]);
+        exit;
+    }
+
+    // 3. Lấy các biến cơ bản (Dùng ?? để gán mặc định nếu lỡ bị thiếu)
+    $occasion = $input['occasion'] ?? 'đi học';
+    $gender = $input['gender'] ?? 'male';
+    $style = $input['style'] ?? 'basic';
+    $weatherTemp = $input['weather']['temp'] ?? 25;
+    $weatherCond = $input['weather']['condition'] ?? 'mild';
+    $weatherStr = $weatherTemp . '°C, ' . $weatherCond;
+    $age = $input['age'] ?? 'Không rõ';
+    $location = $input['location'] ?? 'Không rõ';
+    $targetDate = $input['targetDate'] ?? 'Hôm nay';
 
     // 2. ĐỊNH NGHĨA MODEL VÀ URL (gemini-flash-latest đã chạy thành công)
     $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $cleanApiKey;
@@ -50,27 +71,28 @@ try {
                 while ($pRow = mysqli_fetch_assoc($resPersonal)) {
                     // Chuyển đổi sang cùng format với outfits.json
                     $personalItem = [
-                        'id'          => 'personal_' . $pRow['id'], // Prefix tránh trùng ID shop
-                        'type'        => $pRow['type'] ?? 'top',
-                        'name'        => $pRow['name'] ?? 'Đồ cá nhân',
-                        'gender'      => json_decode($pRow['gender'] ?? '[]', true) ?: [],
-                        'occasion'    => json_decode($pRow['occasion'] ?? '[]', true) ?: [],
-                        'style'       => json_decode($pRow['style'] ?? '[]', true) ?: [],
-                        'color'       => $pRow['color_name'] ?? '',
-                        'fit'         => json_decode($pRow['fit'] ?? '[]', true) ?: [],
-                        'weather'     => json_decode($pRow['weather'] ?? '[]', true) ?: [],
-                        'image'       => $pRow['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg',
-                        'price'       => (int)($pRow['price'] ?? 0),
-                        'sizes'       => [],
-                        'age'         => 'All',
+                        'id' => 'personal_' . $pRow['id'],
+                        'type' => $pRow['type'] ?? 'top',
+                        'name' => $pRow['name'] ?? 'Đồ cá nhân',
+                        'gender' => json_decode($pRow['gender'] ?? '[]', true) ?: [],
+                        'occasion' => json_decode($pRow['occasion'] ?? '[]', true) ?: [],
+                        'style' => json_decode($pRow['style'] ?? '[]', true) ?: [],
+                        'color' => $pRow['color_name'] ?? '',
+                        'fit' => json_decode($pRow['fit'] ?? '[]', true) ?: [],
+                        'weather' => json_decode($pRow['weather'] ?? '[]', true) ?: [],
+                        'image' => $pRow['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg',
+                        'price' => (int)($pRow['price'] ?? 0),
+                        'sizes' => [],
+                        'age' => 'All',
                         'seller_note' => '(Đồ cá nhân của khách)'
                     ];
                     $wardrobeData[] = $personalItem;
                 }
                 mysqli_stmt_close($stmtPersonal);
             }
-        } catch (Exception $e) {
-            // Bảng chưa có cột is_commercial/owner_id → bỏ qua, chỉ dùng đồ shop
+        }
+        catch (Exception $e) {
+        // Bảng chưa có cột is_commercial/owner_id → bỏ qua, chỉ dùng đồ shop
         }
     }
 
@@ -121,7 +143,7 @@ $wardrobeBrief
 
 Quy tắc phối đồ & Trả kết quả (BẮT BUỘC TUÂN THỦ):
 1. Mở đầu (Greeting & Context): Chào hỏi thân thiện, nhắc ngắn gọn đến ĐỊA ĐIỂM, THỜI TIẾT và NGÀY đã chọn. (Ví dụ: 'Vào $targetDate ở $location trời $weatherStr, rất lý tưởng để dạo phố...').
-2. Lọc Logic: Khớp loại đồ với hoàn cảnh, thời tiết và độ tuổi của khách.
+2. Lọc Logic: Khớp loại đồ với hoàn cảnh, thời tiết và độ tuổi của khách. RẤT QUAN TRỌNG: Hãy dành khoảng 30-40% tỷ lệ chọn loại trang phục liền thân (onepiece như váy liền, đầm, đồ bộ áo dài, jumpsuit) nếu có trong danh sách và phù hợp thời tiết. NẾU CHỌN onepiece (vd: đầm, đồ bộ, áo dài) thì BẮT BUỘC phải bỏ trống (null) áo (top) và quần (bottom). Ngược lại NẾU KHÔNG CHỌN onepiece (tức là chọn áo quần) thì onepiece sẽ là null.
 3. Nội dung Giải thích (RẤT QUAN TRỌNG): 
    - TUYỆT ĐỐI KHÔNG liệt kê tên toàn bộ các món đồ đã chọn (ví dụ: không viết 'gợi ý phối áo khoác cùng quần jean...').
    - TUYỆT ĐỐI KHÔNG hiển thị ID của món đồ ra văn bản.
@@ -130,7 +152,7 @@ Quy tắc phối đồ & Trả kết quả (BẮT BUỘC TUÂN THỦ):
    - Viết thật ngắn gọn, súc tích, tối đa 2-3 câu để người dùng dễ đọc.
 
 TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI THÍCH Ở NGOÀI JSON:
-{\"styleName\": \"Tên style ngắn gọn\", \"caption\": \"Toàn bộ nội dung Mở đầu và Trình bày (gồm 2-3 câu như yêu cầu)\", \"ids\": {\"top\": ID, \"bottom\": ID, \"shoes\": ID, \"acc\": ID}}";
+{\"styleName\": \"Tên style ngắn gọn\", \"caption\": \"Toàn bộ nội dung Mở đầu và Trình bày (gồm 2-3 câu như yêu cầu)\", \"ids\": {\"top\": ID hoặc null, \"bottom\": ID hoặc null, \"onepiece\": ID hoặc null, \"shoes\": ID, \"acc\": ID hoặc null}}";
 
     $data = ["contents" => [["parts" => [["text" => $prompt]]]]];
 
@@ -192,6 +214,7 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
 
     $top = findItem($cleanJson['ids']['top'] ?? null, $wardrobeData);
     $bottom = findItem($cleanJson['ids']['bottom'] ?? null, $wardrobeData);
+    $onepiece = findItem($cleanJson['ids']['onepiece'] ?? null, $wardrobeData);
     $shoes = findItem($cleanJson['ids']['shoes'] ?? null, $wardrobeData);
     $acc = findItem($cleanJson['ids']['acc'] ?? null, $wardrobeData);
 
@@ -206,25 +229,29 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
         $defaultTop = './assets/img/default-top.jpg';
         $defaultBottom = './assets/img/default-bottom.jpg';
     }
-
-// 9. Kiểm tra xem bộ đồ này đã được người dùng lưu chưa
+    // 9. Kiểm tra xem bộ đồ này đã được người dùng lưu chưa
     $isSaved = false;
-    $topId    = isset($top['id']) ? (int)$top['id'] : null;
+    $topId = isset($top['id']) ? (int)$top['id'] : null;
     $bottomId = isset($bottom['id']) ? (int)$bottom['id'] : null;
-    $shoesId  = isset($shoes['id']) ? (int)$shoes['id'] : null;
-    $accId    = isset($acc['id']) ? (int)$acc['id'] : null;
+    $onepieceId = isset($onepiece['id']) ? (int)$onepiece['id'] : null;
+    $shoesId = isset($shoes['id']) ? (int)$shoes['id'] : null;
+    $accId = isset($acc['id']) ? (int)$acc['id'] : null;
 
-    if (isset($_SESSION['user_id']) && $topId && $bottomId && $shoesId) {
+    if (isset($_SESSION['user_id']) && (($topId && $bottomId) || $onepieceId) && $shoesId) {
         $userId = $_SESSION['user_id'];
-        
-        // Logic so sánh chính xác kể cả trường hợp acc_id là NULL
+
+        // Logic so sánh chính xác kể cả trường hợp null
         $checkSql = "SELECT COUNT(*) as cnt FROM saved_outfits 
-                     WHERE user_id = ? AND top_id = ? AND bottom_id = ? AND shoes_id = ? 
+                     WHERE user_id = ? 
+                     AND (top_id = ? OR (top_id IS NULL AND ? IS NULL)) 
+                     AND (bottom_id = ? OR (bottom_id IS NULL AND ? IS NULL))
+                     AND (onepiece_id = ? OR (onepiece_id IS NULL AND ? IS NULL))
+                     AND shoes_id = ? 
                      AND (acc_id = ? OR (acc_id IS NULL AND ? IS NULL))";
-                     
+
         $checkStmt = mysqli_prepare($conn, $checkSql);
         if ($checkStmt) {
-            mysqli_stmt_bind_param($checkStmt, "iiiiii", $userId, $topId, $bottomId, $shoesId, $accId, $accId);
+            mysqli_stmt_bind_param($checkStmt, "iiiiiiiiii", $userId, $topId, $topId, $bottomId, $bottomId, $onepieceId, $onepieceId, $shoesId, $accId, $accId);
             mysqli_stmt_execute($checkStmt);
             $checkRes = mysqli_stmt_get_result($checkStmt);
             $checkData = mysqli_fetch_assoc($checkRes);
@@ -240,6 +267,7 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
             // lấy ID
             'topId' => $top['id'] ?? null,
             'bottomId' => $bottom['id'] ?? null,
+            'onepieceId' => $onepiece['id'] ?? null,
             'shoesId' => $shoes['id'] ?? null,
             'accId' => $acc['id'] ?? null,
             // trạng thái đã lưu
@@ -249,6 +277,8 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
             'topImage' => $top['image'] ?? $defaultTop,
             'bottom' => $bottom['name'] ?? 'Chưa xác định',
             'bottomImage' => $bottom['image'] ?? $defaultBottom,
+            'onepiece' => $onepiece['name'] ?? null,
+            'onepieceImage' => $onepiece['image'] ?? null,
             'shoes' => $shoes['name'] ?? 'Chưa xác định',
             'shoesImage' => $shoes['image'] ?? '',
             'accessories' => $acc['name'] ?? 'Không có',

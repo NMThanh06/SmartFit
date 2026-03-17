@@ -16,27 +16,43 @@ if (!isset($_SESSION['role']) || !in_array($_SESSION['role'], ['admin', 'sales']
 }
 
 // 2. Xử lý Thống kê (Queries)
+$current_user_id = $_SESSION['user_id'];
+$user_role = $_SESSION['role'];
+
 // --- Thống kê Đơn hàng ---
-$order_total_query = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending FROM orders";
+$order_total_query = "SELECT COUNT(*) as total, SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending FROM orders WHERE 1=1";
+if ($user_role === 'sales') {
+    $order_total_query .= " AND shop_id = $current_user_id";
+}
 $order_res = mysqli_query($conn, $order_total_query);
 $order_data = mysqli_fetch_assoc($order_res);
 $total_orders = $order_data['total'];
 $pending_orders = $order_data['pending'];
 
-// --- Thống kê Doanh thu (Chỉ tính đơn thành công) ---
+// --- Thống kê Doanh thu ---
 $revenue_query = "SELECT SUM(total_amount) as total_rev FROM orders WHERE status IN ('completed', 'success')";
+if ($user_role === 'sales') {
+    $revenue_query .= " AND shop_id = $current_user_id";
+}
 $revenue_res = mysqli_query($conn, $revenue_query);
 $revenue_data = mysqli_fetch_assoc($revenue_res);
 $total_revenue = $revenue_data['total_rev'] ?? 0;
 
-// --- Thống kê Người dùng ---
-$user_query = "SELECT COUNT(*) as total_users FROM users";
+// --- Thống kê Người dùng (Chỉ admin thấy tổng khách, Sales thấy khách đã mua hàng của mình) ---
+if ($user_role === 'admin') {
+    $user_query = "SELECT COUNT(*) as total_users FROM users WHERE role = 'user'";
+} else {
+    $user_query = "SELECT COUNT(DISTINCT user_id) as total_users FROM orders WHERE shop_id = $current_user_id";
+}
 $user_res = mysqli_query($conn, $user_query);
 $user_data = mysqli_fetch_assoc($user_res);
 $total_users = $user_data['total_users'];
 
 // --- Thống kê Sản phẩm ---
 $product_query = "SELECT COUNT(*) as total_products FROM outfits WHERE is_commercial = 1";
+if ($user_role === 'sales') {
+    $product_query .= " AND owner_id = $current_user_id";
+}
 $product_res = mysqli_query($conn, $product_query);
 $product_data = mysqli_fetch_assoc($product_res);
 $total_products = $product_data['total_products'];
