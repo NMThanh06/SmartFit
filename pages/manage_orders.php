@@ -32,9 +32,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
 }
 
 // ========================================
-// TRUY VẤN DANH SÁCH ĐƠN HÀNG
+// TRUY VẤN DANH SÁCH ĐƠN HÀNG (Có hỗ trợ lọc)
 // ========================================
-$orders_sql = "SELECT * FROM orders ORDER BY created_at DESC";
+$searchQuery = $_GET['search'] ?? '';
+$sortOrder = $_GET['sort'] ?? 'desc';
+$allowedSort = ['asc', 'desc'];
+if (!in_array($sortOrder, $allowedSort)) $sortOrder = 'desc';
+
+$orders_sql = "SELECT * FROM orders WHERE 1=1 ";
+if (!empty($searchQuery)) {
+    $searchParam = mysqli_real_escape_string($conn, $searchQuery);
+    $orders_sql .= " AND (id LIKE '%$searchParam%' OR fullname LIKE '%$searchParam%' OR phone LIKE '%$searchParam%') ";
+}
+$orders_sql .= " ORDER BY created_at " . ($sortOrder === 'asc' ? 'ASC' : 'DESC');
+
 $orders_result = mysqli_query($conn, $orders_sql);
 
 include $base_dir . 'includes/header.php';
@@ -59,6 +70,24 @@ include $base_dir . 'includes/header.php';
         </div>
 
         <div class="manage-orders__card">
+            <!-- Toolbar Tìm kiếm & Lọc -->
+            <div class="order-toolbar" style="margin-top: 0; margin-bottom: 25px; border-radius: 12px;">
+                <form action="" method="GET" class="order-search">
+                    <i class="fa-solid fa-magnifying-glass order-search__icon"></i>
+                    <input type="text" name="search" class="order-search__input" 
+                           placeholder="Mã đơn, tên khách, SĐT..." 
+                           value="<?= htmlspecialchars($searchQuery) ?>">
+                </form>
+
+                <div class="order-filter">
+                    <span class="order-filter__label">Sắp xếp:</span>
+                    <select class="order-filter__select" onchange="window.location.href='?search=<?= urlencode($searchQuery) ?>&sort=' + this.value">
+                        <option value="desc" <?= $sortOrder === 'desc' ? 'selected' : '' ?>>Mới nhất</option>
+                        <option value="asc" <?= $sortOrder === 'asc' ? 'selected' : '' ?>>Cũ nhất</option>
+                    </select>
+                </div>
+            </div>
+
             <div class="manage-table-wrapper">
                 <table class="manage-table">
                     <thead>

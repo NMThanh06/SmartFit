@@ -10,10 +10,26 @@ if ($userId == 0) {
     exit;
 }
 
-// Lấy toàn bộ đơn hàng của User này, sắp xếp mới nhất lên đầu
-$sql = "SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC";
+// Xử lý Tìm kiếm và Sắp xếp
+$searchQuery = $_GET['q'] ?? '';
+$sortOrder = $_GET['sort'] ?? 'desc';
+$allowedSort = ['asc', 'desc'];
+if (!in_array($sortOrder, $allowedSort)) $sortOrder = 'desc';
+
+// Lấy toàn bộ đơn hàng của User này, có hỗ trợ tìm kiếm và sắp xếp
+$sql = "SELECT * FROM orders WHERE user_id = ? ";
+if (!empty($searchQuery)) {
+    $sql .= " AND id LIKE ? ";
+}
+$sql .= " ORDER BY created_at " . ($sortOrder === 'asc' ? 'ASC' : 'DESC');
+
 $stmt = mysqli_prepare($conn, $sql);
-mysqli_stmt_bind_param($stmt, "i", $userId);
+if (!empty($searchQuery)) {
+    $searchParam = "%$searchQuery%";
+    mysqli_stmt_bind_param($stmt, "is", $userId, $searchParam);
+} else {
+    mysqli_stmt_bind_param($stmt, "i", $userId);
+}
 mysqli_stmt_execute($stmt);
 $ordersResult = mysqli_stmt_get_result($stmt);
 
@@ -32,6 +48,24 @@ include '../includes/header.php';
         </div>
 
         <div class="orders-page__content">
+            <!-- Thanh tìm kiếm và lọc -->
+            <div class="order-toolbar">
+                <form action="" method="GET" class="order-search">
+                    <i class="fa-solid fa-magnifying-glass order-search__icon"></i>
+                    <input type="text" name="q" class="order-search__input" 
+                           placeholder="Tìm theo mã đơn hàng..." 
+                           value="<?php echo htmlspecialchars($searchQuery); ?>">
+                </form>
+
+                <div class="order-filter">
+                    <span class="order-filter__label">Sắp xếp:</span>
+                    <select class="order-filter__select" onchange="window.location.href='?q=<?php echo urlencode($searchQuery); ?>&sort=' + this.value">
+                        <option value="desc" <?php echo $sortOrder === 'desc' ? 'selected' : ''; ?>>Mới nhất</option>
+                        <option value="asc" <?php echo $sortOrder === 'asc' ? 'selected' : ''; ?>>Cũ nhất</option>
+                    </select>
+                </div>
+            </div>
+
             <?php if (mysqli_num_rows($ordersResult) == 0): ?>
                 <div class="orders-empty">
                     <div class="orders-empty__icon">
