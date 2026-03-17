@@ -19,7 +19,7 @@ $max_price = isset($_GET['max_price']) ? (int)$_GET['max_price'] : 0;
 $q = isset($_GET['q']) ? mysqli_real_escape_string($conn, $_GET['q']) : '';
 
 // --- 3. XÂY DỰNG SQL QUERY ĐỘNG ---
-$where_clauses = ["1=1"];
+$where_clauses = ["is_commercial = 1"];
 
 if ($q !== '') {
     $where_clauses[] = "(name LIKE '%$q%' OR description LIKE '%$q%' OR seller_note LIKE '%$q%')";

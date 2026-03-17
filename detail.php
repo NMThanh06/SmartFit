@@ -25,6 +25,16 @@ if (!$product) {
     die("Không tìm thấy sản phẩm!");
 }
 
+// Kiểm tra quyền riêng tư cho đồ cá nhân (is_commercial = 0)
+// Chỉ chủ sở hữu (owner_id) mới được xem
+if (isset($product['is_commercial']) && $product['is_commercial'] == 0) {
+    if (!isset($_SESSION['user_id']) || $product['owner_id'] != $_SESSION['user_id']) {
+        // Nếu không phải chủ sở hữu, chuyển hướng về shop hoặc báo lỗi
+        header("Location: shop.php");
+        exit;
+    }
+}
+
 // Lấy Size và số lượng từ bảng outfit_sizes
 $sqlSizes = "SELECT color_id, size_name, quantity FROM outfit_sizes WHERE outfit_id = ?";
 $stmtSizes = mysqli_prepare($conn, $sqlSizes);

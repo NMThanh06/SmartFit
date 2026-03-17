@@ -51,10 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             // Lưu ý: Trong thực tế nên xóa ảnh cũ trong folder, nhưng để an toàn tôi sẽ giữ lại hoặc xử lý sau
             mysqli_query($conn, "DELETE FROM outfit_sizes WHERE outfit_id = $outfit_id");
             mysqli_query($conn, "DELETE FROM outfit_colors WHERE outfit_id = $outfit_id");
-        } else {
-            // TRƯỜNG HỢP: THÊM MỚI (INSERT)
-            $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at) 
-                           VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW())";
+            // TRƯỜNG HỢP: THÊM MỚI (INSERT) - Mặc định là sản phẩm của Shop (is_commercial = 1)
+            $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial) 
+                           VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1)";
             if (!mysqli_query($conn, $sql_outfit)) throw new Exception("Lỗi chèn bảng outfits: " . mysqli_error($conn));
             $outfit_id = mysqli_insert_id($conn);
         }
@@ -306,10 +305,10 @@ include $base_dir . 'includes/header.php';
                     </thead>
                     <tbody id="manageProductList">
                         <?php
-                        // Lấy danh sách sản phẩm thực tế từ DB
+                        // Lấy danh sách sản phẩm thực tế từ DB - Chỉ lấy đồ của Shop (is_commercial = 1)
                         $list_sql = "SELECT o.id, o.name, o.price, o.type, 
                                     (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as image 
-                                    FROM outfits o ORDER BY o.id DESC";
+                                    FROM outfits o WHERE o.is_commercial = 1 ORDER BY o.id DESC";
                         $list_result = mysqli_query($conn, $list_sql);
                         while ($p = mysqli_fetch_assoc($list_result)):
                         ?>
@@ -659,6 +658,16 @@ include $base_dir . 'includes/header.php';
     }
 
     .btn-primary:hover {
+        background: #333;
+        transform: translateY(-3px);
+    }
+
+    /* Color Picker Styles */
+    .color-picker-group { display: flex; gap: 8px; align-items: center; }
+    .color-picker-group input[type="text"] { flex: 1; }
+    .color-picker-group input[type="color"] { width: 45px; height: 45px; padding: 2px; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; background: #fff; }
+    .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    .color-picker-group input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
         opacity: 0.9;
         transform: scale(1.05);
     }
@@ -862,13 +871,26 @@ include $base_dir . 'includes/header.php';
 
     // Hàm tự động điền mã Hex khi nhập tên màu
     function suggestHex(input, cIdx) {
-        const hexInput = document.getElementById(`hexInput_${cIdx}`);
+        const hexText = document.getElementById(`hexInput_${cIdx}`);
+        const hexPicker = document.getElementById(`hexPicker_${cIdx}`);
         const colorName = input.value.toLowerCase().trim();
         
-        // Nếu tìm thấy trong từ điển thì tự điền
         if (colorMap[colorName]) {
-            hexInput.value = colorMap[colorName];
+            hexText.value = colorMap[colorName];
+            hexPicker.value = colorMap[colorName];
         }
+    }
+
+    function syncColorPicker(cIdx, val) {
+        const picker = document.getElementById(`hexPicker_${cIdx}`);
+        if (/^#[0-9A-F]{6}$/i.test(val)) {
+            picker.value = val;
+        }
+    }
+
+    function syncColorText(cIdx, val) {
+        const text = document.getElementById(`hexInput_${cIdx}`);
+        text.value = val.toUpperCase();
     }
 
     // Hàm thêm một khối màu sắc mới
@@ -896,9 +918,14 @@ include $base_dir . 'includes/header.php';
             </div>
             <div class="col l-4 m-12 c-12">
                 <div class="config-form__group">
-                    <label class="add-product__label">Mã màu HEX (Tự động)</label>
-                    <input type="text" name="colors[${colorCount}][hex]" id="hexInput_${colorCount}" 
-                        class="config-form__input--text" placeholder="#000000">
+                    <label class="add-product__label">Mã màu HEX (Nhập/Chọn)</label>
+                    <div class="color-picker-group">
+                        <input type="text" name="colors[${colorCount}][hex]" id="hexInput_${colorCount}" 
+                            class="config-form__input--text" placeholder="#000000"
+                            oninput="syncColorPicker(${colorCount}, this.value)">
+                        <input type="color" id="hexPicker_${colorCount}" value="#ffffff"
+                            oninput="syncColorText(${colorCount}, this.value)">
+                    </div>
                 </div>
             </div>
             <div class="col l-4 m-12 c-12">
@@ -1099,7 +1126,10 @@ include $base_dir . 'includes/header.php';
                     const block = document.getElementById(`colorBlock_${currentCIdx}`);
                     
                     block.querySelector(`[name="colors[${currentCIdx}][name]"]`).value = c.color_name;
-                    block.querySelector(`[name="colors[${currentCIdx}][hex]"]`).value = c.hex_code;
+                    const hexInput = block.querySelector(`[name="colors[${currentCIdx}][hex]"]`);
+                    const hexPicker = document.getElementById(`hexPicker_${currentCIdx}`);
+                    hexInput.value = c.hex_code;
+                    if (hexPicker) hexPicker.value = c.hex_code;
                     
                     // Hiển thị ảnh cũ (optional - maybe just placeholder for now since file input can't be set)
                     // We'll skip file input value because it's not possible, but we can show preview label nearby if needed.

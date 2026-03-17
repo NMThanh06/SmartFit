@@ -1651,6 +1651,8 @@ section.hero--home {
     border-radius: 12px;
     font-weight: 700;
     transition: all 0.3s;
+    border: none;
+    cursor: pointer;
 }
 
 .btn-primary:hover {

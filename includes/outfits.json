@@ -1,6 +1,72 @@
 {
     "items": [
         {
+            "id": "6",
+            "type": "shoes",
+            "name": "Giày Nike Air Force 1",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date",
+                "event"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "Trắng",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/1773752318_outfit_6_color_1.avif",
+            "price": 1000000,
+            "sizes": {
+                "38": 4,
+                "39": 7,
+                "40": 6,
+                "41": 1,
+                "42": 2
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
+            "id": "5",
+            "type": "bottom",
+            "name": "Quần short ",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/outfits/1773752263_user_2_closet.webp",
+            "price": 0,
+            "sizes": [],
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "4",
             "type": "top",
             "name": "Áo Hoodie",
@@ -86,7 +152,7 @@
                 "basic",
                 "street"
             ],
-            "color": "Trắng",
+            "color": "neutral",
             "fit": [
                 "regular"
             ],
@@ -95,15 +161,9 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773591299_outfit_2_color_1.avif",
+            "image": "/SmartFit/assets/img/default-placeholder.jpg",
             "price": 1000000,
-            "sizes": {
-                "38": 4,
-                "39": 7,
-                "40": 6,
-                "41": 1,
-                "42": 2
-            },
+            "sizes": [],
             "age": "All",
             "seller_note": ""
         },
