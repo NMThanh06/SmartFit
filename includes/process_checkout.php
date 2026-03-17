@@ -175,26 +175,18 @@ try {
             $response = curl_exec($ch);
 
             // 4. Bắt mạch xem n8n trả lời cái gì
-            if (curl_errno($ch)) {
+            $error_msg = curl_error($ch);
+            $has_error = curl_errno($ch);
+            curl_close($ch);
+
+            if ($has_error) {
                 // Lỗi không gửi được (sai IP, sai cổng, n8n sập...)
                 echo json_encode([
                     'status' => 'error',
-                    'message' => 'Lỗi mạng cURL: ' . curl_error($ch)
+                    'message' => 'Lỗi mạng cURL: ' . $error_msg
                 ]);
                 exit;
             }
-            else {
-                // Sửa lại thành 'success' để website tiếp tục chuyển hướng trang báo thành công
-                echo json_encode([
-                    'status' => 'success', 
-                    'message' => 'Đặt hàng và gửi mail thành công!',
-                    'order_id' => $orderId,           // Giữ lại để JS có thông tin chuyển trang
-                    'redirect_url' => 'order_history.php'
-                ]);
-                exit;
-            }
-
-            curl_close($ch);
             // ==========================================
 
             echo json_encode([
