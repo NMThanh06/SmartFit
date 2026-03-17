@@ -36,7 +36,7 @@ $user_data = mysqli_fetch_assoc($user_res);
 $total_users = $user_data['total_users'];
 
 // --- Thống kê Sản phẩm ---
-$product_query = "SELECT COUNT(*) as total_products FROM outfits";
+$product_query = "SELECT COUNT(*) as total_products FROM outfits WHERE is_commercial = 1";
 $product_res = mysqli_query($conn, $product_query);
 $product_data = mysqli_fetch_assoc($product_res);
 $total_products = $product_data['total_products'];
