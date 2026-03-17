@@ -184,11 +184,12 @@ try {
                 exit;
             }
             else {
-                // Gửi thành công, in ra câu trả lời của n8n
-                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                // Sửa lại thành 'success' để website tiếp tục chuyển hướng trang báo thành công
                 echo json_encode([
-                    'status' => 'error', // Cố tình để error để JS hiện popup thông báo cho mình xem
-                    'message' => 'Mã HTTP: ' . $http_code . ' - n8n trả lời: ' . $response
+                    'status' => 'success', 
+                    'message' => 'Đặt hàng và gửi mail thành công!',
+                    'order_id' => $orderId,           // Giữ lại để JS có thông tin chuyển trang
+                    'redirect_url' => 'order_history.php'
                 ]);
                 exit;
             }
