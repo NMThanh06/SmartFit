@@ -67,6 +67,24 @@
     opacity: 0.8;
 }
 
+/* Header Contact Links */
+.contact-header-link {
+    color: white;
+    font-size: 1.15rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, color 0.2s, text-shadow 0.2s;
+    text-decoration: none;
+    margin-right: 4px;
+}
+
+.contact-header-link:hover {
+    transform: scale(1.2);
+    color: #f8f9fa;
+    text-shadow: 0 0 8px rgba(255,255,255,0.6);
+}
+
 /* Resize Buttons */
 .chatbot-header__resize {
     display: flex;
@@ -365,12 +383,15 @@
     border-radius: 14px 14px 0 14px;
     margin-left: auto;
 }
+
 </style>
 
 <!-- Nút mở Chatbot -->
 <div class="chatbot-toggle" id="chatbotToggleBtn" onclick="toggleChatbot()">
     <img src="/SmartFit/assets/img/chatbox.png" alt="Mở Chatbot AI">
 </div>
+
+
 
 <!-- Khung Chatbot -->
 <div id="smartfit-chatbot">
@@ -380,16 +401,13 @@
             Trợ lý AI SmartFit
         </div>
         <div class="chatbot-header__actions">
-            <div class="chatbot-header__resize">
-                <span class="chatbot-header__resize-btn" onclick="resizeChatbot('up')" title="Phóng to">
-                    <i class="fa-solid fa-plus"></i>
-                </span>
-                <span class="chatbot-header__resize-btn" onclick="resizeChatbot('down')" title="Thu nhỏ">
-                    <i class="fa-solid fa-minus"></i>
-                </span>
-            </div>
-            <i class="fa-solid fa-headset chatbot-header__icon" title="Trò chuyện với nhân viên"></i>
-            <i class="fa-solid fa-envelope chatbot-header__icon" title="Gửi Email"></i>
+            <!-- Nút liên hệ mới nằm trên title header -->
+            <a href="https://zalo.me/0971996942" target="_blank" title="Liên hệ Zalo" class="contact-header-link">
+                <i class="fa-solid fa-comment-dots"></i>
+            </a>
+            <a href="mailto:nguyenminhthanh043216@gmail.com" title="Gửi Email" class="contact-header-link">
+                <i class="fa-solid fa-envelope"></i>
+            </a>
             <i class="fa-solid fa-xmark chatbot-header__icon" onclick="toggleChatbot()" title="Đóng"></i>
         </div>
     </div>
@@ -419,13 +437,12 @@
         <div class="chat-msg chat-msg--ai">
             <div class="suggestion-chips">
                 <div class="chip" onclick="sendSuggestion('Phối đồ với món này')">Phối đồ với món này 📸</div>
-                <div class="chip" onclick="sendSuggestion('Trò chuyện với nhân viên')">Trò chuyện với nhân viên</div>
             </div>
         </div>
     </div>
 
-    <!-- Footer / Input -->
-    <div class="chatbot-footer">
+    <!-- AI Chatbot Footer -->
+    <div class="chatbot-footer" id="aiChatFooter">
         <div class="chat-image-preview" id="chatImagePreview">
             <img src="" alt="Preview" class="chat-image-preview__thumb" id="chatImageThumb">
             <button class="chat-image-preview__remove" onclick="removeChatImagePreview()" title="Hủy ảnh">&times;</button>
@@ -441,6 +458,8 @@
             </button>
         </div>
     </div>
+
+
 </div>
 
 <script>

@@ -74,7 +74,7 @@ $vnp_ResponseCode = $_GET['vnp_ResponseCode'];
                 // ========================================
                 // GỬI WEBHOOK EMAIL HÓA ĐƠN SAU KHI VNPAY XÁC NHẬN THÀNH CÔNG
                 // ========================================
-                $webhookUrl = 'http://localhost:5678/webhook-test/order-email';
+                $webhookUrl = 'http://host.docker.internal:5678/webhook/order-email';
                 $webhookData = json_encode([
                     'order_id'       => $orderId,
                     'email'          => $_SESSION['order_email'] ?? '',

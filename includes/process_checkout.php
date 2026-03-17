@@ -141,42 +141,69 @@ try {
     // BƯỚC 4: CHỐT GIAO DỊCH — TẤT CẢ THÀNH CÔNG
     // ========================================
     mysqli_commit($conn);
-    
+
     // ========================================
     // BƯỚC 5: XỬ LÝ THEO TỪNG PHƯƠNG THỨC THANH TOÁN
     // ========================================
     switch ($payment_method) {
         case 'cod':
-            // ========================================
-            // COD: Gửi webhook email hóa đơn NGAY vì không cần chờ cổng thanh toán
-            // ========================================
-            $webhookUrl = 'http://localhost:5678/webhook-test/order-email';
-            $webhookData = json_encode([
-                'order_id'       => $orderId,
-                'email'          => $email,
-                'fullname'       => $fullname,
-                'total_amount'   => $totalAmount,
+            // ==========================================
+            // ĐOẠN CODE GỬI WEBHOOK SANG n8n (DEBUG MODE)
+            // ==========================================
+
+            // 1. Gom dữ liệu để gửi
+            $data_to_n8n = [
+                'order_id' => $orderId,
+                'fullname' => $fullname,
+                'email' => $email,
+                'total_amount' => $totalAmount,
                 'payment_method' => 'cod',
-                'address'        => $address
+                'address' => $address
+            ];
+
+            // 2. Setup cURL
+            $webhook_url = 'http://127.0.0.1:5678/webhook/order-email';
+            $ch = curl_init($webhook_url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data_to_n8n));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json'
             ]);
 
-            $ch = curl_init($webhookUrl);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $webhookData);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 2);
-            curl_exec($ch);
+            // 3. Bóp cò gửi đi
+            $response = curl_exec($ch);
+
+            // 4. Bắt mạch xem n8n trả lời cái gì
+            if (curl_errno($ch)) {
+                // Lỗi không gửi được (sai IP, sai cổng, n8n sập...)
+                echo json_encode([
+                    'status' => 'error',
+                    'message' => 'Lỗi mạng cURL: ' . curl_error($ch)
+                ]);
+                exit;
+            }
+            else {
+                // Gửi thành công, in ra câu trả lời của n8n
+                $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                echo json_encode([
+                    'status' => 'error', // Cố tình để error để JS hiện popup thông báo cho mình xem
+                    'message' => 'Mã HTTP: ' . $http_code . ' - n8n trả lời: ' . $response
+                ]);
+                exit;
+            }
+
             curl_close($ch);
+            // ==========================================
 
             echo json_encode([
-                'status' => 'success', 
+                'status' => 'success',
                 'message' => 'Đặt hàng thành công! Mã đơn: #' . $orderId,
                 'order_id' => $orderId,
                 'redirect_url' => 'order_history.php'
             ]);
             break;
-            
+
         case 'vnpay':
             // VNPay/MoMo: KHÔNG gửi webhook ở đây.
             // Webhook sẽ được gửi từ vnpay_return.php SAU KHI cổng thanh toán xác nhận thành công.
@@ -190,31 +217,32 @@ try {
             $_SESSION['order_fullname'] = $fullname;
             $_SESSION['order_address'] = $address;
             $_SESSION['order_payment_method'] = $payment_method;
-            
+
             // File này sẽ phụ trách tạo VNPAY URL và echo JSON để frontend redirect tới VNPay
             require_once 'vnpay_create.php';
             break;
-            
+
         case 'momo':
             echo json_encode([
-                'status' => 'error', 
+                'status' => 'error',
                 'message' => 'Chức năng thanh toán qua Ví MoMo đang được phát triển!'
             ]);
             break;
-            
+
         default:
             echo json_encode([
-                'status' => 'error', 
+                'status' => 'error',
                 'message' => 'Phương thức thanh toán không hợp lệ!'
             ]);
             break;
     }
 
-} catch (Exception $e) {
+}
+catch (Exception $e) {
     // ========================================
     // ROLLBACK — HOÀN TÁC TẤT CẢ NẾU CÓ BẤT KỲ LỖI NÀO
     // ========================================
-    mysqli_rollback($conn); 
+    mysqli_rollback($conn);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
 ?>

@@ -64,7 +64,7 @@ require_once __DIR__ . '/config.php';
 </head>
 
 <body>
-    <?php if (isset($page_extra_body)) echo $page_extra_body; ?>
+    <?php if (isset($page_extra_body) && is_string($page_extra_body)) echo $page_extra_body; ?>
     
     <main class="web__container ">
         <!-- Navigation -->
@@ -156,6 +156,8 @@ require_once __DIR__ . '/config.php';
                                     <span>Quản lý người dùng</span>
                                 </a>
                                 <?php endif; ?>
+
+
 
                                 <div class="user-dropdown__divider"></div>
 

@@ -31,6 +31,49 @@ try {
     }
 
     $wardrobeData = $decodedJson['items'];
+
+    // === TRỘN ĐỒ CÁ NHÂN TỪ DATABASE VÀO POOL ===
+    $currentUserId = $_SESSION['user_id'] ?? null;
+    if ($currentUserId) {
+        try {
+            $sqlPersonal = "SELECT o.id, o.name, o.type, o.gender, o.occasion, o.style, o.fit, o.weather, o.price,
+                                   oc.color_name, oc.image
+                            FROM outfits o
+                            LEFT JOIN outfit_colors oc ON o.id = oc.outfit_id
+                            WHERE o.is_commercial = 0 AND o.owner_id = ?";
+            $stmtPersonal = mysqli_prepare($conn, $sqlPersonal);
+            if ($stmtPersonal) {
+                mysqli_stmt_bind_param($stmtPersonal, "i", $currentUserId);
+                mysqli_stmt_execute($stmtPersonal);
+                $resPersonal = mysqli_stmt_get_result($stmtPersonal);
+
+                while ($pRow = mysqli_fetch_assoc($resPersonal)) {
+                    // Chuyển đổi sang cùng format với outfits.json
+                    $personalItem = [
+                        'id'          => 'personal_' . $pRow['id'], // Prefix tránh trùng ID shop
+                        'type'        => $pRow['type'] ?? 'top',
+                        'name'        => $pRow['name'] ?? 'Đồ cá nhân',
+                        'gender'      => json_decode($pRow['gender'] ?? '[]', true) ?: [],
+                        'occasion'    => json_decode($pRow['occasion'] ?? '[]', true) ?: [],
+                        'style'       => json_decode($pRow['style'] ?? '[]', true) ?: [],
+                        'color'       => $pRow['color_name'] ?? '',
+                        'fit'         => json_decode($pRow['fit'] ?? '[]', true) ?: [],
+                        'weather'     => json_decode($pRow['weather'] ?? '[]', true) ?: [],
+                        'image'       => $pRow['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg',
+                        'price'       => (int)($pRow['price'] ?? 0),
+                        'sizes'       => [],
+                        'age'         => 'All',
+                        'seller_note' => '(Đồ cá nhân của khách)'
+                    ];
+                    $wardrobeData[] = $personalItem;
+                }
+                mysqli_stmt_close($stmtPersonal);
+            }
+        } catch (Exception $e) {
+            // Bảng chưa có cột is_commercial/owner_id → bỏ qua, chỉ dùng đồ shop
+        }
+    }
+
     $wardrobeBrief = "";
 
     foreach ($wardrobeData as $item) {

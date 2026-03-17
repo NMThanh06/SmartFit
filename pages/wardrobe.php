@@ -328,10 +328,16 @@ endif; ?>
                 <div class="col l-6 m-12 c-12">
                     <div class="form-group">
                         <label>Ảnh sản phẩm (Chụp hoặc tải lên) <span class="required">*</span></label>
-                        <div class="upload-box" onclick="document.getElementById('personal-file').click()">
-                            <i class="fa-solid fa-cloud-arrow-up"></i>
-                            <p id="file-name">Nhấn để chọn ảnh hoặc chụp</p>
-                            <input type="file" id="personal-file" name="image" accept="image/*" capture="environment" hidden required onchange="updateFileName(this)">
+                        <div class="upload-box" id="uploadBox" onclick="document.getElementById('personal-file').click()">
+                            <div class="upload-box__placeholder" id="uploadPlaceholder">
+                                <i class="fa-solid fa-cloud-arrow-up"></i>
+                                <p>Nhấn để chọn ảnh hoặc chụp</p>
+                            </div>
+                            <div class="upload-box__preview" id="uploadPreview" style="display:none;">
+                                <img src="" alt="Preview" id="uploadPreviewImg">
+                            </div>
+                            <p class="upload-box__filename" id="file-name"></p>
+                            <input type="file" id="personal-file" name="image" accept="image/*" capture="environment" hidden required onchange="previewUploadImage(this)">
                         </div>
                     </div>
                 </div>
@@ -439,7 +445,10 @@ endif; ?>
     .upload-box { border: 2px dashed #ddd; border-radius: 15px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #fafafa; height: 100%; display: flex; flex-direction: column; justify-content: center; }
     .upload-box:hover { border-color: #007aff; background: #f0f7ff; }
     .upload-box i { font-size: 3rem; color: #007aff; margin-bottom: 10px; }
-    .upload-box p { font-size: 1.3rem; color: #86868b; }
+    .upload-box p { font-size: 1.3rem; color: #86868b; margin: 0; }
+    .upload-box__preview { display: flex; justify-content: center; align-items: center; }
+    .upload-box__preview img { max-width: 100%; max-height: 180px; border-radius: 12px; object-fit: cover; border: 2px solid #e0e0e0; }
+    .upload-box__filename { font-size: 1.2rem; color: #86868b; margin-top: 8px; word-break: break-all; }
 
     .form-divider { margin: 20px 0 15px; font-size: 1.4rem; font-weight: 700; color: #86868b; border-bottom: 1px solid #eee; padding-bottom: 5px; }
     .form-label-small { font-size: 1.3rem; font-weight: 700; margin-bottom: 8px; display: block; }
@@ -499,7 +508,7 @@ endif; ?>
         document.getElementById('item_id').value = '0';
         document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Thêm món đồ cá nhân';
         document.getElementById('btnSubmit').innerText = 'Lưu món đồ';
-        document.getElementById('file-name').innerText = 'Nhấn để chọn ảnh hoặc chụp';
+        resetUploadPreview();
         document.getElementById('addPersonalModal').style.display = 'block';
     }
 
@@ -530,8 +539,17 @@ endif; ?>
             } catch(e) {}
         });
 
-        document.getElementById('file-name').innerText = 'Để trống nếu không muốn đổi ảnh';
-        form.querySelector('#personal-file').required = false; // Khi sửa không bắt buộc up lại ảnh
+        // Hiển ảnh hiện tại của món đồ làm preview
+        if (item.image) {
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            document.getElementById('uploadPreview').style.display = 'flex';
+            document.getElementById('uploadPreviewImg').src = item.image;
+            document.getElementById('file-name').innerText = 'Để trống nếu không muốn đổi ảnh';
+        } else {
+            resetUploadPreview();
+            document.getElementById('file-name').innerText = 'Để trống nếu không muốn đổi ảnh';
+        }
+        form.querySelector('#personal-file').required = false;
 
         document.getElementById('addPersonalModal').style.display = 'block';
     }
@@ -540,9 +558,30 @@ endif; ?>
         document.getElementById('addPersonalModal').style.display = 'none';
     }
 
-    function updateFileName(input) {
-        const fileName = input.files[0]?.name || "Nhấn để chọn ảnh hoặc chụp";
-        document.getElementById('file-name').innerText = fileName;
+    // Reset upload preview về trạng thái ban đầu
+    function resetUploadPreview() {
+        document.getElementById('uploadPlaceholder').style.display = '';
+        document.getElementById('uploadPreview').style.display = 'none';
+        document.getElementById('uploadPreviewImg').src = '';
+        document.getElementById('file-name').innerText = '';
+    }
+
+    // Xem trước ảnh khi chọn file
+    function previewUploadImage(input) {
+        if (!input.files || !input.files[0]) {
+            resetUploadPreview();
+            return;
+        }
+
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('uploadPlaceholder').style.display = 'none';
+            document.getElementById('uploadPreview').style.display = 'flex';
+            document.getElementById('uploadPreviewImg').src = e.target.result;
+            document.getElementById('file-name').innerText = file.name;
+        };
+        reader.readAsDataURL(file);
     }
 
     // Đóng modal khi click ra ngoài

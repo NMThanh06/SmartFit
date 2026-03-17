@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mysqli_stmt_execute($insert)) {
         // Gửi webhook đến n8n để gửi email chào mừng
-        $webhookUrl = 'http://localhost:5678/webhook-test/welcome-email';
+        $webhookUrl = 'http://host.docker.internal:5678/webhook/welcome-email';
         $webhookData = json_encode([
             'name'  => $name,
             'email' => $email
