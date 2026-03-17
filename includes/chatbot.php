@@ -21,6 +21,18 @@
     bottom: 25px;
 }
 
+/* Chatbot Resize States */
+#smartfit-chatbot.enlarged {
+    width: 460px;
+    height: 650px;
+}
+
+#smartfit-chatbot.maximized {
+    width: 550px;
+    height: 80vh;
+    max-height: 800px;
+}
+
 /* Chatbot Header */
 .chatbot-header {
     background: #003366; /* HUTECH dark blue */
@@ -32,7 +44,7 @@
 }
 
 .chatbot-header__title {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     font-weight: 600;
     display: flex;
     align-items: center;
@@ -55,6 +67,32 @@
     opacity: 0.8;
 }
 
+/* Resize Buttons */
+.chatbot-header__resize {
+    display: flex;
+    gap: 6px;
+    margin-right: 4px;
+}
+
+.chatbot-header__resize-btn {
+    color: white;
+    cursor: pointer;
+    font-size: 1.25rem;
+    opacity: 0.85;
+    transition: opacity 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.chatbot-header__resize-btn:hover {
+    opacity: 1;
+    transform: scale(1.15);
+}
+
 /* Chatbot Body */
 .chatbot-body {
     flex: 1;
@@ -69,8 +107,8 @@
 /* Messages */
 .chat-msg {
     max-width: 85%;
-    font-size: 0.95rem;
-    line-height: 1.5;
+    font-size: 1.15rem;
+    line-height: 1.6;
     animation: fadeInMsg 0.3s ease forwards;
 }
 
@@ -151,7 +189,7 @@
     color: #003366;
     padding: 8px 14px;
     border-radius: 20px;
-    font-size: 0.85rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 2px 5px rgba(0,0,0,0.02);
@@ -199,7 +237,7 @@
     border: none;
     background: transparent;
     padding: 10px;
-    font-size: 0.95rem;
+    font-size: 1.1rem;
     outline: none;
     color: #333;
 }
@@ -266,6 +304,67 @@
     0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
     40% { transform: scale(1); opacity: 1; }
 }
+/* Image Preview Strip */
+.chat-image-preview {
+    display: none;
+    padding: 8px 15px 0;
+    position: relative;
+}
+
+.chat-image-preview.active {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chat-image-preview__thumb {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid #e0e0e0;
+    margin-bottom: 5px;
+}
+
+.chat-image-preview__remove {
+    position: absolute;
+    top: 4px;
+    left: 62px;
+    width: 20px;
+    height: 20px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: transform 0.15s;
+}
+
+.chat-image-preview__remove:hover {
+    transform: scale(1.15);
+}
+
+/* Chat Image Bubble */
+.chat-msg__img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 14px;
+    object-fit: cover;
+    display: block;
+    margin-bottom: 4px;
+    cursor: pointer;
+}
+
+.chat-msg--user .chat-msg__img {
+    border-radius: 14px 14px 0 14px;
+    margin-left: auto;
+}
 </style>
 
 <!-- Nút mở Chatbot -->
@@ -281,6 +380,14 @@
             Trợ lý AI SmartFit
         </div>
         <div class="chatbot-header__actions">
+            <div class="chatbot-header__resize">
+                <span class="chatbot-header__resize-btn" onclick="resizeChatbot('up')" title="Phóng to">
+                    <i class="fa-solid fa-plus"></i>
+                </span>
+                <span class="chatbot-header__resize-btn" onclick="resizeChatbot('down')" title="Thu nhỏ">
+                    <i class="fa-solid fa-minus"></i>
+                </span>
+            </div>
             <i class="fa-solid fa-headset chatbot-header__icon" title="Trò chuyện với nhân viên"></i>
             <i class="fa-solid fa-envelope chatbot-header__icon" title="Gửi Email"></i>
             <i class="fa-solid fa-xmark chatbot-header__icon" onclick="toggleChatbot()" title="Đóng"></i>
@@ -319,6 +426,10 @@
 
     <!-- Footer / Input -->
     <div class="chatbot-footer">
+        <div class="chat-image-preview" id="chatImagePreview">
+            <img src="" alt="Preview" class="chat-image-preview__thumb" id="chatImageThumb">
+            <button class="chat-image-preview__remove" onclick="removeChatImagePreview()" title="Hủy ảnh">&times;</button>
+        </div>
         <div class="chat-input-wrapper">
             <input type="file" id="chatImageUpload" hidden accept="image/*">
             <button class="chat-btn" onclick="document.getElementById('chatImageUpload').click()" title="Tải ảnh lên">
@@ -342,6 +453,25 @@ function toggleChatbot() {
     if (chatbot.classList.contains('active')) {
         syncWeatherToChatbot();
     }
+}
+
+// Phóng to / Thu nhỏ Chatbot
+function resizeChatbot(direction) {
+    const chatbot = document.getElementById('smartfit-chatbot');
+    const states = ['', 'enlarged', 'maximized']; // 3 mức: bình thường → lớn → rất lớn
+
+    // Tìm state hiện tại
+    let current = 0;
+    if (chatbot.classList.contains('maximized')) current = 2;
+    else if (chatbot.classList.contains('enlarged')) current = 1;
+
+    // Tăng hoặc giảm
+    if (direction === 'up' && current < 2) current++;
+    else if (direction === 'down' && current > 0) current--;
+
+    // Xóa tất cả, gán mới
+    chatbot.classList.remove('enlarged', 'maximized');
+    if (states[current]) chatbot.classList.add(states[current]);
 }
 
 // Lấy dữ liệu thời tiết hiện tại từ trang index đẩy vào thẻ Weather Card
@@ -372,22 +502,30 @@ function getChatContext() {
     };
 }
 
-// Gửi tin nhắn tới Backend AI
-async function sendToAI(message) {
+// Gửi tin nhắn tới Backend AI (hỗ trợ Multimodal)
+async function sendToAI(message, imageBase64) {
     const context = getChatContext();
 
     // Hiển thị typing indicator
     showTypingIndicator();
 
+    // Xây dựng payload
+    const payload = {
+        message: message,
+        weather: context.weather,
+        location: context.location
+    };
+
+    // Nếu có ảnh, gửi kèm base64
+    if (imageBase64) {
+        payload.image = imageBase64;
+    }
+
     try {
         const response = await fetch('/SmartFit/includes/chatbot_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                message: message,
-                weather: context.weather,
-                location: context.location
-            })
+            body: JSON.stringify(payload)
         });
 
         const data = await response.json();
@@ -420,23 +558,84 @@ function handleChatEnter(e) {
     }
 }
 
-// Gửi tin nhắn từ input
+// Biến lưu ảnh đính kèm hiện tại
+let chatPendingImage = null;
+
+// Lắng nghe chọn ảnh
+document.getElementById('chatImageUpload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Kiểm tra định dạng ảnh
+    if (!file.type.startsWith('image/')) {
+        if (typeof showToast === 'function') showToast('Vui lòng chọn file ảnh!', 'error');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        chatPendingImage = evt.target.result;
+        const preview = document.getElementById('chatImagePreview');
+        const thumb = document.getElementById('chatImageThumb');
+        thumb.src = chatPendingImage;
+        preview.classList.add('active');
+    };
+    reader.readAsDataURL(file);
+});
+
+// Hủy ảnh preview
+function removeChatImagePreview() {
+    chatPendingImage = null;
+    const preview = document.getElementById('chatImagePreview');
+    preview.classList.remove('active');
+    document.getElementById('chatImageUpload').value = '';
+}
+
+// Gửi tin nhắn từ input (có hỗ trợ ảnh)
 function sendUserMessage() {
     const inputEl = document.getElementById('chatInput');
     const text = inputEl.value.trim();
-    if (!text) return;
+    const hasImage = !!chatPendingImage;
+
+    if (!text && !hasImage) return;
     
-    appendUserMessage(text);
+    appendUserMessage(text, chatPendingImage);
     inputEl.value = '';
-    sendToAI(text);
+
+    // Xóa preview sau khi gửi
+    const sentImage = chatPendingImage;
+    removeChatImagePreview();
+
+    // Gửi AI với text và/hoặc ảnh (Multimodal)
+    if (text) {
+        sendToAI(text, sentImage || null);
+    } else if (hasImage) {
+        sendToAI('', sentImage);
+    }
 }
 
-// Render tin nhắn của User
-function appendUserMessage(text) {
+// Render tin nhắn của User (hỗ trợ ảnh)
+function appendUserMessage(text, imageSrc) {
     const chatBody = document.getElementById('chatBody');
     const msgDiv = document.createElement('div');
     msgDiv.className = 'chat-msg chat-msg--user';
-    msgDiv.innerText = text;
+
+    // Nếu có ảnh, hiển thị ảnh như bong bóng Messenger
+    if (imageSrc) {
+        const img = document.createElement('img');
+        img.src = imageSrc;
+        img.className = 'chat-msg__img';
+        img.alt = 'Hình ảnh đính kèm';
+        img.onclick = function() { window.open(imageSrc, '_blank'); };
+        msgDiv.appendChild(img);
+    }
+
+    if (text) {
+        const textSpan = document.createElement('span');
+        textSpan.innerText = text;
+        msgDiv.appendChild(textSpan);
+    }
+
     chatBody.appendChild(msgDiv);
     chatBody.scrollTop = chatBody.scrollHeight;
 }
