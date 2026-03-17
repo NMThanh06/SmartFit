@@ -2,12 +2,20 @@
 session_start();
 require_once 'config.php';
 
+// Lấy URL trang hiện tại để redirect về sau khi xử lý
+$redirectUrl = '../style_outfits.php'; // Mặc định
+if (!empty($_POST['redirect_url'])) {
+    $redirectUrl = $_POST['redirect_url'];
+} elseif (!empty($_SERVER['HTTP_REFERER'])) {
+    $redirectUrl = $_SERVER['HTTP_REFERER'];
+}
+
 // Kiểm tra xem có phải yêu cầu AJAX (Fetch API) không
 $isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' 
           || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
 
 function sendResponse($success, $message, $data = []) {
-    global $isAjax;
+    global $isAjax, $redirectUrl;
     if ($isAjax) {
         header('Content-Type: application/json');
         echo json_encode(array_merge(['success' => $success, 'message' => $message], $data));
@@ -18,7 +26,7 @@ function sendResponse($success, $message, $data = []) {
         } else {
             $_SESSION['error'] = $message;
         }
-        header('Location: ../style_outfits.php');
+        header('Location: ' . $redirectUrl);
         exit;
     }
 }
@@ -66,5 +74,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-header('Location: ../style_outfits.php');
+header('Location: ' . $redirectUrl);
 exit;

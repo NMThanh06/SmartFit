@@ -76,6 +76,7 @@
         <div id="loginForm">
             <div class="auth-card__title">Đăng nhập</div>
             <form action="<?php echo $root; ?>includes/login.php" method="post" class="auth-card__form">
+                <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">
                 <div class="auth-card__group">
                     <h4 class="auth-card__heading">Email hoặc Tên đăng nhập</h4>
                     <input type="text" placeholder="Nhập Email hoặc Tên đăng nhập" class="auth-card__input" name="email" required>
@@ -93,6 +94,7 @@
         <div id="registerForm" style="display: none;">
             <div class="auth-card__title">Đăng ký</div>
             <form action="<?php echo $root; ?>includes/signup-form.php" method="post" class="auth-card__form">
+                <input type="hidden" name="redirect_url" value="<?php echo htmlspecialchars($_SERVER['REQUEST_URI']); ?>">
                 <div class="auth-card__group">
                     <h4 class="auth-card__heading">Tên đăng nhập</h4>
                     <input type="text" placeholder="Nhập tên đăng nhập" class="auth-card__input" name="name" required>
