@@ -129,8 +129,11 @@ include '../includes/header.php';
                                                 <span>Số lượng: <?php echo $item['quantity']; ?></span>
                                             </div>
                                         </div>
-                                        <div class="order-item__price">
-                                            <?php echo number_format($item['price'], 0, ',', '.'); ?> đ
+                                        <div class="order-item__price" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                            <div><?php echo number_format($item['price'], 0, ',', '.'); ?> đ</div>
+                                            <?php if ($order['status'] === 'completed'): ?>
+                                                <a href="<?php echo $root; ?>pages/review.php?order_id=<?php echo $order['id']; ?>&outfit_id=<?php echo $item['outfit_id']; ?>" class="button" style="padding: 5px 10px; font-size: 1.2rem; background: #ee4d2d; color: white; border-radius: 4px; text-decoration: none; border: none;">Đánh giá sản phẩm</a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endwhile; ?>

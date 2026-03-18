@@ -65,6 +65,7 @@ include 'includes/header.php';
                             </div>
                             <div class="shop-sort">
                                 <select class="shop-sort__select" id="sortFilter">
+                                    <option value="popular">Phổ biến nhất</option>
                                     <option value="newest">Mới nhất</option>
                                     <option value="price-asc">Giá tăng dần</option>
                                     <option value="price-desc">Giá giảm dần</option>
