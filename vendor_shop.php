@@ -347,17 +347,41 @@ $totalProducts = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCount))['total']
         colorContainer.innerHTML = '';
         if (item.colors && item.colors.length > 0) {
             item.colors.forEach(c => {
-                const btn = document.createElement('span');
-                btn.className = 'config-color-btn';
-                btn.style.background = c.hex_code;
+                const btn = document.createElement('div');
+                btn.className = 'config-color-btn-img';
+                btn.style.width = '40px';
+                btn.style.height = '40px';
+                btn.style.borderRadius = '4px';
+                btn.style.overflow = 'hidden';
+                btn.style.border = '1px solid #e0e0e0';
+                btn.style.cursor = 'pointer';
+                btn.style.display = 'flex';
+                btn.style.alignItems = 'center';
+                btn.style.justifyContent = 'center';
+                btn.style.margin = '2px';
+                
+                const img = document.createElement('img');
+                img.src = c.image ? c.image : './assets/img/default-placeholder.jpg';
+                img.alt = c.color_name;
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                
+                btn.appendChild(img);
                 btn.title = c.color_name;
+                
                 const colorStock = item.sizes.filter(s => s.color_id == c.id).reduce((sum, s) => sum + parseInt(s.quantity), 0);
                 if (colorStock <= 0) {
                     btn.classList.add('out-of-stock');
+                    btn.style.opacity = '0.5';
                 } else {
                     btn.onclick = () => {
-                        document.querySelectorAll('.config-color-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.config-color-btn-img').forEach(b => {
+                            b.classList.remove('active');
+                            b.style.borderColor = '#e0e0e0';
+                        });
                         btn.classList.add('active');
+                        btn.style.borderColor = '#007aff';
                         selectedConfigColor = c.color_name;
                         if (c.image) document.getElementById('modalProductImg').src = c.image;
                         renderSizesForColor(c.id);
@@ -365,7 +389,7 @@ $totalProducts = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCount))['total']
                 }
                 colorContainer.appendChild(btn);
             });
-            const firstAvailable = colorContainer.querySelector('.config-color-btn:not(.out-of-stock)');
+            const firstAvailable = colorContainer.querySelector('.config-color-btn-img:not(.out-of-stock)');
             if (firstAvailable) firstAvailable.click();
         } else {
             colorContainer.innerHTML = '<p style="font-size:1.2rem;color:#999;">Không có biến thể màu</p>';

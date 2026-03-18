@@ -68,7 +68,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
         $name = mysqli_real_escape_string($conn, $_POST['name']);
         $type = mysqli_real_escape_string($conn, $_POST['type']);
         $color_name = mysqli_real_escape_string($conn, $_POST['color_name'] ?? 'Mặc định');
-        $hex_code = mysqli_real_escape_string($conn, $_POST['hex_code'] ?? '#000000');
 
         // Phân loại (JSON)
         $gender = json_encode($_POST['gender'] ?? [], JSON_UNESCAPED_UNICODE);
@@ -96,10 +95,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                 if (!mysqli_stmt_execute($stmt_upd))
                     throw new Exception("Lỗi cập nhật thông tin: " . mysqli_error($conn));
 
-                // Cập nhật bảng outfit_colors (Tên màu và Hex)
-                $sql_col_upd = "UPDATE outfit_colors SET color_name = ?, hex_code = ? WHERE outfit_id = ?";
+                // Cập nhật bảng outfit_colors (Tên màu)
+                $sql_col_upd = "UPDATE outfit_colors SET color_name = ? WHERE outfit_id = ?";
                 $stmt_col_upd = mysqli_prepare($conn, $sql_col_upd);
-                mysqli_stmt_bind_param($stmt_col_upd, "ssi", $color_name, $hex_code, $itemId);
+                mysqli_stmt_bind_param($stmt_col_upd, "si", $color_name, $itemId);
                 mysqli_stmt_execute($stmt_col_upd);
 
                 // Nếu có upload ảnh mới (qua file hoặc base64 từ camera)
@@ -169,9 +168,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     }
                 }
 
-                $sql_col = "INSERT INTO outfit_colors (outfit_id, color_name, hex_code, image) VALUES (?, ?, ?, ?)";
+                $sql_col = "INSERT INTO outfit_colors (outfit_id, color_name, image) VALUES (?, ?, ?)";
                 $stmt_col = mysqli_prepare($conn, $sql_col);
-                mysqli_stmt_bind_param($stmt_col, "isss", $outfit_id, $color_name, $hex_code, $image_path);
+                mysqli_stmt_bind_param($stmt_col, "iss", $outfit_id, $color_name, $image_path);
                 mysqli_stmt_execute($stmt_col);
                 $msg = "Đã thêm món đồ mới vào tủ đồ!";
             }
@@ -352,6 +351,10 @@ endif; ?>
                             <option value="accessory">Phụ kiện (Accessory)</option>
                         </select>
                     </div>
+                    <div class="form-group">
+                        <label>Màu sắc</label>
+                        <input type="text" name="color_name" placeholder="VD: Trắng, Đen, Xanh...">
+                    </div>
 
                 </div>
                 <div class="col l-6 m-12 c-12">
@@ -484,11 +487,6 @@ endif; ?>
     .form-group input, .form-group select { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 1.4rem; outline: none; transition: 0.3s; }
     .form-group input:focus { border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1); }
     
-    .color-picker-group { display: flex; gap: 8px; align-items: center; }
-    .color-picker-group input[type="text"] { flex: 1; }
-    .color-picker-group input[type="color"] { width: 45px; height: 45px; padding: 2px; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; background: #fff; }
-    .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .color-picker-group input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
     
     .upload-box { border: 2px dashed #ddd; border-radius: 15px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #fafafa; min-height: 200px; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; }
     .upload-box:hover { border-color: #007aff; background: #f0f7ff; }
@@ -514,34 +512,6 @@ endif; ?>
 </style>
 
 <script>
-    const colorMap = {
-        'đen': '#000000', 'trắng': '#FFFFFF', 'đỏ': '#FF0000', 'vàng': '#FFFF00',
-        'xanh lá': '#008000', 'xanh dương': '#0000FF', 'xanh lam': '#0000FF',
-        'cam': '#FFA500', 'tím': '#800080', 'hồng': '#FFC0CB', 'xám': '#808080',
-        'nâu': '#3f2929ff', 'kem': '#d8d7c7ff', 'be': '#F5F5DC'
-    };
-
-    function suggestHex(input) {
-        const hexText = document.getElementById('hex_code_text');
-        const hexPicker = document.getElementById('hex_code_picker');
-        const colorName = input.value.toLowerCase().trim();
-        if (colorMap[colorName]) {
-            hexText.value = colorMap[colorName];
-            hexPicker.value = colorMap[colorName];
-        }
-    }
-
-    function syncColorPicker(val) {
-        const picker = document.getElementById('hex_code_picker');
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            picker.value = val;
-        }
-    }
-
-    function syncColorText(val) {
-        const text = document.getElementById('hex_code_text');
-        text.value = val.toUpperCase();
-    }
 
     function switchTab(btn, sectionId) {
         document.querySelectorAll('.wardrobe-tab').forEach(t => t.classList.remove('active'));
