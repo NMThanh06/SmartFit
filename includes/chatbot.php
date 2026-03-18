@@ -401,6 +401,15 @@
             Trợ lý AI SmartFit
         </div>
         <div class="chatbot-header__actions">
+            <!-- Nút thu phóng chatbot -->
+            <div class="chatbot-header__resize">
+                <button class="chatbot-header__resize-btn" onclick="resizeChatbot('up')" title="Phóng to">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+                <button class="chatbot-header__resize-btn" onclick="resizeChatbot('down')" title="Thu nhỏ">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+            </div>
             <!-- Nút liên hệ mới nằm trên title header -->
             <a href="https://zalo.me/0971996942" target="_blank" title="Liên hệ Zalo" class="contact-header-link">
                 <i class="fa-solid fa-comment-dots"></i>
