@@ -153,7 +153,7 @@ try {
             ];
 
             // 2. Setup cURL
-            $webhook_url = 'http://127.0.0.1:5678/webhook/order-email';
+            $webhook_url = N8N_BASE_URL . '/webhook/order-email';
             $ch = curl_init($webhook_url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);

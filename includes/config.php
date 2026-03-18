@@ -12,6 +12,9 @@ $db   = getenv('DB_NAME') ?: 'webtest_db';
 
 $conn = mysqli_connect($host, $user, $pass, $db);
 
+// Cấu hình Base URL cho n8n Webhooks
+define('N8N_BASE_URL', getenv('N8N_URL') ?: 'http://localhost:5678');
+
 if (!$conn) {
     die('Kết nối thất bại: ' . mysqli_connect_error());
 }
