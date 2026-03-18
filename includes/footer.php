@@ -349,11 +349,22 @@
         openCart: function() {
             document.getElementById('cartOverlay').classList.add('show');
             document.getElementById('cartDrawer').classList.add('open');
+            
+            // Ẩn Chatbot
+            const chatToggle = document.getElementById('chatbotToggleBtn');
+            const chatWindow = document.getElementById('smartfit-chatbot');
+            if (chatToggle) chatToggle.style.display = 'none';
+            if (chatWindow) chatWindow.classList.remove('active');
+
             syncCart();
         },
         closeCart: function() {
             document.getElementById('cartOverlay').classList.remove('show');
             document.getElementById('cartDrawer').classList.remove('open');
+
+            // Hiện lại Chatbot
+            const chatToggle = document.getElementById('chatbotToggleBtn');
+            if (chatToggle) chatToggle.style.display = 'flex';
         }
     };
 </script>

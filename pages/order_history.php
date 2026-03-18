@@ -129,23 +129,27 @@ include '../includes/header.php';
                                                 <span>Số lượng: <?php echo $item['quantity']; ?></span>
                                             </div>
                                         </div>
-                                        <div class="order-item__price">
-                                            <?php echo number_format($item['price'], 0, ',', '.'); ?> đ
+                                        <div class="order-item__price" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                                            <div><?php echo number_format($item['price'], 0, ',', '.'); ?> đ</div>
+                                            <?php if ($order['status'] === 'completed'): ?>
+                                                <a href="<?php echo $root; ?>pages/review.php?order_id=<?php echo $order['id']; ?>&outfit_id=<?php echo $item['outfit_id']; ?>" class="button" style="padding: 5px 10px; font-size: 1.2rem; background: #ee4d2d; color: white; border-radius: 4px; text-decoration: none; border: none;">Đánh giá sản phẩm</a>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 <?php endwhile; ?>
                             </div>
 
-                                <div class="order-card__total">
-                                    <span class="order-card__total-label">Tổng cộng:</span>
-                                    <span class="order-card__total-value"><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</span>
+                                <div class="order-card__footer">
+                                    <div class="order-card__total">
+                                        <span class="order-card__total-label">Tổng cộng:</span>
+                                        <span class="order-card__total-value"><?php echo number_format($order['total_amount'], 0, ',', '.'); ?> ₫</span>
+                                    </div>
+                                    <button class="order-card__btn-detail" 
+                                        onclick="openOrderDetail(<?php echo htmlspecialchars(json_encode($order)); ?>, this)">
+                                        <i class="fa-solid fa-circle-info"></i> Xem chi tiết
+                                    </button>
                                 </div>
-                                <button class="order-card__btn-detail" 
-                                    onclick="openOrderDetail(<?php echo htmlspecialchars(json_encode($order)); ?>, this)">
-                                    <i class="fa-solid fa-circle-info"></i> Xem chi tiết
-                                </button>
                             </div>
-                        </div>
                     <?php endwhile; ?>
                 </div>
             <?php endif; ?>

@@ -74,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         if (isset($_POST['colors']) && is_array($_POST['colors'])) {
             foreach ($_POST['colors'] as $cIdx => $colorData) {
                 $color_name = mysqli_real_escape_string($conn, $colorData['name']);
-                $hex_code = mysqli_real_escape_string($conn, $colorData['hex']);
                 $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
 
                 // Nếu là Update và không upload ảnh mới, cần giữ ảnh cũ (trong logic đơn giản này ta coi như phải upload hoặc dùng placeholder)
@@ -91,8 +90,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     }
                 }
 
-                $sql_color = "INSERT INTO outfit_colors (outfit_id, color_name, hex_code, image) 
-                               VALUES ($outfit_id, '$color_name', '$hex_code', '$image_path')";
+                $sql_color = "INSERT INTO outfit_colors (outfit_id, color_name, image) 
+                               VALUES ($outfit_id, '$color_name', '$image_path')";
                 mysqli_query($conn, $sql_color);
                 $color_id = mysqli_insert_id($conn);
 
@@ -334,80 +333,74 @@ include $base_dir . 'includes/header.php';
                         $list_sql .= " ORDER BY o.id DESC";
                         $list_result = mysqli_query($conn, $list_sql);
                         while ($p = mysqli_fetch_assoc($list_result)):
-                            ?>
-                            <tr id="row_<?= $p['id'] ?>" class="manage-table__row">
-                                <td>
-                                    <button type="button" class="btn-expand-variants"
-                                        onclick="toggleProductVariants(<?= $p['id'] ?>, this)">
-                                        <i class="fa-solid fa-chevron-down"></i>
-                                    </button>
-                                </td>
-                                <td>#<?= $p['id'] ?></td>
-                                <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>"
-                                        class="manage-table__img"></td>
-                                <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
-                                <td><?= number_format($p['price'], 0, ',', '.') ?>đ</td>
-                                <td><?= ucfirst($p['type']) ?></td>
-                                <td class="manage-table__actions">
-                                    <button type="button" class="btn-edit" onclick="editProduct(<?= $p['id'] ?>)">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                    <button type="button" class="btn-delete" onclick="deleteProduct(<?= $p['id'] ?>)">
-                                        <i class="fa-solid fa-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                            <!-- Chi tiết Biến thể (Màu & Size) -->
-                            <tr id="variants_<?= $p['id'] ?>" class="variants-detail-row" style="display: none;">
-                                <td colspan="7">
-                                    <div class="variants-detail-wrapper">
-                                        <table class="variants-subtable">
-                                            <thead>
-                                                <tr>
-                                                    <th>Ảnh màu</th>
-                                                    <th>Tên màu & Mã HEX</th>
-                                                    <th>Kích cỡ & Tồn kho</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <?php
-                                                $color_sql = "SELECT id, color_name, hex_code, image FROM outfit_colors WHERE outfit_id = " . $p['id'];
-                                                $color_res = mysqli_query($conn, $color_sql);
-                                                while ($c = mysqli_fetch_assoc($color_res)):
-                                                    ?>
-                                                    <tr>
-                                                        <td style="width: 80px;">
-                                                            <img src="<?= $c['image'] ?>" class="variants-subtable__img">
-                                                        </td>
-                                                        <td style="width: 150px;">
-                                                            <div class="color-preview-item">
-                                                                <span class="color-preview-box"
-                                                                    style="background-color: <?= $c['hex_code'] ?>;"></span>
-                                                                <strong><?= htmlspecialchars($c['color_name']) ?></strong>
-                                                                <small><?= strtoupper($c['hex_code']) ?></small>
-                                                            </div>
-                                                        </td>
-                                                        <td>
-                                                            <div class="variant-sizes-list">
-                                                                <?php
-                                                                $size_sql = "SELECT size_name, quantity FROM outfit_sizes WHERE color_id = " . $c['id'];
-                                                                $size_res = mysqli_query($conn, $size_sql);
-                                                                while ($s = mysqli_fetch_assoc($size_res)):
-                                                                    ?>
-                                                                    <span class="size-badge">
-                                                                        <strong><?= $s['size_name'] ?></strong>:
-                                                                        <?= $s['quantity'] ?>
-                                                                    </span>
-                                                                <?php endwhile; ?>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endwhile; ?>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </td>
-                            </tr>
+                        ?>
+                        <tr id="row_<?= $p['id'] ?>" class="manage-table__row">
+                            <td>
+                                <button type="button" class="btn-expand-variants" onclick="toggleProductVariants(<?= $p['id'] ?>, this)">
+                                    <i class="fa-solid fa-chevron-down"></i>
+                                </button>
+                            </td>
+                            <td>#<?= $p['id'] ?></td>
+                            <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>" class="manage-table__img"></td>
+                            <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
+                            <td><?= number_format($p['price'], 0, ',', '.') ?>đ</td>
+                            <td><?= ucfirst($p['type']) ?></td>
+                            <td class="manage-table__actions">
+                                <button type="button" class="btn-edit" onclick="editProduct(<?= $p['id'] ?>)">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                <button type="button" class="btn-delete" onclick="deleteProduct(<?= $p['id'] ?>)">
+                                    <i class="fa-solid fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <!-- Chi tiết Biến thể (Màu & Size) -->
+                        <tr id="variants_<?= $p['id'] ?>" class="variants-detail-row" style="display: none;">
+                            <td colspan="7">
+                                <div class="variants-detail-wrapper">
+                                    <table class="variants-subtable">
+                                        <thead>
+                                            <tr>
+                                                <th>Ảnh màu</th>
+                                                <th>Tên màu</th>
+                                                <th>Kích cỡ & Tồn kho</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            $color_sql = "SELECT id, color_name, image FROM outfit_colors WHERE outfit_id = " . $p['id'];
+                                            $color_res = mysqli_query($conn, $color_sql);
+                                            while ($c = mysqli_fetch_assoc($color_res)):
+                                            ?>
+                                            <tr>
+                                                <td style="width: 80px;">
+                                                    <img src="<?= $c['image'] ?>" class="variants-subtable__img">
+                                                </td>
+                                                <td style="width: 150px;">
+                                                    <div class="color-preview-item">
+                                                        <strong><?= htmlspecialchars($c['color_name']) ?></strong>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="variant-sizes-list">
+                                                        <?php
+                                                        $size_sql = "SELECT size_name, quantity FROM outfit_sizes WHERE color_id = " . $c['id'];
+                                                        $size_res = mysqli_query($conn, $size_sql);
+                                                        while ($s = mysqli_fetch_assoc($size_res)):
+                                                        ?>
+                                                        <span class="size-badge">
+                                                            <strong><?= $s['size_name'] ?></strong>: <?= $s['quantity'] ?>
+                                                        </span>
+                                                        <?php endwhile; ?>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <?php endwhile; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
                         <?php endwhile; ?>
                     </tbody>
                 </table>
@@ -690,39 +683,6 @@ include $base_dir . 'includes/header.php';
         transform: translateY(-3px);
     }
 
-    /* Color Picker Styles */
-    .color-picker-group {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-    }
-
-    .color-picker-group input[type="text"] {
-        flex: 1;
-    }
-
-    .color-picker-group input[type="color"] {
-        width: 45px;
-        height: 45px;
-        padding: 2px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        cursor: pointer;
-        background: #fff;
-    }
-
-    .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper {
-        padding: 0;
-    }
-
-    .color-picker-group input[type="color"]::-webkit-color-swatch {
-        border: none;
-        border-radius: 8px;
-    }
-
-    opacity: 0.9;
-    transform: scale(1.05);
-    }
 
     @keyframes slideUp {
         from {
@@ -887,13 +847,6 @@ include $base_dir . 'includes/header.php';
         gap: 2px;
     }
 
-    .color-preview-box {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        margin-bottom: 2px;
-    }
 
     .variant-sizes-list {
         display: flex;
@@ -940,63 +893,7 @@ include $base_dir . 'includes/header.php';
 
     let colorCount = 0;
 
-    // Từ điển màu sắc phổ biến (Tiếng Việt & Tiếng Anh)
-    const colorMap = {
-        'đen': '#000000',
-        'trắng': '#FFFFFF',
-        'đỏ': '#FF0000',
-        'xanh lá': '#008000',
-        'xanh dương': '#0000FF',
-        'xanh lam': '#0000FF',
-        'vàng': '#FFFF00',
-        'cam': '#FFA500',
-        'tím': '#800080',
-        'hồng': '#FFC0CB',
-        'xám': '#808080',
-        'ghi': '#808080',
-        'nâu': '#3f2929ff',
-        'kem': '#d8d7c7ff',
-        'be': '#F5F5DC',
-        'xanh đen': '#000080',
-        'than': '#36454F',
-        'kaki': '#C3B091',
-        'khaki': '#F0E68C',
-        'xanh nhạt': '#BCD4E6',
-        'xanh đậm': '#1A2A6C',
-        'xanh rêu': '#4F633B',
-        'đen xám': '#4A4A4A',
-        'màu wash': '#91A3B0',
-        'black': '#000000',
-        'white': '#FFFFFF',
-        'red': '#FF0000',
-        'green': '#008000',
-        'blue': '#0000FF',
-        'yellow': '#FFFF00'
-    };
 
-    // Hàm tự động điền mã Hex khi nhập tên màu
-    function suggestHex(input, cIdx) {
-        const hexText = document.getElementById(`hexInput_${cIdx}`);
-        const hexPicker = document.getElementById(`hexPicker_${cIdx}`);
-        const colorName = input.value.toLowerCase().trim();
-
-        if (colorMap[colorName]) {
-            hexText.value = colorMap[colorName];
-            hexPicker.value = colorMap[colorName];
-        }
-    }
-
-    function syncColorPicker(cIdx, val) {
-        const picker = document.getElementById(`hexPicker_${cIdx}`);
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            picker.value = val;
-        }
-    }
-
-    function syncColorText(cIdx, val) {
-        const text = document.getElementById(`hexInput_${cIdx}`);
-        text.value = val.toUpperCase();
-    }
 
     // Hàm thêm một khối màu sắc mới
     function addColorBlock() {
@@ -1017,23 +914,10 @@ include $base_dir . 'includes/header.php';
                 <div class="config-form__group">
                     <label class="add-product__label">Tên màu (VD: Đen, Trắng...)</label>
                     <input type="text" name="colors[${colorCount}][name]" 
-                        oninput="suggestHex(this, ${colorCount})"
                         class="config-form__input--text" required>
                 </div>
             </div>
-            <div class="col l-4 m-12 c-12">
-                <div class="config-form__group">
-                    <label class="add-product__label">Mã màu HEX (Nhập/Chọn)</label>
-                    <div class="color-picker-group">
-                        <input type="text" name="colors[${colorCount}][hex]" id="hexInput_${colorCount}" 
-                            class="config-form__input--text" placeholder="#000000"
-                            oninput="syncColorPicker(${colorCount}, this.value)">
-                        <input type="color" id="hexPicker_${colorCount}" value="#ffffff"
-                            oninput="syncColorText(${colorCount}, this.value)">
-                    </div>
-                </div>
-            </div>
-            <div class="col l-4 m-12 c-12">
+            <div class="col l-8 m-12 c-12">
                 <div class="config-form__group">
                     <label class="add-product__label">Ảnh minh họa màu</label>
                     <input type="file" name="color_images_${colorCount}" class="config-form__input--text" accept="image/*" required>
@@ -1233,11 +1117,8 @@ include $base_dir . 'includes/header.php';
                     const block = document.getElementById(`colorBlock_${currentCIdx}`);
 
                     block.querySelector(`[name="colors[${currentCIdx}][name]"]`).value = c.color_name;
-                    const hexInput = block.querySelector(`[name="colors[${currentCIdx}][hex]"]`);
-                    const hexPicker = document.getElementById(`hexPicker_${currentCIdx}`);
-                    hexInput.value = c.hex_code;
-                    if (hexPicker) hexPicker.value = c.hex_code;
 
+                    
                     // Hiển thị ảnh cũ (optional - maybe just placeholder for now since file input can't be set)
                     // We'll skip file input value because it's not possible, but we can show preview label nearby if needed.
 

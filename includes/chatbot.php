@@ -384,6 +384,33 @@
     margin-left: auto;
 }
 
+/* Responsive for Mobile Screens */
+@media (max-width: 480px) {
+    #smartfit-chatbot {
+        width: calc(100% - 40px);
+        right: 20px;
+        height: 70vh; /* Shorter on mobile if needed */
+        max-height: 500px;
+    }
+    
+    #smartfit-chatbot.active {
+        bottom: 20px;
+    }
+
+    .chatbot-toggle {
+        width: 60px;
+        height: 60px;
+        right: 20px;
+        bottom: 20px;
+    }
+    
+    /* Enlarged/Maximized on mobile should just be full width */
+    #smartfit-chatbot.enlarged, 
+    #smartfit-chatbot.maximized {
+        width: calc(100% - 40px);
+        height: 85vh;
+    }
+}
 </style>
 
 <!-- Nút mở Chatbot -->

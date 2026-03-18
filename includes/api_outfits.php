@@ -12,7 +12,7 @@ header('Content-Type: application/json; charset=utf-8');
  */
 // --- 2. XỬ LÝ THAM SỐ LỌC ---
 $type = isset($_GET['type']) ? mysqli_real_escape_string($conn, $_GET['type']) : 'all';
-$sort = isset($_GET['sort']) ? mysqli_real_escape_string($conn, $_GET['sort']) : 'newest';
+$sort = isset($_GET['sort']) && $_GET['sort'] !== '' ? mysqli_real_escape_string($conn, $_GET['sort']) : 'popular';
 $size = isset($_GET['size']) ? mysqli_real_escape_string($conn, $_GET['size']) : '';
 $min_price = isset($_GET['min_price']) ? (int)$_GET['min_price'] : 0;
 $max_price = isset($_GET['max_price']) ? (int)$_GET['max_price'] : 0;
@@ -54,10 +54,11 @@ if ($max_price > 0) {
 $where_str = implode(" AND ", $where_clauses);
 
 // Sắp xếp
-$order_by = "id DESC"; // Mặc định: Mới nhất (Newest)
-if ($sort === 'price-asc') $order_by = "price ASC";
+$order_by = "( (IFNULL(avg_rating, 0) * 10) + LOG10(IFNULL(review_count, 0) + 1) * 5 + LOG10(IFNULL(total_sold, 0) + 1) * 5 ) DESC, created_at DESC"; // Mặc định: Phổ biến
+if ($sort === 'newest') $order_by = "created_at DESC";
+elseif ($sort === 'price-asc') $order_by = "price ASC";
 elseif ($sort === 'price-desc') $order_by = "price DESC";
-elseif ($sort === 'oldest') $order_by = "created_at ASC"; // Tùy chọn thêm
+elseif ($sort === 'oldest') $order_by = "created_at ASC";
 
 $sql = "SELECT id, name, price, type FROM outfits WHERE $where_str ORDER BY $order_by";
 $result = mysqli_query($conn, $sql);
@@ -70,7 +71,7 @@ if ($result && mysqli_num_rows($result) > 0) {
         
         // Lấy danh sách màu sắc và ảnh tương ứng
         $colors = [];
-        $color_res = mysqli_query($conn, "SELECT id, color_name, hex_code, image FROM outfit_colors WHERE outfit_id = $outfit_id");
+        $color_res = mysqli_query($conn, "SELECT id, color_name, image FROM outfit_colors WHERE outfit_id = $outfit_id");
         while ($c = mysqli_fetch_assoc($color_res)) {
             $colors[] = $c;
         }

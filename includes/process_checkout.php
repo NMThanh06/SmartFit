@@ -161,23 +161,11 @@ try {
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json'
             ]);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Timeout ngắn (3s) để tránh treo trang
 
-            // 3. Bóp cò gửi đi
-            $response = curl_exec($ch);
-
-            // 4. Bắt mạch xem n8n trả lời cái gì
-            $error_msg = curl_error($ch);
-            $has_error = curl_errno($ch);
+            // 3. Thực hiện gửi (Bỏ qua lỗi nếu dịch vụ n8n không chạy)
+            @curl_exec($ch);
             curl_close($ch);
-
-            if ($has_error) {
-                // Lỗi không gửi được (sai IP, sai cổng, n8n sập...)
-                echo json_encode([
-                    'status' => 'error',
-                    'message' => 'Lỗi mạng cURL: ' . $error_msg
-                ]);
-                exit;
-            }
             // ==========================================
 
             echo json_encode([

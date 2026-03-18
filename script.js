@@ -254,9 +254,11 @@ window.app = {
             };
         }
 
-        authOverlay.onclick = (e) => {
-            if (e.target === authOverlay) authOverlay.style.display = 'none';
-        };
+        if (authOverlay) {
+            authOverlay.onclick = (e) => {
+                if (e.target === authOverlay) authOverlay.style.display = 'none';
+            };
+        }
     },
 
     // Xử lý gửi form Đăng nhập/Đăng ký qua AJAX

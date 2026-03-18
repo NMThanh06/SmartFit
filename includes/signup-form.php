@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 2); // Timeout 2 giây để không bị treo
-        curl_exec($ch);
+        @curl_exec($ch);
         curl_close($ch);
 
         sendResponse(true, 'Đăng ký thành công! Vui lòng đăng nhập.');

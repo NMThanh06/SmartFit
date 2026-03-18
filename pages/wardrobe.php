@@ -67,8 +67,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
         $itemId = isset($_POST['item_id']) ? (int)$_POST['item_id'] : 0;
         $name = mysqli_real_escape_string($conn, $_POST['name']);
         $type = mysqli_real_escape_string($conn, $_POST['type']);
-        $color_name = mysqli_real_escape_string($conn, $_POST['color_name']);
-        $hex_code = mysqli_real_escape_string($conn, $_POST['hex_code']);
+        $color_name = mysqli_real_escape_string($conn, $_POST['color_name'] ?? 'Mặc định');
+        $hex_code = mysqli_real_escape_string($conn, $_POST['hex_code'] ?? '#000000');
 
         // Phân loại (JSON)
         $gender = json_encode($_POST['gender'] ?? [], JSON_UNESCAPED_UNICODE);
@@ -325,23 +325,7 @@ endif; ?>
                             <option value="accessory">Phụ kiện (Accessory)</option>
                         </select>
                     </div>
-                    <div class="row">
-                        <div class="col l-6">
-                            <div class="form-group">
-                                <label>Tên màu</label>
-                                <input type="text" name="color_name" placeholder="VD: Trắng" oninput="suggestHex(this)">
-                            </div>
-                        </div>
-                        <div class="col l-6">
-                            <div class="form-group">
-                                <label>Mã màu (Hex)</label>
-                                <div class="color-picker-group">
-                                    <input type="text" name="hex_code" id="hex_code_text" value="#ffffff" placeholder="#FFFFFF" oninput="syncColorPicker(this.value)">
-                                    <input type="color" id="hex_code_picker" value="#ffffff" oninput="syncColorText(this.value)">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+
                 </div>
                 <div class="col l-6 m-12 c-12">
                     <div class="form-group">
@@ -540,11 +524,7 @@ endif; ?>
         
         form.querySelector('[name="name"]').value = item.name;
         form.querySelector('[name="type"]').value = item.type;
-        form.querySelector('[name="color_name"]').value = item.color_name || '';
-        
-        const hexVal = item.hex_code || '#ffffff';
-        document.getElementById('hex_code_text').value = hexVal.toUpperCase();
-        document.getElementById('hex_code_picker').value = hexVal;
+
         
         // Populate JSON fields (gender, occasion, style, weather, fit)
         ['gender', 'occasion', 'style', 'weather', 'fit'].forEach(key => {

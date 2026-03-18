@@ -9,7 +9,7 @@ if ($vendorId <= 0) {
 }
 
 // Lấy thông tin Vendor
-$sqlVendor = "SELECT fullname FROM users WHERE id = ? AND role IN ('sales', 'admin')";
+$sqlVendor = "SELECT fullname, avatar FROM users WHERE id = ? AND role IN ('sales', 'admin')";
 $stmtVendor = mysqli_prepare($conn, $sqlVendor);
 mysqli_stmt_bind_param($stmtVendor, "i", $vendorId);
 mysqli_stmt_execute($stmtVendor);
@@ -31,12 +31,17 @@ $totalProducts = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCount))['total']
 
 <!-- Hero Banner -->
 <div class="vendor-hero">
-    <div class="vendor-hero__overlay"></div>
     <div class="grid wide vendor-hero__content">
-        <div class="vendor-avatar">
-            <i class="fa-solid fa-store"></i>
+        <div class="vendor-hero__left">
+            <div class="vendor-avatar">
+                <?php if (!empty($vendor['avatar'])): ?>
+                    <img src="<?php echo htmlspecialchars($vendor['avatar']); ?>" alt="Shop Avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                <?php else: ?>
+                    <i class="fa-solid fa-store"></i>
+                <?php endif; ?>
+            </div>
+            <h1 class="vendor-hero__name"><?php echo htmlspecialchars($vendor['fullname'] ?: 'SmartFit Shop'); ?></h1>
         </div>
-        <h1 class="vendor-hero__name"><?php echo htmlspecialchars($vendor['fullname'] ?: 'SmartFit Shop'); ?></h1>
         <div class="vendor-hero__stats">
             <div class="vendor-stat">
                 <span class="vendor-stat__num"><?php echo $totalProducts; ?></span>
@@ -162,37 +167,70 @@ $totalProducts = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCount))['total']
 </div>
 
 <style>
-    /* Vendor Hero */
+    /* Vendor Hero - Monochrome Redesign */
     .vendor-hero {
-        position: relative;
-        background: var(--primary-blue);
-        padding: 70px 0 50px;
-        text-align: center;
-        overflow: hidden;
-        margin-bottom: 40px;
+        background: var(--card-bg);
+        padding: 40px 0;
+        border-bottom: 1px solid var(--border-color);
     }
-    .vendor-hero::before {
-        content: '';
-        position: absolute; inset: 0;
-        background: radial-gradient(circle at 30% 50%, rgba(99,102,241,0.3) 0%, transparent 60%),
-                    radial-gradient(circle at 70% 50%, rgba(59,130,246,0.2) 0%, transparent 60%);
+    .vendor-hero__content { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
-    .vendor-hero__content { position: relative; z-index: 1; }
+    .vendor-hero__left {
+        display: flex;
+        align-items: center;
+        gap: 25px;
+    }
     .vendor-avatar {
-        width: 90px; height: 90px; border-radius: 50%;
-        background: rgba(255,255,255,0.1);
-        border: 3px solid rgba(255,255,255,0.3);
+        width: 100px; height: 100px; border-radius: 50%;
+        background: var(--apple-bg);
+        border: 1px solid var(--border-color);
         display: flex; align-items: center; justify-content: center;
-        margin: 0 auto 20px;
-        font-size: 3.5rem; color: #fff;
-        backdrop-filter: blur(10px);
+        font-size: 4rem; color: var(--apple-grey);
+        overflow: hidden;
+        flex-shrink: 0;
     }
-    .vendor-hero__name { font-size: 3.5rem; font-weight: 800; color: #fff; margin-bottom: 20px; }
-    .vendor-hero__bio { font-size: 1.5rem; color: rgba(255,255,255,0.75); max-width: 550px; margin: 0 auto 24px; line-height: 1.7; }
-    .vendor-hero__stats { display: flex; gap: 40px; justify-content: center; }
+    .vendor-hero__name { 
+        font-size: 3rem; 
+        font-weight: 700; 
+        color: var(--apple-black); 
+        letter-spacing: -0.5px;
+        margin: 0;
+    }
+    .vendor-hero__stats { display: flex; gap: 40px; }
     .vendor-stat { text-align: center; }
-    .vendor-stat__num { display: block; font-size: 2rem; font-weight: 700; color: #fff; }
-    .vendor-stat__label { font-size: 1.2rem; color: rgba(255,255,255,0.6); }
+    .vendor-stat__num { 
+        display: block; 
+        font-size: 2.4rem; 
+        font-weight: 700; 
+        color: var(--apple-black); 
+        margin-bottom: 4px;
+    }
+    .vendor-stat__label { 
+        font-size: 1.2rem; 
+        color: var(--apple-grey); 
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Responsive cho Vendor Hero */
+    @media (max-width: 767px) {
+        .vendor-hero__content {
+            flex-direction: column;
+            gap: 25px;
+            text-align: center;
+        }
+        .vendor-hero__left {
+            flex-direction: column;
+            gap: 15px;
+        }
+        .vendor-hero__name {
+            font-size: 2.4rem;
+        }
+    }
 
     /* Section */
     .vendor-shop-section { padding-bottom: 60px; }

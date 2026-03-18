@@ -1,6 +1,42 @@
 {
     "items": [
         {
+            "id": "16",
+            "type": "bottom",
+            "name": "Chân váy ngắn xếp ly nữ",
+            "gender": [
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout",
+                "date"
+            ],
+            "style": [
+                "basic",
+                "street"
+            ],
+            "color": "Trắng",
+            "fit": [
+                "regular",
+                "slim",
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/1773839247_outfit_16_color_1.png",
+            "price": 99000,
+            "sizes": {
+                "L": 577,
+                "M": 743,
+                "S": 1907
+            },
+            "age": "15-25",
+            "seller_note": "đồ này thích hợp cho người thuộc lứa tuổi trung niên"
+        },
+        {
             "id": "15",
             "type": "one-piece",
             "name": "ĐỒ BỘ LỤA",
@@ -62,7 +98,7 @@
             "price": 299000,
             "sizes": {
                 "38": 283,
-                "39": 1646,
+                "39": 1644,
                 "40": 126,
                 "41": 223
             },
