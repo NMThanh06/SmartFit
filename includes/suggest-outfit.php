@@ -150,6 +150,7 @@ Quy tắc phối đồ & Trả kết quả (BẮT BUỘC TUÂN THỦ):
    - CHỈ NHẮC ĐẾN tên của một món đồ cụ thể NẾU món đồ đó thật sự ĐẶC BIỆT (phù hợp với 'Ghi chú từ khách' hoặc có 'Seller note' ấn tượng). 
    - Tập trung giải thích lý do chung vì sao set đồ phong cách này mang lại sự thoải mái, phù hợp với thời tiết và ghi chú của khách.
    - Viết thật ngắn gọn, súc tích, tối đa 2-3 câu để người dùng dễ đọc.
+4. LƯU Ý QUAN TRỌNG VỀ DỮ LIỆU: Hệ thống hiện tại lưu trữ màu sắc bằng Tên màu tiếng Việt (cột color_name) như: Đen, Trắng, Xanh rêu, Xanh dương... Tuyệt đối KHÔNG dùng mã màu HEX. Khi người dùng yêu cầu màu sắc (ví dụ: \"thích màu sáng\", \"màu tối\", \"áo đỏ\"), bạn hãy tự động suy luận ngữ nghĩa và trả về các món đồ có color_name khớp hoặc tương đương nhất.
 
 TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI THÍCH Ở NGOÀI JSON:
 {\"styleName\": \"Tên style ngắn gọn\", \"caption\": \"Toàn bộ nội dung Mở đầu và Trình bày (gồm 2-3 câu như yêu cầu)\", \"ids\": {\"top\": ID hoặc null, \"bottom\": ID hoặc null, \"onepiece\": ID hoặc null, \"shoes\": ID, \"acc\": ID hoặc null}}";
