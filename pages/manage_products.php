@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         if (isset($_POST['colors']) && is_array($_POST['colors'])) {
             foreach ($_POST['colors'] as $cIdx => $colorData) {
                 $color_name = mysqli_real_escape_string($conn, $colorData['name']);
-                $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
+                $image_path = '/assets/img/default-placeholder.jpg';
 
                 // Nếu là Update và không upload ảnh mới, cần giữ ảnh cũ (trong logic đơn giản này ta coi như phải upload hoặc dùng placeholder)
                 // Tuy nhiên form hiện tại không gửi link ảnh cũ. Để cải thiện, tôi sẽ cho dùng placeholder nếu không có ảnh mới.
@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     $upload_path = $base_dir . "assets/img/" . $new_filename;
 
                     if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_path)) {
-                        $image_path = "/SmartFit/assets/img/" . $new_filename;
+                        $image_path = "/assets/img/" . $new_filename;
                     }
                 }
 
@@ -341,7 +341,7 @@ include $base_dir . 'includes/header.php';
                                 </button>
                             </td>
                             <td>#<?= $p['id'] ?></td>
-                            <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>" class="manage-table__img"></td>
+                            <td><img src="<?= $p['image'] ?: '/assets/img/default-placeholder.jpg' ?>" class="manage-table__img"></td>
                             <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
                             <td><?= number_format($p['price'], 0, ',', '.') ?>đ</td>
                             <td><?= ucfirst($p['type']) ?></td>

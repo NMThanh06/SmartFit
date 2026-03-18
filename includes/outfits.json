@@ -26,7 +26,7 @@
                 "hot",
                 "mild"
             ],
-            "image": "/SmartFit/assets/img/1773839247_outfit_16_color_1.png",
+            "image": "/assets/img/1773839247_outfit_16_color_1.png",
             "price": 99000,
             "sizes": {
                 "L": 577,
@@ -62,7 +62,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773788014_outfit_15_color_1.png",
+            "image": "/assets/img/1773788014_outfit_15_color_1.png",
             "price": 149000,
             "sizes": {
                 "L": 934,
@@ -94,7 +94,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773787278_outfit_14_color_1.png",
+            "image": "/assets/img/1773787278_outfit_14_color_1.png",
             "price": 299000,
             "sizes": {
                 "38": 283,
@@ -128,7 +128,7 @@
                 "hot",
                 "mild"
             ],
-            "image": "/SmartFit/assets/img/1773787206_outfit_13_color_1.png",
+            "image": "/assets/img/1773787206_outfit_13_color_1.png",
             "price": 199000,
             "sizes": {
                 "L": 400,
@@ -160,7 +160,7 @@
             "weather": [
                 "mild"
             ],
-            "image": "/SmartFit/assets/img/1773785844_outfit_12_color_1.png",
+            "image": "/assets/img/1773785844_outfit_12_color_1.png",
             "price": 699000,
             "sizes": {
                 "L": 250,
@@ -195,7 +195,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773777084_outfit_11_color_1.webp",
+            "image": "/assets/img/1773777084_outfit_11_color_1.webp",
             "price": 400000,
             "sizes": {
                 "L": 78,
@@ -231,7 +231,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773768226_outfit_10_color_1.webp",
+            "image": "/assets/img/1773768226_outfit_10_color_1.webp",
             "price": 350000,
             "sizes": {
                 "L": 54,
@@ -265,7 +265,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773767727_outfit_9_color_1.webp",
+            "image": "/assets/img/1773767727_outfit_9_color_1.webp",
             "price": 300000,
             "sizes": {
                 "L": 99,
@@ -299,7 +299,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773767357_outfit_8_color_1.webp",
+            "image": "/assets/img/1773767357_outfit_8_color_1.webp",
             "price": 200000,
             "sizes": {
                 "L": 40,
@@ -333,7 +333,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/outfits/1773756073_user_3_closet.webp",
+            "image": "/assets/img/outfits/1773756073_user_3_closet.webp",
             "price": 0,
             "sizes": [],
             "age": "All",
@@ -360,7 +360,7 @@
                 "hot",
                 "mild"
             ],
-            "image": "/SmartFit/assets/img/outfits/1773752263_user_2_closet.webp",
+            "image": "/assets/img/outfits/1773752263_user_2_closet.webp",
             "price": 0,
             "sizes": [],
             "age": "All",
@@ -389,7 +389,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773688867_outfit_4_color_1.webp",
+            "image": "/assets/img/1773688867_outfit_4_color_1.webp",
             "price": 370000,
             "sizes": {
                 "L": 7,
@@ -425,7 +425,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773675502_outfit_3_color_1.jpg",
+            "image": "/assets/img/1773675502_outfit_3_color_1.jpg",
             "price": 199000,
             "sizes": {
                 "XL": 9,
@@ -461,7 +461,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773753186_outfit_2_color_1.avif",
+            "image": "/assets/img/1773753186_outfit_2_color_1.avif",
             "price": 1000000,
             "sizes": {
                 "38": 12,
@@ -497,7 +497,7 @@
                 "mild",
                 "cold"
             ],
-            "image": "/SmartFit/assets/img/1773591237_outfit_1_color_1.webp",
+            "image": "/assets/img/1773591237_outfit_1_color_1.webp",
             "price": 200000,
             "sizes": {
                 "L": 8,

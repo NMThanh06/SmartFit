@@ -110,7 +110,7 @@ include '../includes/header.php';
                     <?php endif; ?>
 
                     <div style="display: flex; gap: 15px; margin-bottom: 30px; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #eee;">
-                        <img src="<?php echo htmlspecialchars($outfit['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                        <img src="<?php echo htmlspecialchars($outfit['image'] ?? '/assets/img/default-placeholder.jpg'); ?>" style="width: 80px; height: 80px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd;" onerror="this.src='/assets/img/default-placeholder.jpg'">
                         <div>
                             <h3 style="font-size: 1.6rem; margin-bottom: 5px;"><?php echo htmlspecialchars($outfit['name']); ?></h3>
                             <p style="font-size: 1.3rem; color: #767676;">Đơn hàng: #<?php echo $orderId; ?></p>

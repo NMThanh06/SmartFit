@@ -88,7 +88,7 @@ if ($result && mysqli_num_rows($result) > 0) {
             'name' => $row['name'],
             'price' => (int) $row['price'],
             'type' => $row['type'],
-            'image' => (isset($colors[0]) ? $colors[0]['image'] : '/SmartFit/assets/img/default-placeholder.jpg'),
+            'image' => (isset($colors[0]) ? $colors[0]['image'] : '/assets/img/default-placeholder.jpg'),
             'colors' => $colors,
             'sizes' => $sizes
         ];

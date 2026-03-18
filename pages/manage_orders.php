@@ -154,7 +154,7 @@ include $base_dir . 'includes/header.php';
                                             ?>
                                                 <div class="order-item">
                                                     <div class="order-item__img-wrapper">
-                                                        <img src="<?= htmlspecialchars($item['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg') ?>" class="order-item__img">
+                                                        <img src="<?= htmlspecialchars($item['image'] ?? '/assets/img/default-placeholder.jpg') ?>" class="order-item__img">
                                                     </div>
                                                     <div class="order-item__info">
                                                         <h4 class="order-item__name"><?= htmlspecialchars($item['name']) ?></h4>

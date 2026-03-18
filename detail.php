@@ -221,7 +221,7 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                                           title="<?php echo htmlspecialchars($color['color_name']) . ($isOut ? ' (Hết hàng)' : ''); ?>"
                                           onclick="<?php echo $isOut ? '' : "selectColorOnDetail(this, " . htmlspecialchars(json_encode($color)) . ")"; ?>"
                                           style="width: 40px; height: 40px; border-radius: 4px; overflow: hidden; border: 1px solid #e0e0e0; cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; <?php echo $isOut ? 'opacity: 0.5; cursor: not-allowed;' : ''; ?>">
-                                        <img src="<?php echo htmlspecialchars($color['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="<?php echo htmlspecialchars($color['color_name']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
+                                        <img src="<?php echo htmlspecialchars($color['image'] ?? '/assets/img/default-placeholder.jpg'); ?>" alt="<?php echo htmlspecialchars($color['color_name']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
                                         <?php if ($isOut): ?>
                                             <div style="position: absolute; width: 100%; height: 100%; background: rgba(255,255,255,0.6); display: flex; align-items: center; justify-content: center; left: 0; top: 0;"><i class="fa-solid fa-xmark" style="color: #666;"></i></div>
                                         <?php endif; ?>
@@ -316,7 +316,7 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                         <?php foreach ($reviewsList as $review): ?>
                             <div class="review-item" data-rating="<?php echo intval($review['rating']); ?>" style="display: flex; gap: 15px; padding: 15px 0; border-bottom: 1px dashed #e0e0e0;">
                                 <div class="review-avatar">
-                                    <img src="<?php echo htmlspecialchars($review['avatar'] ?? '/SmartFit/assets/img/default-avatar.png'); ?>" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;" onerror="this.src='/SmartFit/assets/img/default-avatar.png'">
+                                    <img src="<?php echo htmlspecialchars($review['avatar'] ?? '/assets/img/default-avatar.png'); ?>" alt="Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;" onerror="this.src='/assets/img/default-avatar.png'">
                                 </div>
                                 <div class="review-content" style="flex: 1;">
                                     <div class="review-author" style="font-size: 1.4rem; font-weight: 500; color: #333; margin-bottom: 4px;">

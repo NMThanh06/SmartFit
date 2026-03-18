@@ -6,7 +6,7 @@ $vnp_Url = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html"; // URL thanh to
 
 // URL hiển thị cho người dùng sau khi thanh toán trên cổng VNPAY thành công/thất bại
 // Thay đổi domain / port nếu website của bạn chạy ở môi trường khác
-$vnp_Returnurl = "http://localhost/SmartFit/vnpay_return.php"; 
+$vnp_Returnurl = "http://localhost/vnpay_return.php"; 
 
 // API để query (dành cho tính năng truy vấn đơn hàng hoặc dùng IPN sau này, tùy chọn)
 $vnp_apiUrl = "http://sandbox.vnpayment.vn/merchant_webapi/merchant.html";

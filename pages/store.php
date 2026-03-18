@@ -115,7 +115,7 @@
     </style>
 </head>
 <body>
-    <a href="/SmartFit/style_outfits.php" class="btn-back">⬅ Quay lại Trang chủ</a>
+    <a href="/style_outfits.php" class="btn-back">⬅ Quay lại Trang chủ</a>
     <div class="cart-icon-container" id="cart-icon" onclick="window.location.href='cart.html'">
         🛒
         <span class="cart-badge" id="cart-count">0</span>
@@ -154,7 +154,7 @@
 
                     // Đổ dữ liệu HTML vào thẻ
                     card.innerHTML = `
-                        <img src="${item.image}" alt="${item.name}" class="product-image" onerror="this.onerror=null; this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                        <img src="${item.image}" alt="${item.name}" class="product-image" onerror="this.onerror=null; this.src='/assets/img/default-placeholder.jpg'">
                         <div class="product-name" title="${item.name}">${item.name}</div>
                         <div class="product-price">${formatPrice(item.price)}</div>
                         <button class="btn-add-cart" onclick="addToCart(event, ${item.id}, '${item.name}', ${item.price}, '${item.image}')">🛒 Thêm vào giỏ</button>

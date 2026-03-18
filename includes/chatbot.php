@@ -415,7 +415,7 @@
 
 <!-- Nút mở Chatbot -->
 <div class="chatbot-toggle" id="chatbotToggleBtn" onclick="toggleChatbot()">
-    <img src="/SmartFit/assets/img/chatbox.png" alt="Mở Chatbot AI">
+    <img src="/assets/img/chatbox.png" alt="Mở Chatbot AI">
 </div>
 
 
@@ -577,7 +577,7 @@ async function sendToAI(message, imageBase64) {
     }
 
     try {
-        const response = await fetch('/SmartFit/includes/chatbot_api.php', {
+        const response = await fetch('/includes/chatbot_api.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)

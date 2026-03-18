@@ -114,7 +114,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     $upload_dir = "../assets/img/outfits/";
                     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     if (file_put_contents($upload_dir . $new_filename, $content)) {
-                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $image_path = "/assets/img/outfits/" . $new_filename;
                         $uploadedImageSrc = true;
                     }
                 } elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
@@ -123,7 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     $upload_dir = "../assets/img/outfits/";
                     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
-                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $image_path = "/assets/img/outfits/" . $new_filename;
                         $uploadedImageSrc = true;
                     }
                 }
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     throw new Exception("Lỗi lưu thông tin: " . mysqli_error($conn));
                 $outfit_id = mysqli_insert_id($conn);
 
-                $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
+                $image_path = '/assets/img/default-placeholder.jpg';
                 if (!empty($_POST['image_base64'])) {
                     $base64_string = $_POST['image_base64'];
                     $data = explode(',', $base64_string);
@@ -157,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     $upload_dir = "../assets/img/outfits/";
                     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     if (file_put_contents($upload_dir . $new_filename, $content)) {
-                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $image_path = "/assets/img/outfits/" . $new_filename;
                     }
                 } elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     $upload_dir = "../assets/img/outfits/";
                     if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
-                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $image_path = "/assets/img/outfits/" . $new_filename;
                     }
                 }
 
@@ -248,14 +248,14 @@ else: ?>
                                 <div class="wardrobe-card__gallery">
                                     <?php if (!empty($outfit['onepiece_name'])): ?>
                                         <div class="wardrobe-card__img" style="flex: 1;">
-                                            <img src="<?php echo htmlspecialchars($outfit['onepiece_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="One-piece" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo htmlspecialchars($outfit['onepiece_img'] ?? '/assets/img/default-placeholder.jpg'); ?>" alt="One-piece" onerror="this.src='/assets/img/default-placeholder.jpg'">
                                         </div>
                                     <?php else: ?>
                                         <div class="wardrobe-card__img">
-                                            <img src="<?php echo htmlspecialchars($outfit['top_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Áo" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo htmlspecialchars($outfit['top_img'] ?? '/assets/img/default-placeholder.jpg'); ?>" alt="Áo" onerror="this.src='/assets/img/default-placeholder.jpg'">
                                         </div>
                                         <div class="wardrobe-card__img">
-                                            <img src="<?php echo htmlspecialchars($outfit['bottom_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Quần" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo htmlspecialchars($outfit['bottom_img'] ?? '/assets/img/default-placeholder.jpg'); ?>" alt="Quần" onerror="this.src='/assets/img/default-placeholder.jpg'">
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -310,7 +310,7 @@ else: ?>
                         <div class="col l-2-4 m-4 c-6">
                             <div class="personal-item-card" onclick='openEditModal(<?php echo json_encode($item); ?>)'>
                                 <div class="personal-item-card__img">
-                                    <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                    <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='/assets/img/default-placeholder.jpg'">
                                 </div>
                                 <div class="personal-item-card__info">
                                     <h3 class="personal-item-card__name"><?php echo htmlspecialchars($item['name']); ?></h3>

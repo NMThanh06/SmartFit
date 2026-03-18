@@ -39,7 +39,7 @@ function syncOutfitsToJson($conn) {
             'color' => $row['main_color'] ?: 'neutral',
             'fit' => json_decode($row['fit'], true) ?: [],
             'weather' => json_decode($row['weather'], true) ?: ['hot', 'mild', 'cold'],
-            'image' => $row['main_image'] ?: '/SmartFit/assets/img/default-placeholder.jpg',
+            'image' => $row['main_image'] ?: '/assets/img/default-placeholder.jpg',
             'price' => (int)$row['price'],
             'sizes' => $sizes,
             'age' => $row['age'] ?: 'All',

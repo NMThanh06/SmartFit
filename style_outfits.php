@@ -209,7 +209,7 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
                     </div>
 
                     <div class="visual-item" id="boxOnePiece" style="display: none; flex: 1;">
-                        <img src="/SmartFit/assets/img/default-placeholder.jpg" alt="Đồ bộ" id="imgOnePiece">
+                        <img src="/assets/img/default-placeholder.jpg" alt="Đồ bộ" id="imgOnePiece">
                     </div>
                 </div>
 

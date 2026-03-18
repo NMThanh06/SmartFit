@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 18, 2026 at 07:38 PM
+-- Generation Time: Mar 18, 2026 at 08:35 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -166,38 +166,38 @@ CREATE TABLE `outfit_colors` (
 --
 
 INSERT INTO `outfit_colors` (`id`, `outfit_id`, `color_name`, `image`) VALUES
-(1, 1, 'Đen', '/SmartFit/assets/img/1773591237_outfit_1_color_1.webp'),
-(2, 1, 'Trắng', '/SmartFit/assets/img/1773591237_outfit_1_color_2.webp'),
-(3, 1, 'Xám', '/SmartFit/assets/img/1773591237_outfit_1_color_3.webp'),
-(4, 1, 'Kaki', '/SmartFit/assets/img/1773591237_outfit_1_color_4.webp'),
-(6, 3, 'Xanh dương', '/SmartFit/assets/img/1773675502_outfit_3_color_1.jpg'),
-(7, 4, 'Đen', '/SmartFit/assets/img/1773688867_outfit_4_color_1.webp'),
-(8, 4, 'Xám', '/SmartFit/assets/img/1773688867_outfit_4_color_2.webp'),
-(9, 5, 'Đen', '/SmartFit/assets/img/outfits/1773752263_user_2_closet.webp'),
-(11, 2, 'Trắng', '/SmartFit/assets/img/1773753186_outfit_2_color_1.avif'),
-(12, 7, 'Xanh dương đậm', '/SmartFit/assets/img/outfits/1773756073_user_3_closet.webp'),
-(13, 8, 'Đen', '/SmartFit/assets/img/1773767357_outfit_8_color_1.webp'),
-(14, 9, 'Đen', '/SmartFit/assets/img/1773767727_outfit_9_color_1.webp'),
-(15, 9, 'Xanh rêu', '/SmartFit/assets/img/1773767727_outfit_9_color_2.webp'),
-(16, 9, 'Nâu', '/SmartFit/assets/img/1773767727_outfit_9_color_3.webp'),
-(17, 9, 'Kem', '/SmartFit/assets/img/1773767727_outfit_9_color_4.webp'),
-(18, 10, 'Đen', '/SmartFit/assets/img/1773768226_outfit_10_color_1.webp'),
-(19, 10, 'Xanh đậm', '/SmartFit/assets/img/1773768226_outfit_10_color_2.webp'),
-(20, 11, 'Đen', '/SmartFit/assets/img/1773777084_outfit_11_color_1.webp'),
-(21, 11, 'Xanh đậm', '/SmartFit/assets/img/1773777084_outfit_11_color_2.webp'),
-(22, 12, 'hồng', '/SmartFit/assets/img/1773785844_outfit_12_color_1.png'),
-(28, 13, 'đen', '/SmartFit/assets/img/1773787206_outfit_13_color_1.png'),
-(29, 13, 'trắng', '/SmartFit/assets/img/1773787206_outfit_13_color_2.png'),
-(30, 13, 'nâu ', '/SmartFit/assets/img/1773787206_outfit_13_color_3.png'),
-(31, 14, 'đen', '/SmartFit/assets/img/1773787278_outfit_14_color_1.png'),
-(32, 14, 'trắng', '/SmartFit/assets/img/1773787278_outfit_14_color_2.png'),
-(33, 15, 'vàng', '/SmartFit/assets/img/1773788014_outfit_15_color_1.png'),
-(34, 15, 'tím', '/SmartFit/assets/img/1773788014_outfit_15_color_2.png'),
-(35, 15, 'hồng', '/SmartFit/assets/img/1773788014_outfit_15_color_3.png'),
-(36, 15, 'xanh dương', '/SmartFit/assets/img/1773788014_outfit_15_color_4.png'),
-(37, 16, 'Trắng', '/SmartFit/assets/img/1773839247_outfit_16_color_1.png'),
-(38, 16, 'Đen', '/SmartFit/assets/img/1773839247_outfit_16_color_2.png'),
-(39, 16, 'Xám', '/SmartFit/assets/img/1773839247_outfit_16_color_3.png');
+(1, 1, 'Đen', '/assets/img/1773591237_outfit_1_color_1.webp'),
+(2, 1, 'Trắng', '/assets/img/1773591237_outfit_1_color_2.webp'),
+(3, 1, 'Xám', '/assets/img/1773591237_outfit_1_color_3.webp'),
+(4, 1, 'Kaki', '/assets/img/1773591237_outfit_1_color_4.webp'),
+(6, 3, 'Xanh dương', '/assets/img/1773675502_outfit_3_color_1.jpg'),
+(7, 4, 'Đen', '/assets/img/1773688867_outfit_4_color_1.webp'),
+(8, 4, 'Xám', '/assets/img/1773688867_outfit_4_color_2.webp'),
+(9, 5, 'Đen', '/assets/img/outfits/1773752263_user_2_closet.webp'),
+(11, 2, 'Trắng', '/assets/img/1773753186_outfit_2_color_1.avif'),
+(12, 7, 'Xanh dương đậm', '/assets/img/outfits/1773756073_user_3_closet.webp'),
+(13, 8, 'Đen', '/assets/img/1773767357_outfit_8_color_1.webp'),
+(14, 9, 'Đen', '/assets/img/1773767727_outfit_9_color_1.webp'),
+(15, 9, 'Xanh rêu', '/assets/img/1773767727_outfit_9_color_2.webp'),
+(16, 9, 'Nâu', '/assets/img/1773767727_outfit_9_color_3.webp'),
+(17, 9, 'Kem', '/assets/img/1773767727_outfit_9_color_4.webp'),
+(18, 10, 'Đen', '/assets/img/1773768226_outfit_10_color_1.webp'),
+(19, 10, 'Xanh đậm', '/assets/img/1773768226_outfit_10_color_2.webp'),
+(20, 11, 'Đen', '/assets/img/1773777084_outfit_11_color_1.webp'),
+(21, 11, 'Xanh đậm', '/assets/img/1773777084_outfit_11_color_2.webp'),
+(22, 12, 'hồng', '/assets/img/1773785844_outfit_12_color_1.png'),
+(28, 13, 'đen', '/assets/img/1773787206_outfit_13_color_1.png'),
+(29, 13, 'trắng', '/assets/img/1773787206_outfit_13_color_2.png'),
+(30, 13, 'nâu ', '/assets/img/1773787206_outfit_13_color_3.png'),
+(31, 14, 'đen', '/assets/img/1773787278_outfit_14_color_1.png'),
+(32, 14, 'trắng', '/assets/img/1773787278_outfit_14_color_2.png'),
+(33, 15, 'vàng', '/assets/img/1773788014_outfit_15_color_1.png'),
+(34, 15, 'tím', '/assets/img/1773788014_outfit_15_color_2.png'),
+(35, 15, 'hồng', '/assets/img/1773788014_outfit_15_color_3.png'),
+(36, 15, 'xanh dương', '/assets/img/1773788014_outfit_15_color_4.png'),
+(37, 16, 'Trắng', '/assets/img/1773839247_outfit_16_color_1.png'),
+(38, 16, 'Đen', '/assets/img/1773839247_outfit_16_color_2.png'),
+(39, 16, 'Xám', '/assets/img/1773839247_outfit_16_color_3.png');
 
 -- --------------------------------------------------------
 

@@ -80,7 +80,7 @@ try {
                         'color' => $pRow['color_name'] ?? '',
                         'fit' => json_decode($pRow['fit'] ?? '[]', true) ?: [],
                         'weather' => json_decode($pRow['weather'] ?? '[]', true) ?: [],
-                        'image' => $pRow['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg',
+                        'image' => $pRow['image'] ?? '/assets/img/default-placeholder.jpg',
                         'price' => (int)($pRow['price'] ?? 0),
                         'sizes' => [],
                         'age' => 'All',

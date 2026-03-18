@@ -542,7 +542,7 @@ window.app = {
             if (liOnePiece) liOnePiece.style.display = 'block';
 
             const imgOP = document.getElementById('imgOnePiece');
-            if (imgOP) imgOP.src = data.onepieceImage || data.onePieceImage || '/SmartFit/assets/img/default-placeholder.jpg';
+            if (imgOP) imgOP.src = data.onepieceImage || data.onePieceImage || '/assets/img/default-placeholder.jpg';
             
             const textOP = document.getElementById('itemOnePieceName');
             if (textOP) textOP.innerText = data.onepiece || data.onePiece || 'Chưa xác định';
