@@ -142,6 +142,36 @@ include 'includes/header.php';
         <?php include 'includes/footer.php'; ?>
         
         <style>
+            .config-color-btn-img.active {
+                border: 2px solid #ee4d2d !important;
+            }
+            .config-color-btn-img.active::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0 0 12px 12px;
+                border-color: transparent transparent #ee4d2d transparent;
+            }
+            .config-color-btn-img.active::before {
+                content: '✓';
+                position: absolute;
+                bottom: -2px;
+                right: 0;
+                color: white;
+                font-size: 8px;
+                z-index: 10;
+            }
+            
+            .config-modal__colors {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
             .config-modal__qty {
                 display: flex;
                 align-items: center;
@@ -338,9 +368,27 @@ include 'includes/header.php';
             if (item.colors && item.colors.length > 0) {
                 // Đếm tổng stock cho mỗi màu
                 item.colors.forEach((c, index) => {
-                    const btn = document.createElement('span');
-                    btn.className = 'config-color-btn';
-                    btn.style.background = c.hex_code;
+                    const btn = document.createElement('div');
+                    btn.className = 'config-color-btn-img';
+                    btn.style.width = '40px';
+                    btn.style.height = '40px';
+                    btn.style.borderRadius = '4px';
+                    btn.style.overflow = 'hidden';
+                    btn.style.border = '1px solid #e0e0e0';
+                    btn.style.cursor = 'pointer';
+                    btn.style.display = 'flex';
+                    btn.style.alignItems = 'center';
+                    btn.style.justifyContent = 'center';
+                    btn.style.position = 'relative';
+                    
+                    const img = document.createElement('img');
+                    img.src = c.image ? c.image : './assets/img/default-placeholder.jpg';
+                    img.alt = c.color_name;
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    
+                    btn.appendChild(img);
                     btn.title = c.color_name;
                     
                     // Kiểm tra tồn kho tổng của màu này
@@ -350,10 +398,26 @@ include 'includes/header.php';
 
                     if (colorStock <= 0) {
                         btn.classList.add('out-of-stock');
+                        btn.style.opacity = '0.5';
+                        btn.style.cursor = 'not-allowed';
+                        
+                        const crossDiv = document.createElement('div');
+                        crossDiv.style.position = 'absolute';
+                        crossDiv.style.width = '100%';
+                        crossDiv.style.height = '100%';
+                        crossDiv.style.background = 'rgba(255,255,255,0.6)';
+                        crossDiv.style.display = 'flex';
+                        crossDiv.style.alignItems = 'center';
+                        crossDiv.style.justifyContent = 'center';
+                        crossDiv.style.left = '0';
+                        crossDiv.style.top = '0';
+                        crossDiv.innerHTML = '<i class=\"fa-solid fa-xmark\" style=\"color: #666;\"></i>';
+                        btn.appendChild(crossDiv);
+
                         btn.title = `${c.color_name} (Hết hàng)`;
                     } else {
                         btn.onclick = () => {
-                            document.querySelectorAll('.config-color-btn').forEach(b => b.classList.remove('active'));
+                            document.querySelectorAll('.config-color-btn-img').forEach(b => b.classList.remove('active'));
                             btn.classList.add('active');
                             selectedConfigColor = c.color_name;
                             
@@ -371,7 +435,7 @@ include 'includes/header.php';
                 });
 
                 // Tự động chọn màu đầu tiên CÒN HÀNG
-                const firstAvailableBtn = colorContainer.querySelector('.config-color-btn:not(.out-of-stock)');
+                const firstAvailableBtn = colorContainer.querySelector('.config-color-btn-img:not(.out-of-stock)');
                 if (firstAvailableBtn) {
                     firstAvailableBtn.click();
                 } else {
