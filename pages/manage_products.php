@@ -11,10 +11,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
     mysqli_begin_transaction($conn);
 
     try {
-        $edit_id = isset($_POST['edit_id']) ? (int)$_POST['edit_id'] : 0;
+        $edit_id = isset($_POST['edit_id']) ? (int) $_POST['edit_id'] : 0;
         $current_user_id = $_SESSION['user_id'];
         $is_admin = ($_SESSION['role'] === 'admin');
-        
+
         // 1. Thu thập thông tin chung
         $name = mysqli_real_escape_string($conn, $_POST['name']);
         $price = (int) $_POST['price'];
@@ -34,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             $check_name_sql = "SELECT id FROM outfits WHERE LOWER(name) = LOWER('$name') LIMIT 1";
             $check_res = mysqli_query($conn, $check_name_sql);
             if ($row = mysqli_fetch_assoc($check_res)) {
-                $edit_id = (int)$row['id'];
+                $edit_id = (int) $row['id'];
             }
         }
 
@@ -54,7 +54,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                             weather='$weather', fit='$fit', age='$age', 
                             seller_note='$seller_note', description='$description' 
                            WHERE id = $edit_id";
-            if (!mysqli_query($conn, $sql_outfit)) throw new Exception("Lỗi cập nhật outfits: " . mysqli_error($conn));
+            if (!mysqli_query($conn, $sql_outfit))
+                throw new Exception("Lỗi cập nhật outfits: " . mysqli_error($conn));
             $outfit_id = $edit_id;
 
             // Xóa các biến thể cũ (colors & sizes) để chèn lại cái mới từ form
@@ -64,7 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             // TRƯỜNG HỢP: THÊM MỚI (INSERT) - Mặc định là sản phẩm của Shop (is_commercial = 1)
             $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial, owner_id) 
                            VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1, $current_user_id)";
-            if (!mysqli_query($conn, $sql_outfit)) throw new Exception("Lỗi chèn bảng outfits: " . mysqli_error($conn));
+            if (!mysqli_query($conn, $sql_outfit))
+                throw new Exception("Lỗi chèn bảng outfits: " . mysqli_error($conn));
             $outfit_id = mysqli_insert_id($conn);
         }
 
@@ -77,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
                 // Nếu là Update và không upload ảnh mới, cần giữ ảnh cũ (trong logic đơn giản này ta coi như phải upload hoặc dùng placeholder)
                 // Tuy nhiên form hiện tại không gửi link ảnh cũ. Để cải thiện, tôi sẽ cho dùng placeholder nếu không có ảnh mới.
-                
+
                 $file_key = "color_images_$cIdx";
                 if (isset($_FILES[$file_key]) && $_FILES[$file_key]['error'] === UPLOAD_ERR_OK) {
                     $ext = pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION);
@@ -162,7 +164,7 @@ include $base_dir . 'includes/header.php';
                     <div class="col l-6 m-12 c-12">
                         <div class="config-form__group">
                             <label class="add-product__label">Khoảng tuổi (VD: 15-20, 21-30, All)</label>
-                            <input type="text" name="age" class="config-form__input--text" 
+                            <input type="text" name="age" class="config-form__input--text"
                                 placeholder="Nhập số tuổi hoặc 'All'" value="All">
                         </div>
                     </div>
@@ -289,7 +291,8 @@ include $base_dir . 'includes/header.php';
             </div>
 
             <div class="add-product__actions">
-                <button type="button" class="btn-secondary" onclick="resetFormToNormal()">Làm mới Form / Thêm mới</button>
+                <button type="button" class="btn-secondary" onclick="resetFormToNormal()">Làm mới Form / Thêm
+                    mới</button>
                 <button type="submit" name="submit" class="btn-primary">Lưu Sản Phẩm Ngay <i
                         class="fa-solid fa-cloud-arrow-up"></i></button>
             </div>
@@ -300,7 +303,7 @@ include $base_dir . 'includes/header.php';
     <div class="add-product" style="padding-top: 0;">
         <div class="add-product__section">
             <h2 class="add-product__section-title"><i class="fa-solid fa-list-check"></i> Quản lý sản phẩm hệ thống</h2>
-            
+
             <div class="manage-table-wrapper">
                 <table class="manage-table">
                     <thead>
@@ -319,88 +322,92 @@ include $base_dir . 'includes/header.php';
                         // Lấy danh sách sản phẩm thực tế từ DB - Chỉ lấy đồ của Shop (is_commercial = 1)
                         $current_user_id = $_SESSION['user_id'];
                         $is_admin = ($_SESSION['role'] === 'admin');
-                        
+
                         $list_sql = "SELECT o.id, o.name, o.price, o.type, 
                                     (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as image 
                                     FROM outfits o WHERE o.is_commercial = 1 ";
-                        
+
                         if (!$is_admin) {
                             $list_sql .= " AND o.owner_id = $current_user_id ";
                         }
-                        
+
                         $list_sql .= " ORDER BY o.id DESC";
                         $list_result = mysqli_query($conn, $list_sql);
                         while ($p = mysqli_fetch_assoc($list_result)):
-                        ?>
-                        <tr id="row_<?= $p['id'] ?>" class="manage-table__row">
-                            <td>
-                                <button type="button" class="btn-expand-variants" onclick="toggleProductVariants(<?= $p['id'] ?>, this)">
-                                    <i class="fa-solid fa-chevron-down"></i>
-                                </button>
-                            </td>
-                            <td>#<?= $p['id'] ?></td>
-                            <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>" class="manage-table__img"></td>
-                            <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
-                            <td><?= number_format($p['price'], 0, ',', '.') ?>đ</td>
-                            <td><?= ucfirst($p['type']) ?></td>
-                            <td class="manage-table__actions">
-                                <button type="button" class="btn-edit" onclick="editProduct(<?= $p['id'] ?>)">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
-                                <button type="button" class="btn-delete" onclick="deleteProduct(<?= $p['id'] ?>)">
-                                    <i class="fa-solid fa-trash"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <!-- Chi tiết Biến thể (Màu & Size) -->
-                        <tr id="variants_<?= $p['id'] ?>" class="variants-detail-row" style="display: none;">
-                            <td colspan="7">
-                                <div class="variants-detail-wrapper">
-                                    <table class="variants-subtable">
-                                        <thead>
-                                            <tr>
-                                                <th>Ảnh màu</th>
-                                                <th>Tên màu & Mã HEX</th>
-                                                <th>Kích cỡ & Tồn kho</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            <?php
-                                            $color_sql = "SELECT id, color_name, hex_code, image FROM outfit_colors WHERE outfit_id = " . $p['id'];
-                                            $color_res = mysqli_query($conn, $color_sql);
-                                            while ($c = mysqli_fetch_assoc($color_res)):
-                                            ?>
-                                            <tr>
-                                                <td style="width: 80px;">
-                                                    <img src="<?= $c['image'] ?>" class="variants-subtable__img">
-                                                </td>
-                                                <td style="width: 150px;">
-                                                    <div class="color-preview-item">
-                                                        <span class="color-preview-box" style="background-color: <?= $c['hex_code'] ?>;"></span>
-                                                        <strong><?= htmlspecialchars($c['color_name']) ?></strong>
-                                                        <small><?= strtoupper($c['hex_code']) ?></small>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="variant-sizes-list">
-                                                        <?php
-                                                        $size_sql = "SELECT size_name, quantity FROM outfit_sizes WHERE color_id = " . $c['id'];
-                                                        $size_res = mysqli_query($conn, $size_sql);
-                                                        while ($s = mysqli_fetch_assoc($size_res)):
-                                                        ?>
-                                                        <span class="size-badge">
-                                                            <strong><?= $s['size_name'] ?></strong>: <?= $s['quantity'] ?>
-                                                        </span>
-                                                        <?php endwhile; ?>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            <?php endwhile; ?>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-                        </tr>
+                            ?>
+                            <tr id="row_<?= $p['id'] ?>" class="manage-table__row">
+                                <td>
+                                    <button type="button" class="btn-expand-variants"
+                                        onclick="toggleProductVariants(<?= $p['id'] ?>, this)">
+                                        <i class="fa-solid fa-chevron-down"></i>
+                                    </button>
+                                </td>
+                                <td>#<?= $p['id'] ?></td>
+                                <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>"
+                                        class="manage-table__img"></td>
+                                <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
+                                <td><?= number_format($p['price'], 0, ',', '.') ?>đ</td>
+                                <td><?= ucfirst($p['type']) ?></td>
+                                <td class="manage-table__actions">
+                                    <button type="button" class="btn-edit" onclick="editProduct(<?= $p['id'] ?>)">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button type="button" class="btn-delete" onclick="deleteProduct(<?= $p['id'] ?>)">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <!-- Chi tiết Biến thể (Màu & Size) -->
+                            <tr id="variants_<?= $p['id'] ?>" class="variants-detail-row" style="display: none;">
+                                <td colspan="7">
+                                    <div class="variants-detail-wrapper">
+                                        <table class="variants-subtable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Ảnh màu</th>
+                                                    <th>Tên màu & Mã HEX</th>
+                                                    <th>Kích cỡ & Tồn kho</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $color_sql = "SELECT id, color_name, hex_code, image FROM outfit_colors WHERE outfit_id = " . $p['id'];
+                                                $color_res = mysqli_query($conn, $color_sql);
+                                                while ($c = mysqli_fetch_assoc($color_res)):
+                                                    ?>
+                                                    <tr>
+                                                        <td style="width: 80px;">
+                                                            <img src="<?= $c['image'] ?>" class="variants-subtable__img">
+                                                        </td>
+                                                        <td style="width: 150px;">
+                                                            <div class="color-preview-item">
+                                                                <span class="color-preview-box"
+                                                                    style="background-color: <?= $c['hex_code'] ?>;"></span>
+                                                                <strong><?= htmlspecialchars($c['color_name']) ?></strong>
+                                                                <small><?= strtoupper($c['hex_code']) ?></small>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <div class="variant-sizes-list">
+                                                                <?php
+                                                                $size_sql = "SELECT size_name, quantity FROM outfit_sizes WHERE color_id = " . $c['id'];
+                                                                $size_res = mysqli_query($conn, $size_sql);
+                                                                while ($s = mysqli_fetch_assoc($size_res)):
+                                                                    ?>
+                                                                    <span class="size-badge">
+                                                                        <strong><?= $s['size_name'] ?></strong>:
+                                                                        <?= $s['quantity'] ?>
+                                                                    </span>
+                                                                <?php endwhile; ?>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                <?php endwhile; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
                         <?php endwhile; ?>
                     </tbody>
                 </table>
@@ -445,7 +452,8 @@ include $base_dir . 'includes/header.php';
     }
 
     .config-form__group {
-        margin-bottom: 25px; /* Cách đều các ô */
+        margin-bottom: 25px;
+        /* Cách đều các ô */
     }
 
     .config-form__input--text,
@@ -683,13 +691,37 @@ include $base_dir . 'includes/header.php';
     }
 
     /* Color Picker Styles */
-    .color-picker-group { display: flex; gap: 8px; align-items: center; }
-    .color-picker-group input[type="text"] { flex: 1; }
-    .color-picker-group input[type="color"] { width: 45px; height: 45px; padding: 2px; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; background: #fff; }
-    .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .color-picker-group input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
-        opacity: 0.9;
-        transform: scale(1.05);
+    .color-picker-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .color-picker-group input[type="text"] {
+        flex: 1;
+    }
+
+    .color-picker-group input[type="color"] {
+        width: 45px;
+        height: 45px;
+        padding: 2px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        cursor: pointer;
+        background: #fff;
+    }
+
+    .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+
+    .color-picker-group input[type="color"]::-webkit-color-swatch {
+        border: none;
+        border-radius: 8px;
+    }
+
+    opacity: 0.9;
+    transform: scale(1.05);
     }
 
     @keyframes slideUp {
@@ -709,11 +741,13 @@ include $base_dir . 'includes/header.php';
         overflow-x: auto;
         margin-top: 10px;
     }
+
     .manage-table {
         width: 100%;
         border-collapse: collapse;
         font-size: 1.4rem;
     }
+
     .manage-table th {
         text-align: left;
         padding: 15px;
@@ -722,11 +756,13 @@ include $base_dir . 'includes/header.php';
         font-weight: 700;
         border-bottom: 2px solid var(--border-color);
     }
+
     .manage-table td {
         padding: 15px;
         border-bottom: 1px solid #eee;
         vertical-align: middle;
     }
+
     .manage-table__img {
         width: 50px;
         height: 50px;
@@ -734,15 +770,19 @@ include $base_dir . 'includes/header.php';
         border-radius: 8px;
         border: 1px solid #eee;
     }
+
     .manage-table__name {
         font-weight: 600;
         color: var(--apple-black);
     }
+
     .manage-table__actions {
         display: flex;
         gap: 10px;
     }
-    .btn-edit, .btn-delete {
+
+    .btn-edit,
+    .btn-delete {
         padding: 8px 12px;
         border: none;
         border-radius: 8px;
@@ -753,10 +793,24 @@ include $base_dir . 'includes/header.php';
         gap: 5px;
         transition: 0.3s;
     }
-    .btn-edit { background: #e0e7ff; color: #4338ca; }
-    .btn-delete { background: #fee2e2; color: #b91c1c; }
-    .btn-edit:hover { background: #c7d2fe; }
-    .btn-delete:hover { background: #fecaca; }
+
+    .btn-edit {
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    .btn-delete {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .btn-edit:hover {
+        background: #c7d2fe;
+    }
+
+    .btn-delete:hover {
+        background: #fecaca;
+    }
 
     /* Dropdown Biến thể (Variants) */
     .btn-expand-variants {
@@ -770,17 +824,26 @@ include $base_dir . 'includes/header.php';
         align-items: center;
         justify-content: center;
     }
-    .btn-expand-variants:hover { color: var(--apple-black); }
-    .btn-expand-variants.active { transform: rotate(180deg); color: var(--primary-purple); }
+
+    .btn-expand-variants:hover {
+        color: var(--apple-black);
+    }
+
+    .btn-expand-variants.active {
+        transform: rotate(180deg);
+        color: var(--primary-purple);
+    }
 
     .variants-detail-row {
         background: #fdfdfd;
     }
+
     .variants-detail-wrapper {
         padding: 0 40px 20px 60px;
         overflow: hidden;
         animation: slideDown 0.3s ease;
     }
+
     .variants-subtable {
         width: 100%;
         border-collapse: separate;
@@ -790,6 +853,7 @@ include $base_dir . 'includes/header.php';
         border-radius: 12px;
         font-size: 1.3rem;
     }
+
     .variants-subtable th {
         background: #fafafa;
         padding: 10px 15px;
@@ -798,13 +862,17 @@ include $base_dir . 'includes/header.php';
         font-weight: 600;
         border-bottom: 1px solid #f0f0f0;
     }
+
     .variants-subtable td {
         padding: 12px 15px;
         border-bottom: 1px solid #f9f9f9;
         vertical-align: middle;
     }
-    .variants-subtable tr:last-child td { border-bottom: none; }
-    
+
+    .variants-subtable tr:last-child td {
+        border-bottom: none;
+    }
+
     .variants-subtable__img {
         width: 45px;
         height: 45px;
@@ -818,11 +886,12 @@ include $base_dir . 'includes/header.php';
         flex-direction: column;
         gap: 2px;
     }
+
     .color-preview-box {
         width: 20px;
         height: 20px;
         border-radius: 4px;
-        border: 1px solid rgba(0,0,0,0.1);
+        border: 1px solid rgba(0, 0, 0, 0.1);
         margin-bottom: 2px;
     }
 
@@ -831,6 +900,7 @@ include $base_dir . 'includes/header.php';
         flex-wrap: wrap;
         gap: 8px;
     }
+
     .size-badge {
         background: #f3f3f3;
         color: #555;
@@ -838,16 +908,31 @@ include $base_dir . 'includes/header.php';
         border-radius: 15px;
         font-size: 1.2rem;
     }
-    .size-badge strong { color: var(--apple-black); }
+
+    .size-badge strong {
+        color: var(--apple-black);
+    }
 
     @keyframes slideDown {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     /* Trạng thái sửa */
-    .edit-mode .add-product__title { color: var(--primary-purple); }
-    .edit-mode .btn-primary { background: var(--apple-black); }
+    .edit-mode .add-product__title {
+        color: var(--primary-purple);
+    }
+
+    .edit-mode .btn-primary {
+        background: var(--apple-black);
+    }
 </style>
 
 <script>
@@ -894,7 +979,7 @@ include $base_dir . 'includes/header.php';
         const hexText = document.getElementById(`hexInput_${cIdx}`);
         const hexPicker = document.getElementById(`hexPicker_${cIdx}`);
         const colorName = input.value.toLowerCase().trim();
-        
+
         if (colorMap[colorName]) {
             hexText.value = colorMap[colorName];
             hexPicker.value = colorMap[colorName];
@@ -1099,12 +1184,12 @@ include $base_dir . 'includes/header.php';
             if (data.success) {
                 const p = data.product;
                 const form = document.getElementById('addProductForm');
-                
+
                 // Đánh dấu edit mode
                 form.parentElement.classList.add('edit-mode');
                 document.querySelector('.add-product__title').innerText = 'Chỉnh Sửa Sản Phẩm';
                 document.querySelector('.btn-primary').innerHTML = 'Cập Nhật Sản Phẩm <i class="fa-solid fa-check"></i>';
-                
+
                 // Thêm input ẩn để gửi ID
                 let idInput = document.getElementById('editProductId');
                 if (!idInput) {
@@ -1146,13 +1231,13 @@ include $base_dir . 'includes/header.php';
                     addColorBlock();
                     const currentCIdx = colorCount;
                     const block = document.getElementById(`colorBlock_${currentCIdx}`);
-                    
+
                     block.querySelector(`[name="colors[${currentCIdx}][name]"]`).value = c.color_name;
                     const hexInput = block.querySelector(`[name="colors[${currentCIdx}][hex]"]`);
                     const hexPicker = document.getElementById(`hexPicker_${currentCIdx}`);
                     hexInput.value = c.hex_code;
                     if (hexPicker) hexPicker.value = c.hex_code;
-                    
+
                     // Hiển thị ảnh cũ (optional - maybe just placeholder for now since file input can't be set)
                     // We'll skip file input value because it's not possible, but we can show preview label nearby if needed.
 
@@ -1181,7 +1266,7 @@ include $base_dir . 'includes/header.php';
         form.parentElement.classList.remove('edit-mode');
         document.querySelector('.add-product__title').innerText = 'Thêm Sản Phẩm Mới';
         document.querySelector('.btn-primary').innerHTML = 'Lưu Sản Phẩm Ngay <i class="fa-solid fa-cloud-arrow-up"></i>';
-        
+
         const idInput = document.getElementById('editProductId');
         if (idInput) idInput.remove();
 
@@ -1189,7 +1274,7 @@ include $base_dir . 'includes/header.php';
         container.innerHTML = '';
         colorCount = 0;
         addColorBlock();
-        
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
         // Hoặc có thể dùng: document.querySelector('.add-product').scrollIntoView({ behavior: 'smooth', block: 'start' });
         app.showNotification('Đã quay lại chế độ thêm mới', 'info');
@@ -1198,7 +1283,7 @@ include $base_dir . 'includes/header.php';
     function toggleProductVariants(productId, btn) {
         const detailRow = document.getElementById(`variants_${productId}`);
         const isHidden = detailRow.style.display === 'none';
-        
+
         // Đóng các hàng khác (optional, để giao diện gọn gàng)
         // document.querySelectorAll('.variants-detail-row').forEach(row => row.style.display = 'none');
         // document.querySelectorAll('.btn-expand-variants').forEach(b => b.classList.remove('active'));

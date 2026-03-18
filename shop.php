@@ -11,8 +11,17 @@ include 'includes/header.php';
                     <p class="shop-page__subtitle">Khám phá phong cách thời trang dẫn đầu xu hướng</p>
                 </div>
 
+                <!-- Nút hiển thị bộ lọc trên Mobile -->
+                <div class="shop-mobile-filter-btn" onclick="toggleShopSidebar()">
+                    <i class="fa-solid fa-filter"></i> Bộ lọc
+                </div>
+
                 <div class="shop-page__content">
+                    <div class="shop-sidebar-overlay" onclick="toggleShopSidebar()"></div>
                     <aside class="shop-sidebar">
+                        <div class="shop-sidebar__close" onclick="toggleShopSidebar()">
+                            <i class="fa-solid fa-xmark"></i>
+                        </div>
                         <div class="shop-filter">
                             <h3 class="shop-filter__title">Danh mục</h3>
                             <ul class="shop-filter__list" id="categoryFilter">
@@ -177,6 +186,17 @@ include 'includes/header.php';
         // SHOP-SPECIFIC FUNCTIONS
         // ========================================
 
+        // 0. Toggle Sidebar trên Mobile
+        function toggleShopSidebar() {
+            const sidebar = document.querySelector('.shop-sidebar');
+            const overlay = document.querySelector('.shop-sidebar-overlay');
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+                // Khóa cuộn trang khi mở filter
+                document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+            }
+        }
 
         // 2. Tải danh sách sản phẩm trang Shop
         // 2. Tải danh sách sản phẩm trang Shop

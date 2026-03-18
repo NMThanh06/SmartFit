@@ -275,6 +275,7 @@
     font-weight: 800;
     letter-spacing: -0.5px;
     margin-bottom: 5px;
+    line-height: 1.2;
 }
 
 .info__weather {
@@ -343,6 +344,7 @@
 .config-form__heading {
     font-size: 2rem;
     margin-bottom: 10px;
+    line-height: 1.2;
 }
 
 .config-form__options {
@@ -780,6 +782,7 @@
     text-align: center !important;
     max-width: 800px;
     display: block !important;
+    line-height: 1.2;
 }
 
 section {
@@ -1309,6 +1312,7 @@ section.hero--home {
     font-size: 2.2rem;
     color: var(--text-main-grey);
     margin-bottom: 12px;
+    line-height: 1.2;
 }
 
 .step-card__desc {
@@ -2471,7 +2475,6 @@ section.hero--home {
     /* Giảm padding trái */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     height: 100%;
 }
 

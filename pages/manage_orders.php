@@ -350,6 +350,7 @@ include $base_dir . 'includes/header.php';
     .manage-orders__subtitle {
         font-size: 1.6rem;
         color: var(--apple-grey);
+        line-height: 1.2;
     }
 
     .manage-orders__card {

@@ -38,13 +38,14 @@ include $root . 'includes/header.php';
                         <ul>
                             <li><strong>Dịch vụ:</strong> Toàn bộ mã nguồn, thiết kế, logo và thuật toán phối đồ AI là tài sản trí tuệ của đội ngũ SmartFit.</li>
                             <li><strong>Ảnh tải lên:</strong> Bạn giữ quyền sở hữu đối với hình ảnh trang phục bạn tải lên. Tuy nhiên, bằng cách tải lên, bạn cấp cho SmartFit quyền sử dụng hình ảnh đó để thực hiện các chức năng phối đồ và cải thiện thuật toán AI.</li>
-                            <li><strong>Nghiêm cấm:</strong> Bạn không được tải lên các nội dung vi phạm pháp luật, hình ảnh nhạy cảm hoặc vi phạm bản quyền của bên thứ ba.</li>
+                            <li><strong>Nghiêm cấm:</strong> Người dùng chịu trách nhiệm về hình ảnh tải lên 'Tủ đồ cá nhân'. Cấm tải lên các hình ảnh vi phạm pháp luật, đồi trụy hoặc vi phạm bản quyền. SmartFit có quyền xóa tài khoản nếu phát hiện vi phạm.</li>
                         </ul>
                     </section>
 
                     <section class="terms-section">
                         <h2>4. Dịch vụ phối đồ và cửa hàng</h2>
                         <ul>
+                            <li><strong>Tính chất tham khảo:</strong> Các gợi ý phối đồ từ 'AI Stylist' mang tính chất tham khảo và tư vấn phong cách. SmartFit không chịu trách nhiệm nếu kết quả phối đồ không hoàn toàn phù hợp với kỳ vọng chủ quan hoặc hoàn cảnh thực tế của người dùng.</li>
                             <li><strong>Độ chính xác:</strong> Thuật toán AI đưa ra gợi ý dựa trên dữ liệu thời tiết và thông tin bạn cung cấp. Các gợi ý này chỉ mang tính chất tham khảo về phong cách.</li>
                             <li><strong>Giao dịch:</strong> Đối với các món đồ trong Shop, chúng tôi cam kết cung cấp thông tin về màu sắc, kích cỡ và kho hàng chính xác nhất có thể. Tuy nhiên, màu sắc thực tế có thể hơi khác do hiển thị của màn hình thiết bị.</li>
                         </ul>
@@ -135,6 +136,7 @@ include $root . 'includes/header.php';
         margin-bottom: 12px;
         display: flex;
         align-items: center;
+        line-height: 1.2;
     }
 
     .terms-section p, .terms-section ul {

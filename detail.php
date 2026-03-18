@@ -97,7 +97,7 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
         <div class="product-detail">
             <div class="row">
                 <!-- Cột trái: Ảnh sản phẩm -->
-                <div class="col l-6 m-12 c-12">
+                <div class="col l-6 m-12 c-12 product-detail__left">
                     <div class="product-detail__gallery">
                         <div class="product-detail__image">
                             <img src="<?php echo htmlspecialchars($product['image']); ?>" id="mainProductImg" 
@@ -115,11 +115,20 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                                 Truy cập <i class="fa-solid fa-arrow-right"></i>
                             </a>
                         </div>
+
+                        <?php if (!empty($product['description'])): ?>
+                        <div class="product-detail__description" style="margin-top: 20px;">
+                            <h3 class="product-detail__label">Mô tả sản phẩm</h3>
+                            <p class="product-detail__text">
+                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
+                            </p>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
                 <!-- Cột phải: Thông tin sản phẩm -->
-                <div class="col l-6 m-12 c-12">
+                <div class="col l-6 m-12 c-12 product-detail__right">
                     <div class="product-detail__content">
                         <h1 class="product-detail__title"><?php echo htmlspecialchars($product['name']); ?></h1>
                         
@@ -149,15 +158,6 @@ $displayType = (in_array($product['type'], ['accessory', 'glasses'])) ? 'Phụ k
                                 <span class="value status" id="stockInfo">Vui lòng chọn size</span>
                             </div>
                         </div>
-
-                        <?php if (!empty($product['description'])): ?>
-                        <div class="product-detail__description">
-                            <h3 class="product-detail__label">Mô tả sản phẩm</h3>
-                            <p class="product-detail__text">
-                                <?php echo nl2br(htmlspecialchars($product['description'])); ?>
-                            </p>
-                        </div>
-                        <?php endif; ?>
 
                         <!-- Chọn Màu sắc -->
                         <div class="product-detail__option">

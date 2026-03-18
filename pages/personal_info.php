@@ -290,12 +290,14 @@ require_once '../includes/header.php';
         font-weight: 700;
         color: var(--personal-text-main);
         margin: 0 0 10px 0;
+        line-height: 1.2;
     }
 
     .personal-subtitle {
         font-size: 1.6rem;
         color: var(--personal-text-sub);
         margin: 0;
+        line-height: 1.2;
     }
 
     /* Alert styles */

@@ -23,9 +23,11 @@ include $root . 'includes/header.php';
                         <h2>1. Thông tin chúng tôi thu thập</h2>
                         <p>Để cung cấp trải nghiệm phối đồ tốt nhất, chúng tôi thu thập các loại dữ liệu sau:</p>
                         <ul>
-                            <li><strong>Thông tin tài khoản:</strong> Tên người dùng, địa chỉ Email khi bạn đăng ký tài khoản.</li>
+                            <li><strong>Thông tin tài khoản:</strong> Tên người dùng, địa chỉ Email, <strong>độ tuổi, giới tính và địa chỉ giao hàng</strong> khi bạn đăng ký hoặc cập nhật hồ sơ để phục vụ việc gợi ý phối đồ phù hợp và mua sắm.</li>
                             <li><strong>Dữ liệu vị trí:</strong> Chúng tôi truy cập vị trí địa lý của bạn (với sự cho phép) để cập nhật dữ liệu thời tiết thời gian thực nhằm đưa ra gợi ý trang phục phù hợp.</li>
-                            <li><strong>Dữ liệu tủ đồ:</strong> Hình ảnh và thông tin về các loại trang phục bạn tải lên hệ thống để quản lý và phối đồ.</li>
+                            <li><strong>Dữ liệu tủ đồ:</strong> Hình ảnh và thông tin về các loại trang phục bạn tải lên hệ thống để quản lý và phối đồ.
+                                <br><small><i>Khi sử dụng tính năng 'Tủ đồ cá nhân', người dùng đồng ý tải lên hệ thống hình ảnh trang phục sở hữu riêng. Chúng tôi cam kết hình ảnh này chỉ được lưu trữ nội bộ và phục vụ duy nhất cho mục đích cá nhân hóa trải nghiệm phối đồ của chính người dùng đó.</i></small>
+                            </li>
                         </ul>
                     </section>
 
@@ -50,7 +52,12 @@ include $root . 'includes/header.php';
 
                     <section class="privacy-section">
                         <h2>4. Chia sẻ thông tin</h2>
-                        <p>SmartFit không bán, trao đổi hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba. Chúng tôi chỉ chia sẻ dữ liệu vị trí với dịch vụ thời tiết bên thứ ba (như OpenWeatherMap) để lấy dữ liệu khí tượng mà không kèm theo danh tính của bạn.</p>
+                        <p>SmartFit không bán, trao đổi hoặc cho thuê thông tin cá nhân của bạn cho bên thứ ba vì mục đích quảng cáo. Chúng tôi chỉ chia sẻ dữ liệu trong các trường hợp sau:</p>
+                        <ul>
+                            <li><strong>Chia sẻ dữ liệu với AI:</strong> Dữ liệu về sở thích, màu sắc và hình ảnh tủ đồ của bạn sẽ được xử lý qua thuật toán Trí tuệ Nhân tạo (AI) của SmartFit để đưa ra gợi ý. Quá trình xử lý này được mã hóa và không chia sẻ cho bên thứ ba vì mục đích quảng cáo.</li>
+                            <li><strong>Chia sẻ thông tin với Người bán (Vendor):</strong> Khi bạn đặt hàng từ các Đối tác bán hàng (Shop) trên sàn, SmartFit sẽ cung cấp các thông tin cần thiết (Họ tên, Địa chỉ, Số điện thoại) cho Shop đó để thực hiện việc giao hàng.</li>
+                            <li><strong>Dữ liệu vị trí:</strong> Chỉ chia sẻ với dịch vụ thời tiết bên thứ ba (như OpenWeatherMap) để lấy dữ liệu khí tượng mà không kèm theo danh tính của bạn.</li>
+                        </ul>
                     </section>
 
                     <section class="privacy-section">
@@ -134,6 +141,7 @@ include $root . 'includes/header.php';
         margin-bottom: 12px;
         display: flex;
         align-items: center;
+        line-height: 1.2;
     }
 
     .privacy-section p, .privacy-section ul {
