@@ -58,23 +58,45 @@ require_once __DIR__ . '/config.php';
     <style>
 
     </style>
+    <script>
+        const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+    </script>
 </head>
 
 <body>
-    <?php if (isset($page_extra_body)) echo $page_extra_body; ?>
+    <?php if (isset($page_extra_body) && is_string($page_extra_body)) echo $page_extra_body; ?>
     
     <main class="web__container ">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="<?php echo $root; ?>./pages/home.php" class="navbar__logo">
+            <a href="<?php echo $root; ?>index.php" class="navbar__logo">
                 <img src="<?php echo $root; ?>assets/img/logo_smartfit.jpg" alt="Logo">
             </a>
 
+            <div class="navbar__menu">
+                <a href="<?php echo $root; ?>style_outfits.php" class="navbar__menu-item">
+                    <i class="fa-solid fa-shirt"></i>
+                    <span>Phối đồ</span>
+                </a>
+
+                <a href="<?php echo $root; ?>pages/wardrobe.php" class="navbar__menu-item">
+                    <i class="fa-solid fa-box-archive"></i>
+                    <span>Tủ đồ</span>
+                </a>
+
+                <a href="<?php echo $root; ?>shop.php" class="navbar__menu-item">
+                    <i class="fa-solid fa-store"></i>
+                    <span>Cửa hàng</span>
+                </a>
+            </div>
+
             <div class="navbar__shop">
-                <div class="navbar__cart" onclick="app.openCart()">
+                <?php if (isset($_SESSION['user_id'])): ?>
+                <div class="navbar__cart" onclick="cartDrawerApp.openCart()">
                     <i class="fa-solid fa-cart-shopping"></i>
                     <span class="cart-badge" id="cartBadge" style="display: none;">0</span>
                 </div>
+                <?php endif; ?>
 
                 <div class="navbar__auth">
                     <?php if (isset($_SESSION['user_name'])): ?>
@@ -85,24 +107,19 @@ require_once __DIR__ . '/config.php';
                             </div>
 
                             <div id="userDropdown" class="user-dropdown">
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('admin_dashboard.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/admin_dashboard.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-gauge-high"></i>
+                                    <span>Bảng điều khiển</span>
+                                </a>
+                                <?php endif; ?>
+
                                 <a href="<?php echo $root; ?>pages/personal_info.php" class="user-dropdown__item">
                                     <i class="fa-solid fa-id-card"></i>
                                     <span>Thông tin cá nhân</span>
-                                </a>
-
-                                <a href="<?php echo $root; ?>index.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-shirt"></i>
-                                    <span>Phối đồ</span>
-                                </a>
-
-                                <a href="<?php echo $root; ?>pages/wardrobe.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-clock-rotate-left"></i>
-                                    <span>Bộ sưu tập</span>
-                                </a>
-
-                                <a href="<?php echo $root; ?>shop.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-store"></i>
-                                    <span>Cửa hàng</span>
                                 </a>
 
                                 <a href="<?php echo $root; ?>pages/order_history.php" class="user-dropdown__item">
@@ -110,10 +127,37 @@ require_once __DIR__ . '/config.php';
                                     <span>Lịch sử đơn hàng</span>
                                 </a>
 
-                                <a href="<?php echo $root; ?>pages/add-outfit.php" class="user-dropdown__item">
-                                    <i class="fa-solid fa-plus"></i>
-                                    <span>Thêm trang phục</span>
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_orders.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_orders.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-clipboard-list"></i>
+                                    <span>Quản lý đơn hàng</span>
                                 </a>
+                                <?php endif; ?>
+
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_products.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_products.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-list-check"></i>
+                                    <span>Quản lý sản phẩm</span>
+                                </a>
+                                <?php endif; ?>
+
+                                <?php 
+                                require_once __DIR__ . '/../config/permissions.php';
+                                if (can_access('manage_users.php', $_SESSION['role'] ?? 'guest')): 
+                                ?>
+                                <a href="<?php echo $root; ?>pages/manage_users.php" class="user-dropdown__item">
+                                    <i class="fa-solid fa-users-gear"></i>
+                                    <span>Quản lý người dùng</span>
+                                </a>
+                                <?php endif; ?>
+
+
 
                                 <div class="user-dropdown__divider"></div>
 
@@ -128,10 +172,15 @@ require_once __DIR__ . '/config.php';
 else: ?>
                         <div id="loginBtn">
                             <i class="fa-solid fa-circle-user"></i>
-                            Đăng nhập
+                            <span>Đăng nhập</span>
                         </div>
                     <?php
 endif; ?>
+                </div>
+
+                <!-- Hamburger Toggle Button -->
+                <div class="navbar__toggle" id="mobileMenuToggle">
+                    <i class="fa-solid fa-bars"></i>
                 </div>
 
             </div>

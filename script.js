@@ -4,16 +4,6 @@ window.app = {
         apiKey: '2cb97f62395b42556d493874d4486859', // Key của bạn
         apiUrl: 'https://api.openweathermap.org/data/2.5/weather',
 
-        videos: {
-            Clear: './assets/video/sunny.mp4',
-            Clouds: './assets/video/cloudy.mp4',
-            Rain: './assets/video/rainy.mp4',
-            Drizzle: './assets/video/rainy.mp4',
-            Thunderstorm: './assets/video/rainy.mp4',
-            Snow: './assets/video/snowy.mp4',
-            Default: './assets/video/cloudy.mp4'
-        },
-
         // Bảng dịch mã thời tiết WMO (Open-Meteo) sang tiếng Việt
         weatherCodeMap: {
             0: 'Trời quang',
@@ -40,6 +30,8 @@ window.app = {
         this.startClock();
         this.initFormEvent();
         this.initForecastDropdown();
+        this.initScrollBtn();
+        this.initMobileMenu();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -49,6 +41,11 @@ window.app = {
         } else {
             alert("Trình duyệt không hỗ trợ định vị.");
             this.handleLocationError({ message: "Not supported" });
+        }
+
+        // Khôi phục bộ đồ nếu vừa mới đăng nhập xong (Redirect case)
+        if (window.smartfit_just_logged_in === true) {
+            this.restoreOutfit();
         }
     },
 
@@ -85,6 +82,10 @@ window.app = {
     getWeatherByPosition: function (position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
+        // Lưu lại tọa độ người dùng để dùng cho nút Vị trí của tôi
+        window.userLat = lat;
+        window.userLng = lon;
+
         console.log(`📍 Tìm thấy tọa độ từ Geolocation: ${lat}, ${lon}`);
         this.updateCurrentWeather(lat, lon);
     },
@@ -94,14 +95,46 @@ window.app = {
         console.log(`🌍 Đang lấy thời tiết cho: ${lat}, ${lng}`);
         const url = `${this.config.apiUrl}?lat=${lat}&lon=${lng}&appid=${this.config.apiKey}&units=metric&lang=vi`;
 
-        fetch(url)
-            .then(response => {
-                if (!response.ok) throw new Error("Không lấy được dữ liệu thời tiết");
-                return response.json();
-            })
-            .then(data => {
-                console.log("🌤 Dữ liệu thời tiết:", data);
-                this.updateUI(data);
+        // BẮT BUỘC: Gọi Reverse Geocoding API để lấy Quận/Huyện, Tỉnh/Thành
+        const geocodeUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&email=contact@smartfit.com`;
+
+        Promise.all([
+            fetch(url).then(r => {
+                if (!r.ok) throw new Error("Không lấy được dữ liệu thời tiết");
+                return r.json();
+            }),
+            fetch(geocodeUrl, { headers: { 'Accept-Language': 'vi' } })
+                .then(r => {
+                    if (r.status === 429) {
+                        console.warn("Nominatim Rate Limit (429)");
+                        return null;
+                    }
+                    return r.ok ? r.json() : null;
+                })
+                .catch(() => null)
+        ])
+            .then(([weatherData, geoData]) => {
+                console.log("🌤 Dữ liệu thời tiết:", weatherData);
+
+                let detailedName = weatherData.name || "Nơi này";
+                if (geoData && geoData.address) {
+                    const addr = geoData.address;
+                    // Lấy Cấp hành chính nhỏ hơn (Quận/Huyện/Xã...)
+                    const district = addr.county || addr.suburb || addr.city_district || addr.town || addr.village || addr.quarter || addr.neighbourhood;
+                    // Lấy Tỉnh/Thành phố
+                    const city = addr.city || addr.province || addr.state || addr.region;
+
+                    if (city && district) {
+                        detailedName = `${city}, ${district}`;
+                    } else if (city) {
+                        detailedName = city;
+                    } else if (district) {
+                        detailedName = district;
+                    }
+                }
+                weatherData.detailedName = detailedName; // Mở rộng data thời tiết
+
+                this.updateUI(weatherData);
             })
             .catch(error => {
                 console.error("Lỗi API:", error);
@@ -131,17 +164,25 @@ window.app = {
 
         const temp = Math.round(data.main.temp);
         const condition = data.weather ? data.weather[0].main : 'Clouds';
-        const locationName = data.name || "Nơi này";
+        const locationName = data.detailedName || data.name || "Nơi này";
+
+        // Lưu vào biến toàn cục của app để truyền cho AI làm context
+        this.currentLocationContext = locationName;
+        // Lưu lại dữ liệu thời tiết hiện tại để phục hồi khi bỏ chọn dropdown
+        this.currentWeatherData = data;
 
         // 1. Thay đổi số Độ
         const tempEl = document.querySelector('.info__weather__temp');
         if (tempEl) tempEl.innerHTML = `${temp}<span>°C</span>`;
 
-        // 2. Thay đổi icon thời tiết (dùng icon từ OpenWeatherMap)
+        // 2. Thay đổi icon thời tiết
         const iconEl = document.querySelector('.info__weather__icon');
         if (iconEl) {
-            const iconCode = data.weather && data.weather[0].icon ? data.weather[0].icon : '03d';
-            iconEl.innerHTML = `<img src="https://openweathermap.org/img/wn/${iconCode}@2x.png" alt="weather icon" style="width: 48px; height: 48px; vertical-align: middle;">`;
+            let weatherIconMsg = `☁️`;
+            if (condition === 'Rain' || condition === 'Drizzle' || condition === 'Thunderstorm') weatherIconMsg = "🌧️";
+            else if (condition === 'Clear') weatherIconMsg = "☀️";
+            else if (condition === 'Snow') weatherIconMsg = "🌨️";
+            iconEl.innerHTML = weatherIconMsg;
         }
 
         // 3. Thay đổi chữ thời tiết (dùng mô tả tiếng Việt từ OWM)
@@ -172,34 +213,6 @@ window.app = {
             }
             descElement.innerHTML = descMsg;
         }
-
-        // 5. Thay đổi Video nền
-        const videoElement = document.querySelector('.web__background');
-        if (videoElement) {
-            const videoSrc = this.config.videos[condition] || this.config.videos.Default;
-            if (videoElement.src && !videoElement.src.includes(videoSrc.substring(2))) {
-                videoElement.src = videoSrc;
-            }
-        }
-    },
-
-    // Copy mail
-    copyToClipboard: function (element) {
-        const emailText = element.querySelector('span').innerText;
-        const tooltip = element.querySelector('.copy-tooltip');
-
-        navigator.clipboard.writeText(emailText)
-            .then(() => {
-                tooltip.classList.add("show");
-
-                setTimeout(() => {
-                    tooltip.classList.remove("show");
-                }, 2000);
-            })
-            .catch(err => {
-                console.error('Lỗi khi copy: ', err);
-                alert("Không thể copy email này!");
-            });
     },
 
     //Auth
@@ -241,9 +254,114 @@ window.app = {
             };
         }
 
-        authOverlay.onclick = (e) => {
-            if (e.target === authOverlay) authOverlay.style.display = 'none';
+        if (authOverlay) {
+            authOverlay.onclick = (e) => {
+                if (e.target === authOverlay) authOverlay.style.display = 'none';
+            };
+        }
+    },
+
+    // Xử lý gửi form Đăng nhập/Đăng ký qua AJAX
+    initAuthFormSubmit: function () {
+        const loginForm = document.querySelector('#loginForm form');
+        const registerForm = document.querySelector('#registerForm form');
+        const self = this;
+
+        const handleAuthSubmit = async (e, formType) => {
+            e.preventDefault();
+            const form = e.target;
+            const formData = new FormData(form);
+            const action = form.getAttribute('action');
+
+            try {
+                const response = await fetch(action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    self.showNotification(data.message, 'success');
+                    document.getElementById('authOverlay').style.display = 'none';
+                    form.reset();
+
+                    if (formType === 'login') {
+                        // Cập nhật Navbar sau khi đăng nhập thành công
+                        self.updateNavbarAfterLogin(data.user_name);
+                    }
+                } else {
+                    self.showNotification(data.message, 'error');
+                }
+            } catch (error) {
+                console.error('Auth Error:', error);
+                self.showNotification('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+            }
         };
+
+        if (loginForm) loginForm.addEventListener('submit', (e) => handleAuthSubmit(e, 'login'));
+        if (registerForm) registerForm.addEventListener('submit', (e) => handleAuthSubmit(e, 'register'));
+    },
+
+    // Cập nhật Navbar dynamic mà không reload trang
+    updateNavbarAfterLogin: function (userName) {
+        const authContainer = document.querySelector('.navbar__auth');
+        if (!authContainer) return;
+
+        // Nội dung HTML mới cho phần User (thay thế nút Đăng nhập)
+        // Lưu ý: Root path ở đây là tương đối, nên dùng window.location.origin hoặc tương đương nếu phức tạp hơn
+        // Tuy nhiên dựa trên header.php, chúng ta sẽ xây dựng cấu trúc tương tự.
+        const userHtml = `
+            <div id="userInfoToggle" class="user-info">
+                <div class="user-info__trigger">
+                    <span class="user-info__name"> Xin chào, <b>${userName}</b></span>
+                    <i class="fa-solid fa-caret-down user-info__arrow"></i>
+                </div>
+                <div id="userDropdown" class="user-dropdown">
+                    <a href="pages/admin_dashboard.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span>Bảng điều khiển</span>
+                    </a>
+                    <a href="pages/personal_info.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Thông tin cá nhân</span>
+                    </a>
+                    <a href="pages/order_history.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-receipt"></i>
+                        <span>Lịch sử đơn hàng</span>
+                    </a>
+                    <a href="pages/manage_orders.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Quản lý đơn hàng</span>
+                    </a>
+                    <a href="pages/manage_products.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Quản lý sản phẩm</span>
+                    </a>
+                    <a href="pages/manage_users.php" class="user-dropdown__item">
+                        <i class="fa-solid fa-users-gear"></i>
+                        <span>Quản lý người dùng</span>
+                    </a>
+                    <div class="user-dropdown__divider"></div>
+                    <a href="includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                        <span>Đăng xuất</span>
+                    </a>
+                </div>
+            </div>
+        `;
+
+        authContainer.innerHTML = userHtml;
+
+        // Khởi tạo lại sự kiện cho menu user mới tạo
+        this.initUserMenu();
+
+        // Tự động khôi phục kết quả phối đồ lên UI sau khi đăng nhập
+        this.restoreOutfit();
     },
 
     // Submenu User
@@ -267,44 +385,65 @@ window.app = {
         }
     },
 
-    initFormEvent: function () {
-        const configForm = document.querySelector('.config-form');
-        const resultSection = document.getElementById('result');
+    // Mobile Menu Toggle
+    initMobileMenu: function () {
+        const toggleBtn = document.getElementById('mobileMenuToggle');
+        const navbarMenu = document.querySelector('.navbar__menu');
 
-        if (configForm) {
-            configForm.addEventListener('submit', (e) => {
-                e.preventDefault();
+        if (toggleBtn && navbarMenu) {
+            toggleBtn.onclick = (e) => {
+                e.stopPropagation();
+                navbarMenu.classList.toggle('active');
+                
+                // Đổi icon bars <-> xmark
+                const icon = toggleBtn.querySelector('i');
+                if (navbarMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-xmark');
+                } else {
+                    icon.classList.remove('fa-xmark');
+                    icon.classList.add('fa-bars');
+                }
+            };
 
-                if (resultSection) {
-                    resultSection.style.display = 'flex';
-
-                    resultSection.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
+            // Đóng menu khi click ra ngoài
+            document.addEventListener('click', (e) => {
+                if (!navbarMenu.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    navbarMenu.classList.remove('active');
+                    const icon = toggleBtn.querySelector('i');
+                    if (icon) {
+                        icon.classList.remove('fa-xmark');
+                        icon.classList.add('fa-bars');
+                    }
                 }
             });
         }
     },
+
 
     resetForm: function () {
         const resultSection = document.getElementById('result');
         const configForm = document.querySelector('.config-form');
 
         if (resultSection) resultSection.style.display = 'none';
+
         if (configForm) {
             configForm.reset();
             configForm.scrollIntoView({ behavior: 'smooth' });
         }
+        // Xóa kết quả lưu trữ
+        localStorage.removeItem('smartfit_last_outfit');
     },
 
-    // Xử lý nút bấm 
     initFormEvent: function () {
         const submitBtn = document.querySelector('.confirm__button');
         const configForm = document.getElementById('configForm');
 
         if (!submitBtn || !configForm) {
-            console.error("❌ Không tìm thấy Form hoặc Nút bấm");
+            // Chỉ log nếu đang ở trang có form (style_outfits.php)
+            if (window.location.pathname.includes('style_outfits.php')) {
+                console.warn("⚠️ Không tìm thấy Form hoặc Nút bấm cấu hình.");
+            }
             return;
         }
 
@@ -322,78 +461,56 @@ window.app = {
             const resultContainer = document.querySelector('.result__container');
 
             // Ẩn kết quả cũ, hiện loading
-            if (resultSection) resultSection.style.display = 'flex';
+            const footer = document.querySelector('.footer');
+            if (resultSection) {
+                resultSection.style.display = 'flex';
+                resultSection.classList.add('is-loading');
+                if (footer) footer.style.display = 'none'; // Ẩn footer khi đang chờ
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
             if (resultContainer) resultContainer.style.display = 'none';
             if (loadingProgress) {
                 loadingProgress.style.display = 'flex';
-                loadingProgress.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
-            //Gọi API thật
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout
-                const response = await fetch('includes/suggest-outfit.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData),
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-
-                const textResponse = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(textResponse);
-                } catch (err) {
-                    throw new Error("Lỗi Server trả về không phải JSON");
-                }
-
-                console.log("✅ Kết quả trả về:", data);
-
+            // Gọi API thật theo khuôn được cung cấp
+            fetch('includes/suggest-outfit.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json' // Báo cho PHP biết tao gửi JSON nhé
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("PHP trả về nè:", data); // F12 xem console chỗ này cực quan trọng
+                
                 if (loadingProgress) loadingProgress.style.display = 'none';
-
-                if (data.success) {
-                    self.displayResult(data.data);
-                    self.showNotification('Đã phối đồ xong!', 'success');
-                } else {
-                    console.error("🔥 LỖI TỪ PHP BÁO VỀ:", data.error);
-                    self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
-                }
-
-                if (loadingProgress) loadingProgress.style.display = 'none';
+                if (resultSection) resultSection.classList.remove('is-loading');
 
                 if (data.success) {
                     if (resultContainer) resultContainer.style.display = 'flex';
-
                     self.displayResult(data.data);
                     self.showNotification('Đã phối đồ xong!', 'success');
-
                     if (resultSection) resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                    //================ save ofits
-                    const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
-                    if (btnSave && data.data) {
-                        btnSave.setAttribute('data-top', data.data.topId);
-                        btnSave.setAttribute('data-bottom', data.data.bottomId);
-                        btnSave.setAttribute('data-shoes', data.data.shoesId);
-                        btnSave.setAttribute('data-acc', data.data.accId || 'null');
-                        btnSave.setAttribute('data-style', data.data.style);
-
-                        // Reset icon về rỗng
-                        const icon = btnSave.querySelector('i');
-                        icon.classList.remove('fa-solid');
-                        icon.classList.add('fa-regular');
-                        btnSave.querySelector('span').innerText = 'Lưu set đồ';
+                } else {
+                    console.error("Lỗi từ PHP: " + data.error);
+                    self.showNotification(data.error || 'Có lỗi xảy ra', 'error');
+                    
+                    // Nếu lỗi do logic hoặc catch all, hiện lại chữ thông báo
+                    if (data.raw_data !== undefined) {
+                        console.log("Dữ liệu thô gửi lên mà PHP nhận được là: ", data.raw_data);
                     }
                 }
-
-            } catch (error) {
-                console.error("❌ Lỗi:", error);
+            })
+            .catch(err => {
+                console.error("Lỗi sập nguồn:", err);
                 if (loadingProgress) loadingProgress.style.display = 'none';
-                self.showNotification(error.message, 'error');
-            }
+                if (resultSection) resultSection.classList.remove('is-loading');
+                const footer = document.querySelector('.footer');
+                if (footer) footer.style.display = 'block'; // Hiện lại footer nế lỗi
+                self.showNotification(err.message, 'error');
+            });
 
         });
     },
@@ -407,31 +524,170 @@ window.app = {
         if (styleEl) styleEl.innerText = data.style;
         if (descEl) descEl.innerHTML = data.explanation;
 
-        // 2. Cập nhật Hình ảnh (Chỉ Áo và Quần)
-        const setImg = (id, src) => {
-            const el = document.getElementById(id);
-            if (el) el.src = src;
-        };
-        setImg('imgTop', data.topImage);
-        setImg('imgBottom', data.bottomImage);
+        // 2. Xử lý hiển thị Hình ảnh và Danh sách món đồ theo loại Outfit
+        const boxTop = document.getElementById('boxTop');
+        const boxBottom = document.getElementById('boxBottom');
+        const boxOnePiece = document.getElementById('boxOnePiece');
+        const liTop = document.getElementById('liTop');
+        const liBottom = document.getElementById('liBottom');
+        const liOnePiece = document.getElementById('liOnePiece');
 
-        // 3. Cập nhật danh sách items
+        if (data.onepieceId && data.onepieceId !== 'null') {
+            // CASE: One-piece
+            if (boxTop) boxTop.style.display = 'none';
+            if (boxBottom) boxBottom.style.display = 'none';
+            if (boxOnePiece) boxOnePiece.style.display = 'block';
+            if (liTop) liTop.style.display = 'none';
+            if (liBottom) liBottom.style.display = 'none';
+            if (liOnePiece) liOnePiece.style.display = 'block';
+
+            const imgOP = document.getElementById('imgOnePiece');
+            if (imgOP) imgOP.src = data.onepieceImage || data.onePieceImage || '/SmartFit/assets/img/default-placeholder.jpg';
+            
+            const textOP = document.getElementById('itemOnePieceName');
+            if (textOP) textOP.innerText = data.onepiece || data.onePiece || 'Chưa xác định';
+            
+            // Add dynamic text description for onepiece
+            let extraDesc = document.getElementById('extraOnePieceDesc');
+            if (!extraDesc) {
+                extraDesc = document.createElement('p');
+                extraDesc.id = 'extraOnePieceDesc';
+                extraDesc.style.fontWeight = 'bold';
+                extraDesc.style.color = 'var(--primary-blue)';
+                extraDesc.style.marginTop = '15px';
+                if (descEl) descEl.parentNode.appendChild(extraDesc);
+            }
+            if (extraDesc) {
+                extraDesc.innerText = "Gợi ý đồ bộ: Set trang phục này là sự kết hợp hoàn hảo, bạn không cần phải đau đầu chọn áo phối với quần nữa!";
+                extraDesc.style.display = 'block';
+            }
+        } else {
+            // CASE: Áo + Quần
+            if (boxTop) boxTop.style.display = 'block';
+            if (boxBottom) boxBottom.style.display = 'block';
+            if (boxOnePiece) boxOnePiece.style.display = 'none';
+            if (liTop) liTop.style.display = 'block';
+            if (liBottom) liBottom.style.display = 'block';
+            if (liOnePiece) liOnePiece.style.display = 'none';
+
+            const imgT = document.getElementById('imgTop');
+            if (imgT) imgT.src = data.topImage || './assets/img/default-top.jpg';
+            const imgB = document.getElementById('imgBottom');
+            if (imgB) imgB.src = data.bottomImage || './assets/img/default-bottom.jpg';
+            
+            const textT = document.getElementById('itemTopName');
+            if (textT) textT.innerText = data.top || 'Chưa xác định';
+            const textB = document.getElementById('itemBottomName');
+            if (textB) textB.innerText = data.bottom || 'Chưa xác định';
+            
+            const extraDesc = document.getElementById('extraOnePieceDesc');
+            if (extraDesc) extraDesc.style.display = 'none';
+        }
+
+        // 3. Cập nhật Giày và Phụ kiện (Chỉ cập nhật text tên, ảnh đã được ẩn ở UI mới)
         const setText = (id, text) => {
             const el = document.getElementById(id);
             if (el) el.innerText = text;
         };
-        setText('itemTopName', data.top);
-        setText('itemBottomName', data.bottom);
-        setText('itemShoes', data.shoes);
-        setText('itemHead', data.accessories);
+        setText('itemShoes', data.shoes || 'Chưa xác định');
+        setText('itemHead', data.accessories || 'Không có');
+
+        // 3.1 Cập nhật Link chi tiết sản phẩm
+        const updateItemLink = (linkId, productId) => {
+            const el = document.getElementById(linkId);
+            if (el) {
+                if (productId && productId !== 'null') {
+                    el.href = `detail.php?id=${productId}`;
+                    el.classList.add('is-clickable');
+                } else {
+                    el.href = "javascript:void(0)";
+                    el.classList.remove('is-clickable');
+                }
+            }
+        };
+        updateItemLink('itemOnePieceLink', data.onepieceId);
+        updateItemLink('itemTopLink', data.topId);
+        updateItemLink('itemBottomLink', data.bottomId);
+        updateItemLink('itemShoesLink', data.shoesId);
+        updateItemLink('itemHeadLink', data.accId);
 
         // 4. Hiển thị Section kết quả
         const resultSection = document.getElementById('result');
+        const footer = document.querySelector('.footer');
         if (resultSection) {
             resultSection.style.display = 'flex';
+            if (footer) footer.style.display = 'block';
             resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        // 5. Cập nhật trạng thái nút Lưu (isSaved từ AI trả về)
+        const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+        if (btnSave) {
+            const icon = btnSave.querySelector('i');
+            const span = btnSave.querySelector('span');
+
+            if (data.isSaved) {
+                btnSave.classList.add('is-saved');
+                if (icon) {
+                    icon.classList.remove('fa-regular');
+                    icon.classList.add('fa-solid');
+                }
+                if (span) span.innerText = 'Đã lưu';
+            } else {
+                btnSave.classList.remove('is-saved');
+                if (icon) {
+                    icon.classList.remove('fa-solid');
+                    icon.classList.add('fa-regular');
+                }
+                if (span) span.innerText = 'Lưu set đồ';
+            }
+
+            // Gán dữ liệu cho nút lưu
+            btnSave.setAttribute('data-onepiece', data.onepieceId || '');
+            btnSave.setAttribute('data-top', data.topId || '');
+            btnSave.setAttribute('data-bottom', data.bottomId || '');
+            btnSave.setAttribute('data-shoes', data.shoesId || '');
+            btnSave.setAttribute('data-acc', data.accId || 'null');
+            btnSave.setAttribute('data-style', data.style || '');
+        }
+
+        // 6. Lưu vào sessionStorage (Tạm thời cho phiên làm việc, tồn tại qua reload/login)
+        sessionStorage.setItem('smartfit_temp_outfit', JSON.stringify(data));
     },
+
+    // Khôi phục kết quả từ sessionStorage (Dùng cho quá trình đăng nhập)
+    restoreOutfit: function () {
+        const savedData = sessionStorage.getItem('smartfit_temp_outfit');
+        if (savedData) {
+            try {
+                const data = JSON.parse(savedData);
+                console.log("🔄 Đang khôi phục kết quả phối đồ sau khi đăng nhập...");
+
+                // Hiển thị lại kết quả
+                this.displayResult(data);
+
+                // Cập nhật dữ liệu cho nút lưu (Quan trọng)
+                const btnSave = document.querySelector('button[onclick="app.toggleSaveOutfit(this)"]');
+                if (btnSave) {
+                    btnSave.setAttribute('data-onepiece', data.onepieceId || '');
+                    btnSave.setAttribute('data-top', data.topId || '');
+                    btnSave.setAttribute('data-bottom', data.bottomId || '');
+                    btnSave.setAttribute('data-shoes', data.shoesId || '');
+                    btnSave.setAttribute('data-acc', data.accId || 'null');
+                    btnSave.setAttribute('data-style', data.style || '');
+                }
+
+                // QUAN TRỌNG: Xóa khỏi sessionStorage ngay sau khi khôi phục
+                // Để đảm bảo nếu nhấn F5 lần nữa (không phải login) thì nó sẽ biến mất
+                sessionStorage.removeItem('smartfit_temp_outfit');
+
+            } catch (e) {
+                console.error("Lỗi khi khôi phục outfit:", e);
+                sessionStorage.removeItem('smartfit_temp_outfit');
+            }
+        }
+    },
+
 
     // Lấy thông tin 
     collectFormData: function () {
@@ -441,16 +697,43 @@ window.app = {
         const color = document.querySelector('input[name="color"]:checked')?.value;
         const fit = document.querySelector('input[name="fit"]:checked')?.value;
         const note = document.querySelector('.config-form__textarea')?.value || '';
+        const age = document.getElementById('age')?.value || 'All';
 
-        if (!occasion || !gender || !style || !color || !fit) {
+        if (!occasion || !gender || !style || !color || !fit || !age) {
             this.showNotification('Vui lòng chọn đầy đủ thông tin!', 'error');
             return null;
         }
 
         const tempText = document.querySelector('.info__weather__temp')?.innerText || '25';
+        const weatherText = document.querySelector('.info__weather__text')?.innerText || 'Trời quang';
+
+        let descText = document.querySelector('.info__desc')?.innerHTML || 'HCM —';
+        // Extract Location. Lấy từ biến currentLocationContext đã được gán bởi Nominatim, 
+        // hoặc fallback qua bóc tách regex
+        let location = this.currentLocationContext || 'Hồ Chí Minh';
+        if (!this.currentLocationContext) {
+            const locationMatch = descText.match(/<b>(.*?)<\/b>/);
+            if (locationMatch && locationMatch[1]) {
+                location = locationMatch[1].trim();
+            }
+        }
+
+        let targetDate = 'Hôm nay';
+        if (this.selectedDateContext) {
+            targetDate = this.selectedDateContext; // VD: 'Ngày mai, 16/03' hoặc 'Thứ 3, 17/03'
+        }
+
         return {
-            occasion, gender, style, color, fit, note,
-            weather: { temp: parseInt(tempText), condition: 'cloudy' },
+            occasion: occasion, 
+            gender: gender, 
+            style: style, 
+            color: color, 
+            fit: fit, 
+            age: age,
+            note: note, 
+            location: location,
+            weather: { temp: parseInt(tempText) || 25, condition: weatherText.trim() },
+            targetDate: targetDate,
             timeOfDay: 'day'
         };
     },
@@ -458,8 +741,10 @@ window.app = {
     resetForm: function () {
         const configForm = document.getElementById('configForm');
         const resultSection = document.getElementById('result');
+
         if (configForm) configForm.reset();
         if (resultSection) resultSection.style.display = 'none';
+
         document.getElementById('hero')?.scrollIntoView({ behavior: 'smooth' });
     },
 
@@ -489,6 +774,7 @@ window.app = {
         const isAlreadySaved = btnElement.classList.contains('is-saved');
 
         // 1. CHỈ ĐỌC dữ liệu từ các thuộc tính data-* của nút bấm
+        const onepieceId = btnElement.getAttribute('data-onepiece');
         const topId = btnElement.getAttribute('data-top');
         const bottomId = btnElement.getAttribute('data-bottom');
         const shoesId = btnElement.getAttribute('data-shoes');
@@ -500,8 +786,9 @@ window.app = {
 
         // 2. Gom dữ liệu gửi đi 
         const dataToSend = {
-            top_id: topId,
-            bottom_id: bottomId,
+            onepiece_id: (onepieceId && onepieceId !== 'null' && onepieceId !== '') ? onepieceId : null,
+            top_id: (topId && topId !== 'null' && topId !== '') ? topId : null,
+            bottom_id: (bottomId && bottomId !== 'null' && bottomId !== '') ? bottomId : null,
             shoes_id: shoesId,
             acc_id: (accId && accId !== 'null' && accId !== '') ? accId : null,
             style_name: styleName || "Phong cách gợi ý"
@@ -564,7 +851,7 @@ window.app = {
             });
     },
 
-    // Hàm tạo hiệu ứng bay
+    // Hiệu ứng bay tới giỏ hàng (giả lập)
     flyToCart: function (imgElement, cartIconElement) {
         if (!imgElement || !cartIconElement) return;
 
@@ -607,9 +894,10 @@ window.app = {
     // Gọi API Open-Meteo và render dropdown
     fetch7DaysForecast: function (lat, lng) {
         const self = this;
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto`;
+        // Lấy 8 ngày vì 1 ngày là hôm nay, lấy thêm 7 ngày tương lai
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=auto&forecast_days=8`;
 
-        console.log('📅 Đang lấy dự báo 7 ngày...');
+        console.log('📅 Đang lấy dự báo 7 ngày tiếp theo...');
 
         fetch(url)
             .then(response => {
@@ -617,54 +905,77 @@ window.app = {
                 return response.json();
             })
             .then(data => {
-                console.log('📅 Dữ liệu dự báo 7 ngày:', data);
+                console.log('📅 Dữ liệu dự báo:', data);
                 const daily = data.daily;
                 if (!daily || !daily.time) return;
 
                 const dropdown = document.getElementById('forecastDropdown');
                 if (!dropdown) return;
 
-                // Xóa các option cũ
-                dropdown.innerHTML = '';
+                // Xóa các option cũ và giữ lại default
+                dropdown.innerHTML = '<option value="">-- Dự báo 7 ngày --</option>';
 
-                // Tạo 7 option mới
-                daily.time.forEach(function (dateStr, i) {
+                const daysOfWeek = ["Chủ nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+
+                // Bắt đầu vòng lặp. Bỏ qua ngày hôm nay (i = 0), duyệt 7 ngày tiếp theo
+                for (let i = 1; i <= 7 && i < daily.time.length; i++) {
+                    const dateStr = daily.time[i];
                     const weatherCode = daily.weathercode[i];
                     const tempMax = Math.round(daily.temperature_2m_max[i]);
                     const tempMin = Math.round(daily.temperature_2m_min[i]);
                     const rainProb = daily.precipitation_probability_max[i];
+
                     const weatherText = self.translateWeatherCode(weatherCode);
 
-                    // Format ngày tháng (VD: 13/03)
+                    // Nhiệt độ trung bình dùng chung cho ngày đó
+                    const tempAvg = Math.round((tempMax + tempMin) / 2);
+
                     const dateObj = new Date(dateStr);
+                    const dayOfWeek = daysOfWeek[dateObj.getDay()];
                     const dayMonth = dateObj.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
-                    const label = i === 0 ? 'Hôm nay' : dayMonth;
+
+                    // Logic label "Ngày mai"
+                    const label = i === 1 ? `Ngày mai, ${dayMonth}` : `${dayOfWeek}, ${dayMonth}`;
 
                     // Value chứa toàn bộ thông tin ngày đó dạng JSON
                     const optionValue = JSON.stringify({
                         date: dateStr,
+                        dateLabel: label,
                         weatherCode: weatherCode,
                         weatherText: weatherText,
-                        tempMax: tempMax,
-                        tempMin: tempMin,
+                        temp: tempAvg,
                         rainProbability: rainProb
                     });
 
                     const option = document.createElement('option');
                     option.value = optionValue;
-                    option.textContent = `${label}: ${weatherText} - ${tempMax}°C (Mưa: ${rainProb}%)`;
+                    option.textContent = `${label}: ${weatherText} - ${tempAvg}°C`;
                     dropdown.appendChild(option);
-                });
-
-                // Mặc định lưu dữ liệu "Hôm nay" vào localStorage
-                if (dropdown.options.length > 0) {
-                    localStorage.setItem('smartfit_target_weather', dropdown.options[0].value);
-                    console.log('💾 Đã lưu dự báo Hôm nay vào localStorage');
                 }
             })
             .catch(error => {
-                console.error('❌ Lỗi lấy dự báo 7 ngày:', error);
+                console.error('❌ Lỗi lấy dự báo:', error);
             });
+    },
+
+    // Map weather code from open-meteo to OpenWeatherMap icon code
+    getOWMIconFromMeteoCode: function (code, isDay = true) {
+        if (code === null || code === undefined) code = 0;
+        const d = isDay ? 'd' : 'n';
+        const iconMap = {
+            0: '01', 1: '02', 2: '03', 3: '04',
+            45: '50', 48: '50',
+            51: '09', 53: '09', 55: '09',
+            56: '09', 57: '09',
+            61: '10', 63: '10', 65: '10',
+            66: '13', 67: '13',
+            71: '13', 73: '13', 75: '13', 77: '13',
+            80: '09', 81: '09', 82: '09',
+            85: '13', 86: '13',
+            95: '11', 96: '11', 99: '11'
+        };
+        const baseIcon = iconMap[code] || '03';
+        return `https://openweathermap.org/img/wn/${baseIcon}${d}@2x.png`;
     },
 
     // Khởi tạo sự kiện change cho dropdown dự báo
@@ -672,11 +983,105 @@ window.app = {
         const dropdown = document.getElementById('forecastDropdown');
         if (!dropdown) return;
 
+        const self = this;
+
         dropdown.addEventListener('change', function () {
             const selectedValue = dropdown.value;
             if (selectedValue) {
+                const data = JSON.parse(selectedValue);
                 localStorage.setItem('smartfit_target_weather', selectedValue);
-                console.log('💾 Đã lưu dự báo ngày đã chọn:', JSON.parse(selectedValue));
+                console.log('💾 Đã chọn dự báo ngày:', data);
+
+                // Cập nhật UI Hero Section cho ngày tương lai
+                const tempEl = document.querySelector('.info__weather__temp');
+                if (tempEl) tempEl.innerHTML = `${data.temp}<span>°C</span>`;
+
+                const weatherTextElement = document.querySelector('.info__weather__text');
+                if (weatherTextElement) {
+                    const capitalDesc = data.weatherText.charAt(0).toUpperCase() + data.weatherText.slice(1);
+                    weatherTextElement.innerHTML = capitalDesc + '&nbsp;';
+                }
+
+                const iconEl = document.querySelector('.info__weather__icon');
+                if (iconEl) {
+                    const iconUrl = self.getOWMIconFromMeteoCode(data.weatherCode);
+                    iconEl.innerHTML = `<img src="${iconUrl}" alt="weather icon" style="width: 48px; height: 48px; vertical-align: middle; object-fit: contain;">`;
+                }
+
+                const descElement = document.querySelector('.info__desc');
+                if (descElement) {
+                    let descMsg = `<b>${self.currentLocationContext || "Hồ Chí Minh"}</b> — `;
+                    if (data.rainProbability > 50) descMsg += `Dự báo ${data.dateLabel} có mưa rào, nhớ chuẩn bị đồ đi mua nhé ☔`;
+                    else if (data.temp < 20) descMsg += `Dự báo ${data.dateLabel} khá lạnh, ưu tiên đồ ấm nhé 🥶`;
+                    else descMsg += `Dự báo ${data.dateLabel} thời tiết sẽ rất đẹp ✨`;
+                    descElement.innerHTML = descMsg;
+                }
+
+                // Lưu vào Global Context của app để FormData bốc vào
+                self.selectedDateContext = data.dateLabel;
+
+            } else {
+                // Return to current real-time condition
+                console.log('↩️ Khôi phục thời tiết hiện tại');
+                if (self.currentWeatherData) {
+                    self.updateUI(self.currentWeatherData);
+                }
+                self.selectedDateContext = null;
+            }
+        });
+    },
+
+    // ---------------------------------------------------------
+    // Nút cuộn trang (Scroll Button)
+    // ---------------------------------------------------------
+    initScrollBtn: function () {
+        const scrollBtn = document.getElementById('scrollBtn');
+        const heroSection = document.getElementById('hero');
+        const featuresSection = document.querySelector('.features');
+
+        if (!scrollBtn) return;
+
+        console.log("🖱️ Khởi tạo Nút cuộn trang...");
+
+        // Xử lý xoay mũi tên: Xoay lên khi ra khỏi Hero
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                // Nếu Hero KHÔNG còn thấy được (đã cuộn xuống qua khỏi nó)
+                if (!entry.isIntersecting) {
+                    scrollBtn.classList.add('up');
+                } else {
+                    // Nếu đang ở Hero
+                    scrollBtn.classList.remove('up');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: '-80px 0px 0px 0px' // Bỏ qua phần navbar sticky
+        });
+
+        observer.observe(heroSection);
+
+        // Xử lý sự kiện click
+        scrollBtn.addEventListener('click', () => {
+            if (scrollBtn.classList.contains('up')) {
+                // Quay lên đầu trang
+                heroSection.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            } else {
+                // Cuộn xuống
+                if (featuresSection) {
+                    featuresSection.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                } else {
+                    window.scrollBy({
+                        top: window.innerHeight,
+                        behavior: 'smooth'
+                    });
+                }
             }
         });
     },

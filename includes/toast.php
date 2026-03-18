@@ -2,7 +2,7 @@
 <style>
 .toast {
     position: fixed;
-    top: 20px;
+    bottom: 50px;
     right: 20px;
     min-width: 250px;
     padding: 16px 24px;
@@ -23,12 +23,38 @@
 }
 </style>
 <script>
-function showToast(message, type) {
-    const toast = document.createElement('div');
-    toast.className = 'toast';
-    toast.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
-    toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + message;
-    document.body.appendChild(toast);
+    function showToast(message, type) {
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        // Sử dụng màu từ CSS Variables
+        if (type === 'success') {
+            toast.style.backgroundColor = 'var(--success, #4CAF50)';
+        } else {
+            toast.style.backgroundColor = 'var(--error, #f44336)';
+        }
+        
+        toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + message;
+        document.body.appendChild(toast);
+        
         setTimeout(() => toast.remove(), 3000);
-}
+    }
 </script>
+
+<?php if (isset($_SESSION['success'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast("<?php echo $_SESSION['success']; ?>", "success");
+        });
+    </script>
+    <?php unset($_SESSION['success']); ?>
+<?php endif; ?>
+
+<?php if (isset($_SESSION['error'])): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            showToast("<?php echo $_SESSION['error']; ?>", "error");
+        });
+    </script>
+    <?php unset($_SESSION['error']); ?>
+<?php endif; ?>

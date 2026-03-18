@@ -1,4 +1,5 @@
 <?php
+ob_start();
 session_start();
 require_once 'config.php';
 
@@ -14,7 +15,8 @@ if (!isset($_SESSION['user_id'])) {
 $data = json_decode(file_get_contents('php://input'), true);
 $userId   = $_SESSION['user_id'];
 $outfitId = $data['outfit_id'] ?? null;
-$size     = $data['size'] ?? 'M'; // Mặc định là M nếu không chọn
+$size     = $data['size'] ?? 'M';
+$color    = $data['color'] ?? ''; 
 $qty      = $data['quantity'] ?? 1;
 
 if (!$outfitId) {
@@ -22,10 +24,10 @@ if (!$outfitId) {
     exit;
 }
 
-// 3. Logic: Kiểm tra xem món này (cùng size) đã có trong giỏ chưa
-$checkSql = "SELECT id, quantity FROM shopping_cart WHERE user_id = ? AND outfit_id = ? AND size_name = ?";
+// 3. Logic: Kiểm tra xem món này (cùng size và màu) đã có trong giỏ chưa
+$checkSql = "SELECT id, quantity FROM shopping_cart WHERE user_id = ? AND outfit_id = ? AND size_name = ? AND color_name = ?";
 $stmt = mysqli_prepare($conn, $checkSql);
-mysqli_stmt_bind_param($stmt, "iis", $userId, $outfitId, $size);
+mysqli_stmt_bind_param($stmt, "iiss", $userId, $outfitId, $size, $color);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 $row = mysqli_fetch_assoc($result);
@@ -39,9 +41,9 @@ if ($row) {
     $success = mysqli_stmt_execute($updStmt);
 } else {
     // NẾU CHƯA CÓ -> THÊM MỚI DÒNG DỮ LIỆU
-    $insertSql = "INSERT INTO shopping_cart (user_id, outfit_id, size_name, quantity) VALUES (?, ?, ?, ?)";
+    $insertSql = "INSERT INTO shopping_cart (user_id, outfit_id, size_name, color_name, quantity) VALUES (?, ?, ?, ?, ?)";
     $insStmt = mysqli_prepare($conn, $insertSql);
-    mysqli_stmt_bind_param($insStmt, "iisi", $userId, $outfitId, $size, $qty);
+    mysqli_stmt_bind_param($insStmt, "iissi", $userId, $outfitId, $size, $color, $qty);
     $success = mysqli_stmt_execute($insStmt);
 }
 
@@ -54,11 +56,13 @@ if ($success) {
     $cRes = mysqli_stmt_get_result($cStmt);
     $cRow = mysqli_fetch_assoc($cRes);
     
+    ob_clean();
     echo json_encode([
         'status' => 'success', 
         'message' => 'Đã thêm vào giỏ hàng!',
         'cart_count' => $cRow['total']
     ]);
 } else {
+    ob_clean();
     echo json_encode(['status' => 'error', 'message' => 'Lỗi hệ thống, vui lòng thử lại!']);
 }

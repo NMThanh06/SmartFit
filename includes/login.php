@@ -2,18 +2,46 @@
 session_start();
 require_once 'config.php';
 
+// Lấy URL trang hiện tại để redirect về sau khi xử lý
+$redirectUrl = '../style_outfits.php'; // Mặc định
+if (!empty($_POST['redirect_url'])) {
+    $redirectUrl = $_POST['redirect_url'];
+} elseif (!empty($_SERVER['HTTP_REFERER'])) {
+    $redirectUrl = $_SERVER['HTTP_REFERER'];
+}
+
+// Kiểm tra xem có phải yêu cầu AJAX (Fetch API) không
+$isAjax = !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' 
+          || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false);
+
+function sendResponse($success, $message, $data = []) {
+    global $isAjax, $redirectUrl;
+    if ($isAjax) {
+        header('Content-Type: application/json');
+        echo json_encode(array_merge(['success' => $success, 'message' => $message], $data));
+        exit;
+    } else {
+        if ($success) {
+            $_SESSION['success'] = $message;
+            $_SESSION['smartfit_just_logged_in'] = true;
+        } else {
+            $_SESSION['error'] = $message;
+        }
+        header('Location: ' . $redirectUrl);
+        exit;
+    }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email'] ?? '');
     $password = $_POST['psw'] ?? '';
 
     if (empty($email) || empty($password)) {
-        $_SESSION['error'] = 'Vui lòng nhập email và mật khẩu';
-        header('Location: ../index.php');
-        exit;
+        sendResponse(false, 'Vui lòng nhập thông tin đăng nhập và mật khẩu');
     }
 
-    $stmt = mysqli_prepare($conn, "SELECT id, name, email, password FROM users WHERE email = ?");
-    mysqli_stmt_bind_param($stmt, 's', $email);
+    $stmt = mysqli_prepare($conn, "SELECT id, name, email, password, role FROM users WHERE email = ? OR name = ?");
+    mysqli_stmt_bind_param($stmt, 'ss', $email, $email);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
     $user = mysqli_fetch_assoc($result);
@@ -22,6 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['user_id'] = $user['id'];
         $_SESSION['user_name'] = $user['name'];
         $_SESSION['user_email'] = $user['email'];
+        $_SESSION['role'] = $user['role'];
 
         if (isset($_POST['remember'])) {
             $token = bin2hex(random_bytes(32));
@@ -33,15 +62,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             setcookie('remember_token', $token, $expiry, '/', '', false, true);
         }
 
-        // $_SESSION['success'] = 'Đăng nhập thành công!';
-        header('Location: ../index.php');
-        exit;
+        sendResponse(true, 'Đăng nhập thành công!', ['user_name' => $user['name']]);
     } else {
-        $_SESSION['error'] = 'Email hoặc mật khẩu không đúng';
-        header('Location: ../index.php');
-        exit;
+        sendResponse(false, 'Email hoặc mật khẩu không đúng');
     }
 }
 
-header('Location:../index.php');
+header('Location: ' . $redirectUrl);
 exit;

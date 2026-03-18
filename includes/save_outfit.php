@@ -19,27 +19,32 @@ if (!$data) {
     exit;
 }
 
-// Kiểm tra các ID bắt buộc
-if (empty($data['top_id']) || empty($data['bottom_id']) || empty($data['shoes_id'])) {
-    echo json_encode(['status' => 'error', 'message' => 'Thiếu dữ liệu món đồ chính (áo, quần, giày).']);
+// Kiểm tra các món đồ chính (Cần [Áo + Quần] HOẶC [One-piece], và luôn cần Giày)
+$isOnePiece = !empty($data['onepiece_id']);
+$hasTopBottom = !empty($data['top_id']) && !empty($data['bottom_id']);
+$hasShoes = !empty($data['shoes_id']);
+
+if ((!$isOnePiece && !$hasTopBottom) || !$hasShoes) {
+    echo json_encode(['status' => 'error', 'message' => 'Thiếu dữ liệu món đồ chính (áo/quần hoặc trang phục nguyên bộ, và giày).']);
     exit;
 }
 
 // Xử lý phụ kiện và lưu DB
-$userId    = $_SESSION['user_id'];
-$topId     = $data['top_id'];
-$bottomId  = $data['bottom_id'];
-$shoesId   = $data['shoes_id'];
+$userId     = $_SESSION['user_id'];
+$topId      = !$isOnePiece ? $data['top_id'] : null;
+$bottomId   = !$isOnePiece ? $data['bottom_id'] : null;
+$onepieceId = $isOnePiece ? $data['onepiece_id'] : null;
+$shoesId    = $data['shoes_id'];
 
 // Ép kiểu phụ kiện
 $accId = (isset($data['acc_id']) && $data['acc_id'] !== "" && $data['acc_id'] !== 'null') ? $data['acc_id'] : null;
 $styleName = !empty($data['style_name']) ? $data['style_name'] : 'Outfit của tôi';
 
-$sql = "INSERT INTO saved_outfits (user_id, top_id, bottom_id, shoes_id, acc_id, style_name) VALUES (?, ?, ?, ?, ?, ?)";
+$sql = "INSERT INTO saved_outfits (user_id, top_id, bottom_id, onepiece_id, shoes_id, acc_id, style_name) VALUES (?, ?, ?, ?, ?, ?, ?)";
 $stmt = mysqli_prepare($conn, $sql);
         
 if ($stmt) {
-    mysqli_stmt_bind_param($stmt, "iiiiis", $userId, $topId, $bottomId, $shoesId, $accId, $styleName);
+    mysqli_stmt_bind_param($stmt, "iiiiiis", $userId, $topId, $bottomId, $onepieceId, $shoesId, $accId, $styleName);
     
     if (mysqli_stmt_execute($stmt)) {
         echo json_encode(['status' => 'success', 'message' => 'Đã lưu trang phục thành công!']);
