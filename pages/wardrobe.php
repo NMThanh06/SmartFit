@@ -102,21 +102,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                 mysqli_stmt_bind_param($stmt_col_upd, "ssi", $color_name, $hex_code, $itemId);
                 mysqli_stmt_execute($stmt_col_upd);
 
-                // Nếu có upload ảnh mới
-                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                // Nếu có upload ảnh mới (qua file hoặc base64 từ camera)
+                $uploadedImageSrc = false;
+                if (!empty($_POST['image_base64'])) {
+                    $base64_string = $_POST['image_base64'];
+                    $data = explode(',', $base64_string);
+                    $content = base64_decode($data[1]);
+                    $ext = 'jpg';
+                    if (strpos($data[0], 'png') !== false) $ext = 'png';
+                    $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
+                    $upload_dir = "../assets/img/outfits/";
+                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                    if (file_put_contents($upload_dir . $new_filename, $content)) {
+                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $uploadedImageSrc = true;
+                    }
+                } elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                     $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
                     $upload_dir = "../assets/img/outfits/";
-                    if (!is_dir($upload_dir))
-                        mkdir($upload_dir, 0777, true);
-
+                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
                         $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
-                        $sql_img = "UPDATE outfit_colors SET image = ? WHERE outfit_id = ?";
-                        $stmt_img = mysqli_prepare($conn, $sql_img);
-                        mysqli_stmt_bind_param($stmt_img, "si", $image_path, $itemId);
-                        mysqli_stmt_execute($stmt_img);
+                        $uploadedImageSrc = true;
                     }
+                }
+
+                if ($uploadedImageSrc) {
+                    $sql_img = "UPDATE outfit_colors SET image = ? WHERE outfit_id = ?";
+                    $stmt_img = mysqli_prepare($conn, $sql_img);
+                    mysqli_stmt_bind_param($stmt_img, "si", $image_path, $itemId);
+                    mysqli_stmt_execute($stmt_img);
                 }
                 $msg = "Đã cập nhật thông tin món đồ!";
             }
@@ -131,12 +147,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                 $outfit_id = mysqli_insert_id($conn);
 
                 $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
-                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                if (!empty($_POST['image_base64'])) {
+                    $base64_string = $_POST['image_base64'];
+                    $data = explode(',', $base64_string);
+                    $content = base64_decode($data[1]);
+                    $ext = 'jpg';
+                    if (strpos($data[0], 'png') !== false) $ext = 'png';
+                    $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
+                    $upload_dir = "../assets/img/outfits/";
+                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+                    if (file_put_contents($upload_dir . $new_filename, $content)) {
+                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                    }
+                } elseif (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
                     $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
                     $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
                     $upload_dir = "../assets/img/outfits/";
-                    if (!is_dir($upload_dir))
-                        mkdir($upload_dir, 0777, true);
+                    if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
                     if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
                         $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
                     }
@@ -329,17 +356,36 @@ endif; ?>
                 </div>
                 <div class="col l-6 m-12 c-12">
                     <div class="form-group">
-                        <label>Ảnh sản phẩm (Chụp hoặc tải lên) <span class="required">*</span></label>
+                        <label>Ảnh sản phẩm <span class="required">*</span></label>
+                        
+                        <!-- Camera Container -->
+                        <div id="cameraContainer" style="display: none; width: 100%; border-radius: 12px; overflow: hidden; position: relative; border: 2px solid #ddd; background: #000;">
+                            <video id="cameraVideo" style="width: 100%; max-height: 350px; object-fit: cover;" autoplay playsinline></video>
+                            <button type="button" onclick="takeSnapshot()" style="position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%); border: none; border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; background: white; color: #007aff; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 10;">
+                                <i class="fa-solid fa-camera" style="font-size: 2.2rem;"></i>
+                            </button>
+                            <button type="button" onclick="closeCamera()" style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; width: 35px; height: 35px; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;">
+                                <i class="fa-solid fa-xmark"></i>
+                            </button>
+                        </div>
+                        <canvas id="cameraCanvas" style="display: none;"></canvas>
+
                         <div class="upload-box" id="uploadBox" onclick="document.getElementById('personal-file').click()">
                             <div class="upload-box__placeholder" id="uploadPlaceholder">
                                 <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>Nhấn để chọn ảnh hoặc chụp</p>
+                                <p>Nhấn để chọn ảnh từ thư mục</p>
                             </div>
                             <div class="upload-box__preview" id="uploadPreview" style="display:none;">
                                 <img src="" alt="Preview" id="uploadPreviewImg">
                             </div>
                             <p class="upload-box__filename" id="file-name"></p>
-                            <input type="file" id="personal-file" name="image" accept="image/*" capture="environment" hidden required onchange="previewUploadImage(this)">
+                            <input type="file" id="personal-file" name="image" accept="image/*" hidden onchange="previewUploadImage(this)">
+                            <input type="hidden" id="image_base64" name="image_base64">
+                        </div>
+
+                        <div style="display: flex; gap: 10px; margin-top: 15px; justify-content: center;">
+                            <button type="button" class="btn-cancel" onclick="document.getElementById('personal-file').click()"><i class="fa-solid fa-folder-open"></i> Tải ảnh lên</button>
+                            <button type="button" class="btn-primary" onclick="openCamera()"><i class="fa-solid fa-camera"></i> Chụp ảnh</button>
                         </div>
                     </div>
                 </div>
@@ -427,10 +473,10 @@ endif; ?>
     .personal-item-card__type { font-size: 1.2rem; color: #86868b; display: block; }
 
     /* Modal Styles */
-    .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-    .modal-content { background: #fff; margin: 5% auto; padding: 30px; border-radius: 24px; width: 700px; max-width: 95%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleUp 0.3s ease; }
-    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
-    .modal-header h2 { font-size: 2.2rem; font-weight: 700; color: #1d1d1f; }
+    .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); overflow-y: auto; padding: 20px 0; }
+    .modal-content { background: #fff; margin: 0 auto; padding: 30px; border-radius: 24px; width: 700px; max-width: 95%; max-height: calc(100vh - 40px); overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleUp 0.3s ease; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; position: sticky; top: -30px; background: #fff; z-index: 100; }
+    .modal-header h2 { font-size: 2.2rem; font-weight: 700; color: #1d1d1f; margin: 0; }
     .close-modal { font-size: 2.8rem; cursor: pointer; color: #86868b; }
     
     .form-group { margin-bottom: 15px; }
@@ -444,7 +490,7 @@ endif; ?>
     .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
     .color-picker-group input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
     
-    .upload-box { border: 2px dashed #ddd; border-radius: 15px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #fafafa; height: 100%; display: flex; flex-direction: column; justify-content: center; }
+    .upload-box { border: 2px dashed #ddd; border-radius: 15px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #fafafa; min-height: 200px; display: flex; flex-direction: column; justify-content: center; margin-bottom: 20px; }
     .upload-box:hover { border-color: #007aff; background: #f0f7ff; }
     .upload-box i { font-size: 3rem; color: #007aff; margin-bottom: 10px; }
     .upload-box p { font-size: 1.3rem; color: #86868b; margin: 0; }
@@ -508,9 +554,11 @@ endif; ?>
         const form = document.querySelector('.personal-form');
         form.reset();
         document.getElementById('item_id').value = '0';
+        document.getElementById('image_base64').value = '';
         document.getElementById('modalTitle').innerHTML = '<i class="fa-solid fa-plus-circle"></i> Thêm món đồ cá nhân';
         document.getElementById('btnSubmit').innerText = 'Lưu món đồ';
         resetUploadPreview();
+        closeCamera(); // Đảm bảo đóng camera nếu mở trước đó
         document.getElementById('addPersonalModal').style.display = 'block';
     }
 
@@ -571,6 +619,9 @@ endif; ?>
             return;
         }
 
+        // Xóa base64 nếu chọn file mới để tránh conflict
+        document.getElementById('image_base64').value = '';
+
         const file = input.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -581,6 +632,77 @@ endif; ?>
         };
         reader.readAsDataURL(file);
     }
+
+    // Camera JS
+    let videoStream = null;
+
+    function openCamera() {
+        const video = document.getElementById('cameraVideo');
+        const container = document.getElementById('cameraContainer');
+        const uploadBox = document.getElementById('uploadBox');
+        
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+            .then(function(stream) {
+                videoStream = stream;
+                video.srcObject = stream;
+                video.play();
+                container.style.display = 'block';
+                uploadBox.style.display = 'none';
+            })
+            .catch(function(err) {
+                console.error("Lỗi truy cập Camera:", err);
+                alert("Không thể truy cập Camera. Hãy chắc chắn bạn đã cấp quyền cho trình duyệt!");
+            });
+    }
+
+    function closeCamera() {
+        if (videoStream) {
+            videoStream.getTracks().forEach(track => track.stop());
+            videoStream = null;
+        }
+        document.getElementById('cameraContainer').style.display = 'none';
+        document.getElementById('uploadBox').style.display = 'flex';
+    }
+
+    function takeSnapshot() {
+        const video = document.getElementById('cameraVideo');
+        const canvas = document.getElementById('cameraCanvas');
+        const context = canvas.getContext('2d');
+        
+        // Thiết lập kích thước canvas bằng kích thước thật của video
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        
+        // Vẽ video lên canvas
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        
+        // Lấy data URL dạng Base64
+        const dataURL = canvas.toDataURL('image/jpeg', 0.85);
+        document.getElementById('image_base64').value = dataURL;
+        
+        // Hiển thị Preview
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+        document.getElementById('uploadPreview').style.display = 'flex';
+        document.getElementById('uploadPreviewImg').src = dataURL;
+        document.getElementById('file-name').innerText = "Ảnh vừa chụp từ Camera";
+        
+        // Reset thẻ input file
+        document.getElementById('personal-file').value = "";
+        
+        closeCamera();
+    }
+
+    // Validate trước khi submit
+    document.querySelector('.personal-form').addEventListener('submit', function(e) {
+        const isEdit = document.getElementById('item_id').value !== '0';
+        const fileVal = document.getElementById('personal-file').value;
+        const b64Val = document.getElementById('image_base64').value;
+        
+        if (!isEdit && !fileVal && !b64Val) {
+            e.preventDefault();
+            alert("Vui lòng tải ảnh lên hoặc chụp ảnh sản phẩm!");
+        }
+    });
 
     // Đóng modal khi click ra ngoài
     window.onclick = function(event) {
