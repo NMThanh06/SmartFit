@@ -731,6 +731,3 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
 </body>
 
 </html>
-</body>
-
-</html>

@@ -556,7 +556,7 @@ window.app = {
             if (liOnePiece) liOnePiece.style.display = 'block';
 
             const imgOP = document.getElementById('imgOnePiece');
-            if (imgOP) imgOP.src = self.resolvePath(data.onepieceImage || data.onePieceImage);
+            if (imgOP) imgOP.src = this.resolvePath(data.onepieceImage || data.onePieceImage);
             
             const textOP = document.getElementById('itemOnePieceName');
             if (textOP) textOP.innerText = data.onepiece || data.onePiece || 'Chưa xác định';
@@ -585,9 +585,9 @@ window.app = {
             if (liOnePiece) liOnePiece.style.display = 'none';
 
             const imgT = document.getElementById('imgTop');
-            if (imgT) imgT.src = self.resolvePath(data.topImage, 'assets/img/default-top.jpg');
+            if (imgT) imgT.src = this.resolvePath(data.topImage, 'assets/img/default-top.jpg');
             const imgB = document.getElementById('imgBottom');
-            if (imgB) imgB.src = self.resolvePath(data.bottomImage, 'assets/img/default-bottom.jpg');
+            if (imgB) imgB.src = this.resolvePath(data.bottomImage, 'assets/img/default-bottom.jpg');
             
             const textT = document.getElementById('itemTopName');
             if (textT) textT.innerText = data.top || 'Chưa xác định';

@@ -20,6 +20,7 @@ $root = rtrim($relative_path, '/') . '/';
 
 // Kết nối Database
 require_once __DIR__ . '/config.php';
+require_once __DIR__ . '/functions.php';
 ?>
 <?php include __DIR__ . '/toast.php'; ?>
 
