@@ -1,0 +1,559 @@
+/* =======================================================
+   DỰ ÁN SMARTFIT - RESPONSIVE STYLES (VER 2026)
+   Chiến lược: Desktop-First kết hợp Fluid Typography
+   Breakpoints: 576px, 768px, 992px, 1200px
+======================================================= */
+
+:root {
+    /* Fluid Typography & Spacing using clamp() */
+    --fluid-h1: clamp(2.4rem, 5vw, 4.5rem);
+    --fluid-h2: clamp(2rem, 4vw, 3.5rem);
+    --fluid-p: clamp(1.4rem, 2vw, 1.6rem);
+    --container-padding: clamp(15px, 3vw, 30px);
+}
+
+/* Base Responsive Fixes */
+.navbar__toggle {
+    display: none;
+    /* Ẩn mặc định trên desktop */
+}
+
+/* =======================================================
+   1. LARGE DESKTOP (Trên 1200px)
+======================================================= */
+@media (min-width: 1200px) {
+    .grid.wide {
+        max-width: 1200px;
+    }
+}
+
+/* =======================================================
+   2. DESKTOP (992px - 1199px)
+======================================================= */
+@media (max-width: 1199px) {
+    .grid.wide {
+        max-width: 960px;
+    }
+}
+
+/* =======================================================
+   3. TABLET LANDSCAPE (768px - 991px)
+======================================================= */
+@media (max-width: 991px) {
+    .grid.wide {
+        max-width: 720px;
+    }
+
+    .navbar__menu {
+        display: flex;
+        position: fixed;
+        top: var(--navbar-height);
+        left: 0;
+        right: 0;
+        background: #fff;
+        flex-direction: column;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        z-index: 100;
+        transform: translateY(-100%);
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .navbar__menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .navbar__toggle {
+        display: block;
+        /* Hiện trên tablet/mobile */
+        font-size: 2.4rem;
+        cursor: pointer;
+        padding: 10px;
+        margin-left: 10px;
+        order: 3;
+        /* Đưa về cuối cùng trong flex container của shop/auth group */
+    }
+
+    .navbar__menu-item {
+        width: 100%;
+        padding: 15px 20px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+
+    /* Product Grid Overrides (2 columns) */
+    .shop-grid .col,
+    .shop__products .col,
+    .feature-products .col {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+
+    /* Admin Table Scroll */
+    .manage-table-wrapper {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 20px;
+        border: 1px solid #eee;
+        border-radius: 8px;
+    }
+
+    .manage-table {
+        min-width: 800px;
+        /* Force scroll on small tables */
+    }
+
+    /* =====================================================
+       BỘ LỌC CỬA HÀNG CHO TABLET (Giống Mobile)
+    ===================================================== */
+    .shop-mobile-filter-btn {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 10px;
+        background-color: #007aff;
+        color: white;
+        padding: 12px 25px;
+        border-radius: 12px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 25px;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+    }
+
+    .shop-sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 9998;
+        display: none;
+    }
+
+    .shop-sidebar-overlay.active {
+        display: block !important;
+    }
+
+    .shop-sidebar {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 300px;
+        max-width: 85%;
+        background: white;
+        z-index: 9999;
+        padding: 30px 20px !important;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.1);
+        transform: translateX(-100%);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow-y: auto;
+    }
+
+    .shop-sidebar.active {
+        transform: translateX(0) !important;
+    }
+
+    .shop-sidebar__close {
+        display: flex !important;
+        justify-content: flex-end;
+        font-size: 2.8rem;
+        color: #86868b;
+        margin-bottom: 20px;
+        cursor: pointer;
+    }
+
+    .shop-page__content {
+        display: block !important; /* Bỏ flex để shop-main chiếm full width */
+    }
+
+    .shop-main {
+        padding-left: 0 !important;
+    }
+
+    /* =====================================================
+       REORDERING TRANG CHI TIẾT SẢN PHẨM (detail.php)
+    ===================================================== */
+    .product-detail .row {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+
+    .product-detail__left,
+    .product-detail__right,
+    .product-detail__gallery {
+        display: contents !important;
+    }
+
+    /* Ảnh trên cùng */
+    .product-detail__image { 
+        order: 1 !important; 
+        margin-bottom: 20px;
+    }
+
+    /* Nội dung sản phẩm (Tên, giá, chọn size/màu) */
+    .product-detail__content { 
+        order: 2 !important; 
+        margin-bottom: 30px;
+        padding-left: 0 !important;
+    }
+
+    /* Ô cung cấp bởi cửa hàng */
+    .product-vendor-box { 
+        order: 3 !important; 
+        margin-bottom: 20px !important;
+    }
+
+    /* Mô tả sản phẩm */
+    .product-detail__description { 
+        order: 4 !important; 
+        margin-bottom: 30px !important;
+    }
+}
+
+/* =======================================================
+   4. MOBILE LARGE / TABLET PORTRAIT (576px - 767px)
+======================================================= */
+@media (max-width: 767px) {
+    .grid.wide {
+        max-width: 540px;
+    }
+
+    /* Hero Section */
+    .hero__title {
+        font-size: var(--fluid-h1);
+        line-height: 1.2;
+    }
+
+    /* Form transition to 1 column */
+    .checkout-form .form-row,
+    .auth-card__group--row,
+    .config-form {
+        flex-direction: column !important;
+    }
+
+    .config-form__group {
+        width: 100% !important;
+        height: auto !important;
+        min-height: 100px;
+    }
+
+    .config-form__group:last-of-type {
+        width: 100% !important;
+    }
+
+    .col-half,
+    .col-6,
+    .col-4 {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* AI Result Stacking */
+    .result__container {
+        flex-direction: column !important;
+        height: auto !important;
+        max-height: none !important;
+        padding: 20px !important;
+    }
+
+    .result__visual {
+        flex: 0 0 auto !important;
+        width: 100% !important;
+        flex-direction: row !important;
+        overflow-x: auto;
+        padding-bottom: 10px;
+    }
+
+    .visual-item {
+        flex: 0 0 200px !important;
+        height: 250px !important;
+    }
+
+    .result__content {
+        padding-left: 0 !important;
+        width: 100%;
+    }
+}
+
+/* =======================================================
+   5. MOBILE (Dưới 576px)
+======================================================= */
+@media (max-width: 575px) {
+    .grid.wide {
+        width: 100%;
+        padding: 0 var(--container-padding);
+    }
+
+    /* Product Grid (1 column) */
+    .shop-grid .col,
+    .shop__products .col {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+    }
+
+    /* Action Buttons Full-width & Stacked */
+    .actions__button,
+    .btn-place-order,
+    .confirm__button,
+    .auth-card__button {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        margin-bottom: 10px;
+    }
+
+    .result__actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+
+    /* Admin Buttons & Icons */
+    .manage-btn {
+        padding: 12px !important;
+        font-size: 1.2rem !important;
+    }
+
+    /* Increase Input size for touch */
+    input,
+    select,
+    textarea,
+    .button,
+    .config-form__label {
+        min-height: 48px;
+        font-size: 1.6rem !important;
+    }
+
+    /* Ẩn span trong navbar auth (trừ dropdown) để giao diện gọn trên mobile nhỏ */
+    .navbar__auth>div>span,
+    #loginBtn span {
+        display: none !important;
+    }
+
+    /* Đảm bảo hiện tên người dùng và text dropdown */
+    .user-info__name {
+        display: block !important;
+        font-size: 1.2rem;
+    }
+
+    /* Buộc hiện span text trong dropdown (specificity cao hơn selector ẩn) */
+    .navbar__auth .user-dropdown .user-dropdown__item span {
+        display: inline !important;
+    }
+
+    .navbar__auth i,
+    #loginBtn i {
+        font-size: 2.2rem;
+    }
+
+    /* Modal Full-width */
+    .modal-content,
+    .order-modal__content,
+    .auth-card,
+    .map-modal__content {
+        width: 95% !important;
+        margin: 10px auto !important;
+        padding: 20px !important;
+    }
+
+    /* Section Spacing & Typography */
+    section {
+        padding: 40px 15px !important;
+    }
+
+    .section-title {
+        font-size: 2.8rem !important;
+        line-height: 1.3 !important;
+        /* Tăng khoảng cách dòng cho title */
+        margin-bottom: 15px !important;
+    }
+
+    .section-subtitle {
+        line-height: 1.8 !important;
+        /* Tăng khoảng cách dòng cho subtitle */
+        margin-bottom: 30px !important;
+    }
+
+    /* Ẩn đường lượn sóng trong phần Cách thức hoạt động */
+    .how-it-works__line {
+        display: none !important;
+    }
+
+    /* Ẩn icon máy bay giấy trên mobile để giao diện gọn gàng hơn */
+    .how-it-works__icon {
+        display: none !important;
+    }
+
+    /* Căn chỉnh khoảng cách giữa các thẻ bước trong phần Cách thức hoạt động */
+    .how-it-works__steps .col {
+        margin-bottom: 20px;
+    }
+
+    /* Xóa margin-bottom ở thẻ cuối cùng để tránh khoảng trắng thừa */
+    .how-it-works__steps .col:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Xóa margin-top lớn của step-card (vốn để theo đường lượn sóng trên desktop)
+       Trên mobile, chúng gây khoảng trống lớn giữa các thẻ */
+    .step-card {
+        margin: 20px 0 0 !important;
+    }
+
+    /* Xóa margin-top 150px của thẻ giữa (step-card--middle) dùng cho wavy line */
+    .step-card--middle {
+        margin-top: 20px !important;
+    }
+
+    /* Thêm khoảng cách giữa các feature-card */
+    .features .col {
+        margin-bottom: 20px;
+    }
+
+    /* =====================================================
+       SỬA TRANG PHỐI ĐỒ (style_outfits.php) TRÊN MOBILE
+    ===================================================== */
+
+    /* Căn giữa hàng Chọn vị trí & Dự báo trên mobile + thêm khoảng cách dưới */
+    .hero__location-row {
+        justify-content: center !important;
+        margin-bottom: 25px !important;
+        width: 100%;
+    }
+
+    /* Đảm bảo dropdown dự báo không quá rộng và bo góc đẹp trên mobile */
+    .forecast-dropdown {
+        min-width: unset !important;
+        width: 100% !important;
+        max-width: 320px;
+    }
+
+    /* Tăng line-height cho thông tin thời tiết để dễ đọc hơn */
+    .info__weather__text {
+        line-height: 1.6 !important;
+    }
+
+    /* Tăng line-height cho mô tả trang phục tránh dính chữ */
+    .info__desc {
+        line-height: 1.6 !important;
+        margin-top: 10px;
+    }
+
+    /* Sửa line-height cho tiêu đề chào: base.css đặt line-height: 1.6rem (tuyệt đối)
+       nhưng font-size ở đây là 3.2rem → dòng chồng lên nhau trên mobile nhỏ */
+    .info__greeting {
+        font-size: 2.4rem !important;
+        line-height: 1.35 !important;
+        /* Tương đối theo font-size để không bị chồng */
+        margin-bottom: 15px !important;
+    }
+
+    /* Tăng độ cao linh hoạt cho các ô group để chứa đủ nội dung (đặc biệt là ô chọn màu) */
+    .config-form__group {
+        height: auto !important;
+        min-height: 120px !important;
+        padding: 15px !important;
+    }
+
+    /* Điều chỉnh kích thước & khoảng cách vòng tròn màu trên mobile */
+    .config-form__label.config-form__label--color {
+        display: inline-block !important;
+        width: 22px !important;
+        min-width: 22px !important;
+        height: 22px !important;
+        min-height: 22px !important;
+        padding: 0 !important;
+        border-width: 2px !important;
+        flex: none !important;
+        margin: 0 4px !important;
+        /* Thêm giãn cách */
+    }
+
+    /* Các ô lựa chọn không được bọc chữ - đảm bảo chữ trong nút hiển thị 1 dòng */
+    .config-form__label {
+        white-space: nowrap !important;
+        min-height: auto !important;
+        height: 44px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 1.4rem !important;
+        /* Ghi đè font-size lớn từ rule chung bên trên */
+        padding: 8px 14px !important;
+        flex: 1 1 auto;
+        /* Co giãn đồng đều trong dòng */
+    }
+
+    /* Cho phép các ô nếu không đủ chỗ thì xuống hàng theo cụm nút (không wrapping chữ) */
+    .config-form__options {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+
+    /* =====================================================
+       SỬA TRANG TỦ ĐỒ (wardrobe.php) TRÊN MOBILE
+    ===================================================== */
+
+    /* Chuyển header sang dạng cột trên mobile để không bị ép chữ */
+    .wardrobe-page__header-flex {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 15px !important;
+    }
+
+    /* Làm nút thêm đồ rộng full-width trên mobile */
+    .wardrobe-page__header-flex .btn-primary {
+        width: 100% !important;
+        justify-content: center !important;
+        margin-top: 10px !important;
+        padding: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+    }
+
+    /* Sửa line-height trang tủ đồ tránh chồng chữ */
+    .wardrobe-page__title {
+        font-size: 2.6rem !important;
+        line-height: 1.3 !important;
+        margin-bottom: 10px !important;
+    }
+
+    .wardrobe-page__subtitle {
+        line-height: 1.6 !important;
+        margin-bottom: 5px !important;
+        font-size: 1.4rem !important;
+    }
+
+    /* Thu nhỏ khoảng cách nút quay lại */
+    .wardrobe-page__back {
+        margin-bottom: 20px !important;
+    }
+
+    /* =====================================================
+       SỬA TRANG CỬA HÀNG (shop.php) TRÊN MOBILE
+    ===================================================== */
+
+    .shop-page__subtitle {
+        font-size: 1.5rem !important;
+        line-height: 1.6 !important;
+        margin-bottom: 25px !important;
+    }
+
+    /* Điều chỉnh chiều cao ảnh sản phẩm trên mobile */
+    .product-card__img {
+        height: 350px !important;
+    }
+
+    .product-card__img img {
+        height: 100% !important;
+        object-fit: cover !important;
+    }
+}

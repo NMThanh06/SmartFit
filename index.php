@@ -1,372 +1,143 @@
-<?php
-session_start();
-$success = $_SESSION['success'] ?? '';
-$error = $_SESSION['error'] ?? '';
-unset($_SESSION['success'], $_SESSION['error']);
-?>
-<?php include 'includes/toast.php'; ?>
+<?php include 'includes/header.php'; ?>
 
-<!DOCTYPE html>
-<html lang="en">
+<!-- Hero Section -->
+<section id="hero" class="hero hero--home">
+    <div class="hero__content">
+        <h1 class="hero__title">Mặc gì hôm nay? Để AI lo!</h1>
+        <p class="hero__subtitle">Giải pháp quản lý tủ đồ thông minh và gợi ý trang phục cá nhân hóa dựa trên thời tiết
+            và phong cách của riêng bạn.</p>
+        <div class="hero__actions">
+            <a href="style_outfits.php" class="button hero__btn">Trải nghiệm phối đồ ngay</a>
+        </div>
+    </div>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartFit</title>
-
-    <!-- Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
-        rel="stylesheet">
-
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css">
-
-    <!-- My Library -->
-    <link rel="stylesheet" href="./assets/css/grid.css">
-    <link rel="stylesheet" href="./assets/css/base.css">
-    <link rel="stylesheet" href="./assets/css/style.css?=v1">
-    <link rel="stylesheet" href="./assets/css/responsive.css">
-
-    <!-- Javascript -->
-    <script src="script.js?v=1<?php echo time(); ?>" defer></script>
+    <!-- Abstract background elements -->
+    <div class="hero__shape hero__shape--1"></div>
+    <div class="hero__shape hero__shape--2"></div>
+    <div class="hero__shape hero__shape--3"></div>
+</section>
 
 
-    <style>
-
-    </style>
-</head>
-
-<body>
-
-    <video src="./assets/video/cloudy.mp4" autoplay muted loop class="web__background"></video>
-
-    <div class="web__background--overlay"></div>
-
-    <main class="web__container">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <a href="" class="navbar__logo">SmartFit</a>
-
-            <div class="navbar__auth">
-                <?php if (isset($_SESSION['user_name'])): ?>
-                    <div id="userInfoToggle" class="user-info">
-                        <div class="user-info__trigger">
-                            <span class="user-info__name"> Xin chào, <b><?php echo htmlspecialchars($_SESSION['user_name']); ?></b></span>
-                            <i class="fa-solid fa-caret-down user-info__arrow"></i>
-                        </div>
-
-                        <div id="userDropdown" class="user-dropdown">
-                            <a href="./includes/" class="user-dropdown__item">
-                                <i class="fa-solid fa-id-card"></i>
-                                <span>Thông tin cá nhân</span>
-                            </a>
-
-                            <a href="wardrobe.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
-                                <span>Bộ sưu tập</span>
-                            </a>
-
-                            <a href="includes/admin-add.php" class="user-dropdown__item">
-                                <i class="fa-solid fa-clock-rotate-left"></i>
-                                <span>Thêm trang phục</span>
-                            </a>
-
-                            <div class="user-dropdown__divider"></div>
-
-                            <a href="./includes/logout.php" class="user-dropdown__item user-dropdown__item--logout">
-                                <i class="fa-solid fa-right-from-bracket"></i>
-                                <span>Đăng xuất</span>
-                            </a>
-                        </div>
+<!-- Features Section -->
+<section class="features">
+    <div class="grid wide">
+        <h2 class="section-title">Tính năng nổi bật</h2>
+        <p class="section-subtitle">Giải pháp toàn diện giúp bạn quản lý phong cách và tủ đồ một cách thông minh.</p>
+        <div class="row">
+            <div class="col l-4 m-6 c-12">
+                <div class="feature-card feature-card--ai">
+                    <div class="feature-card__icon-wrapper">
+                        <i class="fa-solid fa-robot feature-card__icon"></i>
                     </div>
-
-                <?php else: ?>
-                    <div id="loginBtn">
-                        <i class="fa-solid fa-circle-user"></i>
-                        Đăng nhập
-                    </div>
-                <?php endif; ?>
-            </div>
-
-        </nav>
-
-        <!-- Hero Section -->
-        <section class="hero" id="hero">
-            <div class="hero__info">
-                <div class="info__greeting"></div> <!--Câu chào-->
-                <div class="info__weather">
-                    <div class="info__weather__icon"></div> <!-- Icon thời tiết-->
-
-                    <div class="info__weather__text"></div> <!-- Thời tiết hiện tại-->
-                    <div class="info__weather__temp"></div> <!-- Nhiệt độ -->
-                </div>
-                <div class="info__desc">HCM đang khá lạnh đấy, nhớ mặc ấm nhé.</div>
-            </div>
-
-            <form id="configForm" class="config-form" action="">
-
-                <div class="config-form__group">
-                    <h3 class="config-form__heading">Bạn mặc cho dịp gì ?</h3>
-
-                    <div class="config-form__options">
-                        <input class="config-form__input" type="radio" id="study" name="occasion" value="study">
-                        <label class="config-form__label" for="study">Đi học</label>
-
-                        <input class="config-form__input" type="radio" id="goout" name="occasion" value="goout">
-                        <label class="config-form__label" for="goout">Đi chơi</label>
-
-                        <input class="config-form__input" type="radio" id="date" name="occasion" value="date">
-                        <label class="config-form__label" for="date">Hẹn hò</label>
-                    </div>
-                </div>
-
-                <div class="config-form__group">
-                    <h3 class="config-form__heading">Bạn là ?</h3>
-
-                    <div class="config-form__options">
-                        <input class="config-form__input" type="radio" id="male" name="gender" value="male">
-                        <label class="config-form__label" for="male">Nam</label>
-
-                        <input class="config-form__input" type="radio" id="female" name="gender" value="female">
-                        <label class="config-form__label" for="female">Nữ</label>
-                    </div>
-                </div>
-
-                <div class="config-form__group">
-                    <h3 class="config-form__heading">Phong cách bạn hướng tới ?</h3>
-
-                    <div class="config-form__options">
-                        <input class="config-form__input" type="radio" id="basic" name="style" value="basic">
-                        <label class="config-form__label" for="basic">Basic</label>
-
-                        <input class="config-form__input" type="radio" id="street" name="style" value="street">
-                        <label class="config-form__label" for="street">Streetwear</label>
-
-                        <input class="config-form__input" type="radio" id="vintage" name="style" value="vintage">
-                        <label class="config-form__label" for="vintage">Vintage</label>
-                    </div>
-                </div>
-
-
-                <div class="config-form__group">
-                    <h3 class="config-form__heading">Tông màu chủ đạo ?</h3>
-                    <div class="config-form__options">
-
-                        <input class="config-form__input" type="radio" id="color-dark" name="color" value="dark">
-                        <label class="config-form__label config-form__label--color" for="color-dark"
-                            style="background-color: #000000;"></label>
-
-                        <input class="config-form__input" type="radio" id="color-light" name="color" value="light">
-                        <label class="config-form__label config-form__label--color" for="color-light"
-                            style="background-color: #f0f0f0;"></label>
-
-                        <input class="config-form__input" type="radio" id="color-pop" name="color" value="colorful">
-                        <label class="config-form__label config-form__label--color" for="color-pop"
-                            style="background: linear-gradient(#C21807, #DAA520);"></label>
-
-                        <input class="config-form__input" type="radio" id="color-pastel" name="color" value="pastel">
-                        <label class="config-form__label config-form__label--color" for="color-pastel"
-                            style="background: linear-gradient(#2C3E50, #3E5E5E);"></label>
-
-                        <input class="config-form__input" type="radio" id="color-neutral" name="color" value="neutral">
-                        <label class="config-form__label config-form__label--color" for="color-neutral"
-                            style="background: linear-gradient(#fff, #000);"></label>
-
-                    </div>
-                </div>
-
-                <div class="config-form__group">
-                    <h3 class="config-form__heading">Độ rộng (Fit) ?</h3>
-                    <div class="config-form__options">
-                        <input class="config-form__input" type="radio" id="fit-oversize" name="fit" value="oversized">
-                        <label class="config-form__label" for="fit-oversize">Oversized</label>
-
-                        <input class="config-form__input" type="radio" id="fit-regular" name="fit" value="regular">
-                        <label class="config-form__label" for="fit-regular">Vừa vặn</label>
-
-                        <input class="config-form__input" type="radio" id="fit-slim" name="fit" value="slim">
-                        <label class="config-form__label" for="fit-slim">Ôm sát</label>
-                    </div>
-                </div>
-
-                <div class="config-form__group">
-                    <h3 class="config-form__heading">Ghi chú cho AI (Tùy chọn)</h3>
-                    <textarea class="config-form__textarea" name="note"
-                        placeholder="VD: Tôi có đôi Jordan đỏ, tôi không thích mặc váy..."></textarea>
-                </div>
-            </form>
-
-            <button id="PDN" type="submit" class="confirm__button button" form="configForm">
-                Phối đồ ngay ⭐
-            </button>
-        </section>
-
-        <!-- Result Section -->
-        <section class="result" id="result">
-
-            <!-- Loading -->
-            <div id="loadingProgress" style="display: none;">
-                <div class="result-loading__box">
-                    <div class="result-loading__spinner"></div>
-                    <p class="result-loading__text">AI đang suy nghĩ set đồ cực chất cho bạn... Vui lòng đợi vài giây nhé! ⏳</p>
+                    <h3 class="feature-card__title">Trợ lý phối đồ AI</h3>
+                    <p class="feature-card__desc">Tự động đề xuất các bộ cánh thời thượng dựa trên nhiệt độ, thời tiết
+                        thực tế tại vị trí của bạn và mục đích sử dụng (đi học, đi chơi, hẹn hò).</p>
                 </div>
             </div>
-
-            <div class="result__container">
-
-                <div class="result__visual">
-                    <div class="visual-item">
-                        <img src="./assets/img/top.jpeg" alt="Áo" id="imgTop">
+            <div class="col l-4 m-6 c-12">
+                <div class="feature-card feature-card--wardrobe">
+                    <div class="feature-card__icon-wrapper">
+                        <i class="fa-solid fa-shirt feature-card__icon"></i>
                     </div>
-
-                    <div class="visual-item">
-                        <img src="./assets/img/bottom.jpeg" alt="Quần" id="imgBottom">
-                    </div>
-                </div>
-
-                <div class="result__content">
-                    <div class="result__header">
-                        <span class="result__tag">AI Recommendation</span>
-                        <h2 class="result__title" id="outfitStyle">Streetwear Năng Động</h2>
-                    </div>
-
-                    <p class="result__desc" id="outfitDesc">
-                        "Dựa trên thời tiết <b>24°C</b> và dịp <b>Đi chơi</b>, mình chọn cho bạn một set đồ thoải mái,
-                        vừa đủ ấm nhưng vẫn cực kỳ cool ngầu."
-                    </p>
-
-                    <div class="result__items">
-                        <div class="item-box">
-                            <i class="fa-brands fa-redhat item-icon"></i>
-                            <span id="itemHead">Mũ lưỡi trai đen</span>
-                        </div>
-
-                        <div class="item-box">
-                            <i class="fa-solid fa-shirt item-icon"></i>
-                            <span id="itemTopName">Hoodie Oversized xám</span>
-                        </div>
-
-                        <div class="item-box">
-                            <i class="fa-solid fa-vials item-icon"></i>
-                            <span id="itemBottomName">Quần Cargo túi hộp</span>
-                        </div>
-
-                        <div class="item-box">
-                            <i class="fa-solid fa-shoe-prints item-icon"></i>
-                            <span id="itemShoes">Sneaker Jordan 1 High</span>
-                        </div>
-                    </div>
-
-                    <div class="result__actions">
-                        <button class="button actions__button" onclick="app.resetForm()">
-                            <i class="fa-solid fa-rotate-right"></i> Thử lại
-                        </button>
-
-                        <button class="button actions__button" onclick="app.toggleSaveOutfit(this)">
-                            <i class="fa-regular fa-bookmark"></i> <span>Lưu set đồ</span>
-                        </button>
-                    </div>
-
+                    <h3 class="feature-card__title">Tủ đồ thông minh</h3>
+                    <p class="feature-card__desc">Lưu trữ và quản lý những set đồ bạn yêu thích. Không còn mất thời gian
+                        lục tìm hay quên mất mình có những món đồ nào.</p>
                 </div>
             </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer__author">Made with ❤️ by Cuong & Thanh.</div>
-
-            <div class="footer__contact">
-                <a href="https://github.com/NMThanh06/SmartFit" class="footer__contact__github">
-                    <i class="fa-brands fa-square-github"></i>
-                </a>
-
-                <div class="footer__contact__team">
-                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>trungcuong.2006tn@gmail.com</span>
-                        <div class="copy-tooltip">Copied!</div>
+            <div class="col l-4 m-12 c-12">
+                <div class="feature-card feature-card--store">
+                    <div class="feature-card__icon-wrapper">
+                        <i class="fa-solid fa-store feature-card__icon"></i>
                     </div>
-
-                    <div class="footer__contact__mail" onclick="app.copyToClipboard(this)">
-                        <i class="fa-solid fa-envelope"></i>
-                        <span>nguyenminhthanh043216@gmail.com</span>
-                        <div class="copy-tooltip">Copied!</div>
-                    </div>
+                    <h3 class="feature-card__title">Cửa hàng thời trang</h3>
+                    <p class="feature-card__desc">Khám phá và sở hữu ngay những item mới nhất để bổ sung vào bộ sưu tập
+                        cá nhân với trải nghiệm mua sắm mượt mà.</p>
                 </div>
-            </div>
-        </footer>
-    </main>
-
-    <!-- Auth Form -->
-    <section id="authOverlay" class="auth-overlay">
-        <div class="auth-card">
-            <i id="closeAuth" class="fa-solid fa-xmark auth-card__close"></i>
-
-            <div id="loginForm">
-                <div class="auth-card__title">Đăng nhập</div>
-                <form action="includes/login.php" method="post" class="auth-card__form">
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Email :</h4>
-                        <input type="text" placeholder="Nhập Email của bạn." class="auth-card__input" name="email" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
-                    </div>
-                    <button type="submit" class="auth-card__button button">Đăng nhập</button>
-                </form>
-                <p class="auth-card__switch">Bạn chưa có tài khoản? <a href="#" id="toRegister">Đăng ký ngay</a></p>
-            </div>
-
-            <div id="registerForm" style="display: none;">
-                <div class="auth-card__title">Đăng ký</div>
-                <form action="includes/signup-form.php" method="post" class="auth-card__form">
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Tên :</h4>
-                        <input type="text" placeholder="Nhập tên của bạn." class="auth-card__input" name="name" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Email :</h4>
-                        <input type="email" placeholder="Nhập email của bạn." class="auth-card__input" name="email" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập mật khẩu của bạn." class="auth-card__input" name="psw" required>
-                    </div>
-                    <div class="auth-card__group">
-                        <h4 class="auth-card__heading">Xác nhận mật khẩu :</h4>
-                        <input type="password" placeholder="Nhập lại mật khẩu của bạn." class="auth-card__input" name="psw-repeat" required>
-                    </div>
-                    <button type="submit" class="auth-card__button button">Đăng ký</button>
-                </form>
-                <p class="auth-card__switch">Bạn đã có tài khoản? <a href="#" id="toLogin">Đăng nhập ngay</a></p>
             </div>
         </div>
-    </section>
-    <script>
-        // Hàm hiển thị toast
-        function showToast(message, type) {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.backgroundColor = type === 'success' ? '#4CAF50' : '#f44336';
-            toast.innerHTML = (type === 'success' ? '✅ ' : '❌ ') + message;
-            document.body.appendChild(toast);
-            setTimeout(() => {
-                toast.remove();
-            }, 3000);
-        }
+    </div>
+</section>
 
-        window.onload = function() {
-            <?php if ($success): ?>
-                showToast('<?php echo addslashes($success); ?>', 'success');
-            <?php elseif ($error): ?>
-                showToast('<?php echo addslashes($error); ?>', 'error');
-            <?php endif; ?>
-        };
-    </script>
+<section class="how-it-works">
+    <div class="grid wide">
+        <h2 class="section-title">Cách thức hoạt động</h2>
+        <p class="section-subtitle">Quy trình 3 bước đơn giản giúp bạn tìm ra bộ đồ ưng ý chỉ trong chớp mắt.</p>
+        <div class="how-it-works__container">
+            <!-- Wavy Line Background -->
+            <svg class="how-it-works__line" viewBox="-300 0 1600 200" preserveAspectRatio="none">
+                <path d="M -300,100 C -50,250 250,-50 500,100 C 750,250 1050,-50 1300,100" fill="transparent"
+                    stroke="#6C63FF" stroke-width="4" stroke-dasharray="10, 10"></path>
+            </svg>
+
+            <i class="fa fa-paper-plane how-it-works__icon"></i>
+
+            <div class="row how-it-works__steps">
+                <div class="col l-4 m-4 c-12">
+                    <div class="step-card">
+                        <div class="step-card__number">1</div>
+                        <h3 class="step-card__title">Cung cấp thông tin</h3>
+                        <p class="step-card__desc">Chọn dịp bạn mặc, phong cách và tông màu bạn thích.</p>
+                    </div>
+                </div>
+                <div class="col l-4 m-4 c-12">
+                    <div class="step-card step-card--middle">
+                        <div class="step-card__number">2</div>
+                        <h3 class="step-card__title">AI Phân tích</h3>
+                        <p class="step-card__desc">Hệ thống kết hợp sở thích của bạn với dữ liệu thời tiết thực tế.</p>
+                    </div>
+                </div>
+                <div class="col l-4 m-4 c-12">
+                    <div class="step-card">
+                        <div class="step-card__number">3</div>
+                        <h3 class="step-card__title">Nhận kết quả</h3>
+                        <p class="step-card__desc">Nhận ngay gợi ý phối đồ hoàn hảo kèm hình ảnh trực quan.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="why-choose-us">
+    <div class="grid wide">
+        <h2 class="section-title">Tại sao chọn SmartFit?</h2>
+        <p class="section-subtitle">Sự kết hợp hoàn hảo giữa trí tuệ nhân tạo và gu thời trang của riêng bạn.</p>
+        <div class="row">
+            <div class="col l-4 m-6 c-12">
+                <div class="reason-card">
+                    <i class="fa-solid fa-magic-wand-sparkles reason-card__icon"></i>
+                    <h3 class="reason-card__title">Cá nhân hóa tối đa</h3>
+                    <p class="reason-card__desc">AI hiểu phong cách của bạn và đưa ra những gợi ý trang phục cực kỳ
+                        chuẩn xác.</p>
+                </div>
+            </div>
+            <div class="col l-4 m-6 c-12">
+                <div class="reason-card">
+                    <i class="fa-solid fa-cloud-sun reason-card__icon"></i>
+                    <h3 class="reason-card__title">Phù hợp thời tiết</h3>
+                    <p class="reason-card__desc">Không còn lo lắng mặc quá nóng hay quá lạnh. SmartFit luôn đồng hành
+                        cùng bạn.</p>
+                </div>
+            </div>
+            <div class="col l-4 m-12 c-12">
+                <div class="reason-card">
+                    <i class="fa-solid fa-bolt reason-card__icon"></i>
+                    <h3 class="reason-card__title">Tiết kiệm thời gian</h3>
+                    <p class="reason-card__desc">Chỉ mất 30 giây để có bộ trang phục hoàn hảo. Dành thời gian quý báu
+                        cho việc khác!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+         
+        <!-- Scroll Navigation Button -->
+        <div id="scrollBtn" class="scroll-btn">
+            <i class="fa-solid fa-arrow-down"></i>
+        </div>
+
+<?php include 'includes/footer.php'; ?>
 </body>
 
 </html>
