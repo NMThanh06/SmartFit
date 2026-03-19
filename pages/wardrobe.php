@@ -15,6 +15,7 @@ if (isset($_SESSION['user_id'])) {
 
     // 1. SQL lấy bộ đồ đã phối (saved_outfits)
     $sql = "SELECT so.id as saved_id, so.style_name,
+                   so.top_id, so.bottom_id, so.shoes_id, so.acc_id, so.onepiece_id,
                    t.name as top_name, (SELECT image FROM outfit_colors WHERE outfit_id = t.id LIMIT 1) as top_img,
                    b.name as bottom_name, (SELECT image FROM outfit_colors WHERE outfit_id = b.id LIMIT 1) as bottom_img,
                    s.name as shoes_name, (SELECT image FROM outfit_colors WHERE outfit_id = s.id LIMIT 1) as shoes_img,
@@ -301,14 +302,14 @@ else: ?>
                                         </h3>
                                         <div class="wardrobe-card__desc">
                                             <?php if (!empty($outfit['onepiece_name'])): ?>
-                                                <p><span>Đồ bộ:</span> <?php echo htmlspecialchars($outfit['onepiece_name']); ?></p>
+                                                <p><span>Đồ bộ:</span> <a href="../detail.php?id=<?php echo $outfit['onepiece_id']; ?>" class="wardrobe-item-link"><?php echo htmlspecialchars($outfit['onepiece_name']); ?></a></p>
                                             <?php else: ?>
-                                                <p><span>Áo:</span> <?php echo htmlspecialchars($outfit['top_name']); ?></p>
-                                                <p><span>Quần:</span> <?php echo htmlspecialchars($outfit['bottom_name']); ?></p>
+                                                <p><span>Áo:</span> <a href="../detail.php?id=<?php echo $outfit['top_id']; ?>" class="wardrobe-item-link"><?php echo htmlspecialchars($outfit['top_name']); ?></a></p>
+                                                <p><span>Quần:</span> <a href="../detail.php?id=<?php echo $outfit['bottom_id']; ?>" class="wardrobe-item-link"><?php echo htmlspecialchars($outfit['bottom_name']); ?></a></p>
                                             <?php endif; ?>
-                                            <p><span>Giày:</span> <?php echo htmlspecialchars($outfit['shoes_name']); ?></p>
+                                            <p><span>Giày:</span> <a href="../detail.php?id=<?php echo $outfit['shoes_id']; ?>" class="wardrobe-item-link"><?php echo htmlspecialchars($outfit['shoes_name']); ?></a></p>
                                             <?php if (!empty($outfit['acc_name'])): ?>
-                                                <p><span>Phụ kiện:</span> <?php echo htmlspecialchars($outfit['acc_name']); ?></p>
+                                                <p><span>Phụ kiện:</span> <a href="../detail.php?id=<?php echo $outfit['acc_id']; ?>" class="wardrobe-item-link"><?php echo htmlspecialchars($outfit['acc_name']); ?></a></p>
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -504,6 +505,9 @@ endif; ?>
     .personal-item-card__btn-delete { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; color: #ff3b30; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; opacity: 0; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
     .personal-item-card:hover .personal-item-card__btn-delete { opacity: 1; }
     .personal-item-card__btn-delete:hover { background: #ff3b30; color: #fff; transform: scale(1.1); }
+
+    .wardrobe-item-link { color: inherit; text-decoration: none; transition: 0.2s; }
+    .wardrobe-item-link:hover { color: #007aff; text-decoration: underline; }
 
     /* Upload Box Improvements */
     .upload-options { display: flex; gap: 15px; height: 160px; }

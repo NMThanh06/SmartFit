@@ -34,37 +34,6 @@
             "seller_note": ""
         },
         {
-            "id": "20",
-            "type": "top",
-            "name": "Áo thun Sơn Đòong",
-            "gender": [
-                "male"
-            ],
-            "occasion": [
-                "study",
-                "goout"
-            ],
-            "style": [
-                "street"
-            ],
-            "color": "Đen",
-            "fit": [
-                "oversized"
-            ],
-            "weather": [
-                "hot",
-                "mild",
-                "cold"
-            ],
-            "image": "/SmartFit/assets/img/outfits/1773901983_user_2_closet.jpg",
-            "price": 0,
-            "sizes": {
-                "Mặc định": 1
-            },
-            "age": "All",
-            "seller_note": ""
-        },
-        {
             "id": "16",
             "type": "bottom",
             "name": "Chân váy ngắn xếp ly nữ",
@@ -372,35 +341,6 @@
                 "XL": 15
             },
             "age": "25",
-            "seller_note": ""
-        },
-        {
-            "id": "7",
-            "type": "top",
-            "name": "Áo polo hoa cúc",
-            "gender": [
-                "male",
-                "female"
-            ],
-            "occasion": [
-                "study",
-                "goout"
-            ],
-            "style": [
-                "basic"
-            ],
-            "color": "Xanh dương đậm",
-            "fit": [
-                "regular"
-            ],
-            "weather": [
-                "mild",
-                "cold"
-            ],
-            "image": "/SmartFit/assets/img/outfits/1773756073_user_3_closet.webp",
-            "price": 0,
-            "sizes": [],
-            "age": "All",
             "seller_note": ""
         },
         {
