@@ -14,7 +14,9 @@ function syncOutfitsToJson($conn)
     $sql = "SELECT o.*, 
             (SELECT color_name FROM outfit_colors WHERE outfit_id = o.id LIMIT 1) as main_color,
             (SELECT image FROM outfit_colors WHERE outfit_id = o.id LIMIT 1) as main_image
-            FROM outfits o ORDER BY o.id DESC";
+            FROM outfits o 
+            WHERE o.is_commercial = 1
+            ORDER BY o.id DESC";
 
     $result = mysqli_query($conn, $sql);
     $items = [];
