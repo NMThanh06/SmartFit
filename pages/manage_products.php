@@ -349,7 +349,7 @@ include $base_dir . 'includes/header.php';
                                 </button>
                             </td>
                             <td>#<?= $p['id'] ?></td>
-                            <td><img src="<?= $p['image'] ?: '/SmartFit/assets/img/default-placeholder.jpg' ?>" class="manage-table__img"></td>
+                            <td><img src="<?= getImageUrl($p['image']) ?>" class="manage-table__img"></td>
                             <td class="manage-table__name"><?= htmlspecialchars($p['name']) ?></td>
                             <td><?= number_format($p['price'], 0, ',', '.') ?>đ</td>
                             <td><?= ucfirst($p['type']) ?></td>
@@ -382,7 +382,7 @@ include $base_dir . 'includes/header.php';
                                             ?>
                                             <tr>
                                                 <td style="width: 80px;">
-                                                    <img src="<?= $c['image'] ?>" class="variants-subtable__img">
+                                                    <img src="<?= getImageUrl($c['image']) ?>" class="variants-subtable__img">
                                                 </td>
                                                 <td style="width: 150px;">
                                                     <div class="color-preview-item">

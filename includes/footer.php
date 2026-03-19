@@ -271,7 +271,7 @@
                     <div class="cart-shop-products" style="padding: 12px;">
                         ${group.items.map(item => `
                             <div class="cart-item" style="display: flex; gap: 12px; align-items: flex-start;">
-                                <img src="${item.image}" alt="${item.name}" style="width: 65px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                <img src="${item.image}" alt="${item.name}" style="width: 65px; height: 80px; object-fit: cover; border-radius: 8px; flex-shrink: 0;" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                                 <div class="cart-item__info" style="flex: 1; min-width: 0;">
                                     <h4 class="cart-item__name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</h4>
                                     <div style="font-size: 1.3rem; color: #6e6e73; margin-bottom: 4px;">Size: <b>${item.size_name}</b> | Màu: <b>${item.color_name || 'Mặc định'}</b></div>
