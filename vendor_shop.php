@@ -417,7 +417,7 @@ $totalProducts = mysqli_fetch_assoc(mysqli_stmt_get_result($stmtCount))['total']
             grid.innerHTML = '';
 
             if (!data.items || data.items.length === 0) {
-                grid.innerHTML = '<div class="col l-12" style="text-align:center; padding: 60px; font-size:1.6rem; color:#888;"><i class="fa-solid fa-box-open" style="font-size:4rem;display:block;margin-bottom:15px;opacity:0.4;"></i>Không tìm thấy sản phẩm nào.</div>';
+                grid.innerHTML = '<div class="col l-12" style="text-align:center; padding: 60px; font-size:1.6rem; color:#888;"><i class="fa-solid fa-box-open" style="font-size:4rem;display:block;margin:0 auto 15px;opacity:0.4;"></i>Không tìm thấy sản phẩm nào.</div>';
                 return;
             }
 

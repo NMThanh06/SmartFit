@@ -219,7 +219,7 @@ include $base_dir . 'includes/header.php';
                         <?php else: ?>
                             <tr>
                                 <td colspan="6" style="text-align: center; padding: 50px;">
-                                    <i class="fa-solid fa-box-open" style="font-size: 3rem; color: #ddd; margin-bottom: 10px; display: block;"></i>
+                                    <i class="fa-solid fa-box-open" style="font-size: 3rem; color: #ddd; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;"></i>
                                     Chưa có đơn hàng nào trong hệ thống.
                                 </td>
                             </tr>
