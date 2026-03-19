@@ -61,6 +61,7 @@ require_once __DIR__ . '/functions.php';
     </style>
     <script>
         const isLoggedIn = <?php echo isset($_SESSION['user_id']) ? 'true' : 'false'; ?>;
+        window.SMARTFIT_BASE = '<?php echo $root; ?>';
     </script>
 </head>
 

@@ -60,11 +60,12 @@ try {
     }
 
     while ($row = mysqli_fetch_assoc($resData)) {
-        // Lấy tên màu chính từ bảng outfit_colors (để AI biết màu sắc)
+        // Lấy tên màu + ảnh từ bảng outfit_colors (nguồn ảnh chính thức)
         $oid = $row['id'];
-        $colorRes = mysqli_query($conn, "SELECT color_name FROM outfit_colors WHERE outfit_id = $oid LIMIT 1");
+        $colorRes = mysqli_query($conn, "SELECT color_name, image FROM outfit_colors WHERE outfit_id = $oid LIMIT 1");
         $colorRow = mysqli_fetch_assoc($colorRes);
         $mainColor = $colorRow['color_name'] ?? 'Mặc định';
+        $mainImage = $colorRow['image'] ?? ($row['image'] ?: 'assets/img/default-placeholder.jpg');
 
         $wardrobeData[] = [
             'id' => (string)$row['id'],
@@ -76,7 +77,7 @@ try {
             'color' => $mainColor,
             'fit' => json_decode($row['fit'], true) ?: [],
             'weather' => json_decode($row['weather'], true) ?: [],
-            'image' => $row['image'] ?: 'assets/img/default-placeholder.jpg',
+            'image' => $mainImage,
             'price' => (int)$row['price'],
             'sizes' => [],
             'age' => $row['age'] ?? 'All',
@@ -188,7 +189,7 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
     if (!$cleanJson)
         throw new Exception("AI không trả về JSON hợp lệ");
 
-    // 7. Lấy ĐẦY ĐỦ 4 món đồ từ file outfits.json
+    // 7. Lấy ĐẦY ĐỦ các món đồ từ Database (wardrobeData đã load từ DB)
     function findItem($id, $list)
     {
         if (!$id)

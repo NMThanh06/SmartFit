@@ -21,7 +21,24 @@ window.app = {
         }
     },
 
-    // --- 2. CÁC HÀM XỬ LÝ ---
+    // --- 2. HÀM CHUẨN HÓA ĐƯỜNG DẪN ẢNH ---
+    resolvePath: function (relativePath, fallback) {
+        if (!relativePath) return fallback ? this.resolvePath(fallback) : '';
+        // Nếu đã là URL tuyệt đối thì trả về luôn
+        if (relativePath.startsWith('http://') || relativePath.startsWith('https://') || relativePath.startsWith('//')) {
+            return relativePath;
+        }
+        // Lấy base URL từ header.php (window.SMARTFIT_BASE = '/SmartFit/' hoặc '/')
+        const base = window.SMARTFIT_BASE || '/';
+        // Loại bỏ prefix trùng lặp (ví dụ: /SmartFit/assets/... trên XAMPP)
+        let cleanPath = relativePath.replace(/^\/+/, '');
+        if (cleanPath.startsWith('SmartFit/')) {
+            cleanPath = cleanPath.substring(9);
+        }
+        return base + cleanPath;
+    },
+
+    // --- 3. CÁC HÀM XỬ LÝ ---
     start: function () {
         console.log("🚀 Ứng dụng bắt đầu chạy...");
 
