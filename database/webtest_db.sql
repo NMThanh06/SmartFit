@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 19, 2026 at 03:09 PM
+-- Generation Time: Mar 19, 2026 at 06:16 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -44,6 +44,14 @@ CREATE TABLE `orders` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `shop_id`, `fullname`, `phone`, `address`, `note`, `payment_method`, `payment_status`, `vnp_transaction_no`, `total_amount`, `status`, `created_at`, `updated_at`) VALUES
+(20260319175204339, 20, 6, 'Thành', '0908377239', 'Thủ đức, TPHCM', '', 'cod', 'pending', NULL, 250000, 'pending', '2026-03-19 16:52:04', '2026-03-19 16:52:04'),
+(20260319180055135, 21, 6, 'Thành', '0908377239', 'Thủ đức, TPHCM', '', 'cod', 'pending', NULL, 250000, 'pending', '2026-03-19 17:00:55', '2026-03-19 17:00:55');
+
 -- --------------------------------------------------------
 
 --
@@ -58,6 +66,14 @@ CREATE TABLE `order_details` (
   `quantity` int(11) NOT NULL,
   `price` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_details`
+--
+
+INSERT INTO `order_details` (`id`, `order_id`, `outfit_id`, `size_name`, `quantity`, `price`) VALUES
+(37, 20260319175204339, 21, 'L', 1, 250000),
+(38, 20260319180055135, 21, 'L', 1, 250000);
 
 -- --------------------------------------------------------
 
@@ -289,10 +305,10 @@ INSERT INTO `outfit_sizes` (`id`, `outfit_id`, `color_id`, `size_name`, `quantit
 (113, 24, 45, 'Mặc định', 1),
 (116, 21, 48, 'S', 25),
 (117, 21, 48, 'M', 48),
-(118, 21, 48, 'L', 30),
+(118, 21, 48, 'L', 27),
 (119, 21, 49, 'S', 30),
 (120, 21, 49, 'M', 24),
-(121, 21, 49, 'L', 12);
+(121, 21, 49, 'L', 9);
 
 -- --------------------------------------------------------
 
@@ -391,9 +407,10 @@ INSERT INTO `users` (`id`, `name`, `fullname`, `phone`, `age`, `gender`, `addres
 (4, 'sale1', 'Quần áo Vui Vẻ', '123456789', 6, '', '', 'sale1@gmail.com', 'assets/img/avatars/1773777521_9507.jpg', '$2y$10$a2BX8aQj8RWckvxsr6ylEeIE/ZxsXRIJrAjLZZvefo.b6BNlXwZMu', '2026-03-16 19:23:10', 'sales'),
 (5, 'Nguyễn Minh Thành', 'Nguyễn Minh Thành', '0971996942', 19, 'male', 'ấp thới thuận', '9z3a5z7a@gmail.com', 'assets/img/avatars/1773838647_7667.webp', '$2y$10$Ke81Nbxtem2sTlnAjamOY.tSEbVoOKZGS5I3sEbI0e20wk/EIfWHO', '2026-03-17 10:08:56', 'admin'),
 (6, 'sale2', 'Quần áo Tuổi Trẻ', '', 20, '', '', 'sale2@gmail.com', NULL, '$2y$10$ACRQE3wda5n8RMupMUjdY.3i/tsMAtS1C85jBhF9mpFrne.DiXYsa', '2026-03-17 20:06:18', 'sales'),
-(7, 'NMT', NULL, NULL, NULL, NULL, NULL, 'nguyenminhthanh043216@gmail.com', NULL, '$2y$10$BUTVNvaIPWwA6AfSbdU2S.Jngm8lfj7csL9Y4R.tND/hxQb7QmAAK', '2026-03-17 21:53:31', 'admin'),
 (8, 'Hoa', 'Hoa', '', 6, '', '', 'hoa@gmail.com', 'assets/img/avatars/1773838804_2386.png', '$2y$10$EuWjaHqYDiRrJazYOfo2eOCEul1StAi2/coNDGrldhi5sg4scAtJi', '2026-03-17 22:12:34', 'sales'),
-(9, 'Trung', NULL, NULL, NULL, NULL, NULL, 'trung@gmail.com', NULL, '$2y$10$tk5zYpZoSYBbF3zBgzGdD.tSYbuX8iGBpQOACkQv1nqh3WgPJVMf.', '2026-03-17 22:42:15', 'sales');
+(9, 'Trung', NULL, NULL, NULL, NULL, NULL, 'trung@gmail.com', NULL, '$2y$10$tk5zYpZoSYBbF3zBgzGdD.tSYbuX8iGBpQOACkQv1nqh3WgPJVMf.', '2026-03-17 22:42:15', 'sales'),
+(20, 'Thành', NULL, NULL, NULL, NULL, NULL, '9z5a5z7a@gmail.com', NULL, '$2y$10$r/YmKTLAqhZ56Y31ik/ISuYCc1eRqzQmiTFmdA0QafyawucODw0mu', '2026-03-19 16:50:34', 'customer'),
+(21, 'Thành', NULL, NULL, NULL, NULL, NULL, 'nguyenminhthanh043216@gmail.com', NULL, '$2y$10$X3CP1FNvWLIPza3x6mygsem9PFcMqrIU7/iTC6.VPQ51W6cBwezi.', '2026-03-19 17:00:09', 'customer');
 
 --
 -- Indexes for dumped tables
@@ -486,13 +503,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20260319092432205;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20260319180055136;
 
 --
 -- AUTO_INCREMENT for table `order_details`
 --
 ALTER TABLE `order_details`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `outfits`
@@ -534,13 +551,13 @@ ALTER TABLE `saved_outfits`
 -- AUTO_INCREMENT for table `shopping_cart`
 --
 ALTER TABLE `shopping_cart`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 
 --
 -- Constraints for dumped tables
