@@ -103,6 +103,7 @@ include $root . 'includes/header.php';
         color: var(--apple-black);
         letter-spacing: 1px;
         margin-bottom: 15px;
+        line-height: 1.2;
     }
 
     .terms-subtitle {

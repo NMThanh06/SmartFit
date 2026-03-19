@@ -41,8 +41,9 @@ if (isset($_SESSION['user_id'])) {
     }
 
     // 2. SQL lấy món đồ cá nhân (My Items)
-    $sql_my_items = "SELECT o.*, (SELECT c.image FROM outfit_colors c WHERE c.outfit_id = o.id LIMIT 1) as image 
+    $sql_my_items = "SELECT o.*, c.image, c.color_name 
                      FROM outfits o 
+                     LEFT JOIN outfit_colors c ON o.id = c.outfit_id
                      WHERE o.owner_id = ? AND o.is_commercial = 0 
                      ORDER BY o.id DESC";
     $stmt_my = mysqli_prepare($conn, $sql_my_items);
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
         $name = mysqli_real_escape_string($conn, $_POST['name']);
         $type = mysqli_real_escape_string($conn, $_POST['type']);
         $color_name = mysqli_real_escape_string($conn, $_POST['color_name'] ?? 'Mặc định');
-        $hex_code = mysqli_real_escape_string($conn, $_POST['hex_code'] ?? '#000000');
+        if (empty($color_name)) $color_name = 'Mặc định';
 
         // Phân loại (JSON)
         $gender = json_encode($_POST['gender'] ?? [], JSON_UNESCAPED_UNICODE);
@@ -96,21 +97,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                 if (!mysqli_stmt_execute($stmt_upd))
                     throw new Exception("Lỗi cập nhật thông tin: " . mysqli_error($conn));
 
-                // Cập nhật bảng outfit_colors (Tên màu và Hex)
-                $sql_col_upd = "UPDATE outfit_colors SET color_name = ?, hex_code = ? WHERE outfit_id = ?";
+                // Cập nhật bảng outfit_colors (Tên màu)
+                $sql_col_upd = "UPDATE outfit_colors SET color_name = ? WHERE outfit_id = ?";
                 $stmt_col_upd = mysqli_prepare($conn, $sql_col_upd);
-                mysqli_stmt_bind_param($stmt_col_upd, "ssi", $color_name, $hex_code, $itemId);
-                mysqli_stmt_execute($stmt_col_upd);
+                if ($stmt_col_upd) {
+                    mysqli_stmt_bind_param($stmt_col_upd, "si", $color_name, $itemId);
+                    mysqli_stmt_execute($stmt_col_upd);
+                }
 
-                // Nếu có upload ảnh mới
-                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                // Nếu có upload ảnh mới (từ file hoặc camera)
+                $file_key = '';
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) $file_key = 'image';
+                elseif (isset($_FILES['image_camera']) && $_FILES['image_camera']['error'] === UPLOAD_ERR_OK) $file_key = 'image_camera';
+
+                if ($file_key) {
+                    $ext = pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION);
                     $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
                     $upload_dir = "../assets/img/outfits/";
                     if (!is_dir($upload_dir))
                         mkdir($upload_dir, 0777, true);
 
-                    if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
+                    if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_dir . $new_filename)) {
                         $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
                         $sql_img = "UPDATE outfit_colors SET image = ? WHERE outfit_id = ?";
                         $stmt_img = mysqli_prepare($conn, $sql_img);
@@ -131,21 +138,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                 $outfit_id = mysqli_insert_id($conn);
 
                 $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
-                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                    $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $file_key = '';
+                if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) $file_key = 'image';
+                elseif (isset($_FILES['image_camera']) && $_FILES['image_camera']['error'] === UPLOAD_ERR_OK) $file_key = 'image_camera';
+
+                if ($file_key) {
+                    $ext = pathinfo($_FILES[$file_key]['name'], PATHINFO_EXTENSION);
                     $new_filename = time() . "_user_" . $userId . "_closet." . $ext;
                     $upload_dir = "../assets/img/outfits/";
                     if (!is_dir($upload_dir))
                         mkdir($upload_dir, 0777, true);
-                    if (move_uploaded_file($_FILES['image']['tmp_name'], $upload_dir . $new_filename)) {
+                    if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_dir . $new_filename)) {
                         $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
                     }
                 }
 
-                $sql_col = "INSERT INTO outfit_colors (outfit_id, color_name, hex_code, image) VALUES (?, ?, ?, ?)";
+                $sql_col = "INSERT INTO outfit_colors (outfit_id, color_name, image) VALUES (?, ?, ?)";
                 $stmt_col = mysqli_prepare($conn, $sql_col);
-                mysqli_stmt_bind_param($stmt_col, "isss", $outfit_id, $color_name, $hex_code, $image_path);
+                if (!$stmt_col) {
+                    throw new Exception("Lỗi chuẩn bị SQL bảng màu: " . mysqli_error($conn));
+                }
+                mysqli_stmt_bind_param($stmt_col, "iss", $outfit_id, $color_name, $image_path);
                 mysqli_stmt_execute($stmt_col);
+                $color_id = mysqli_insert_id($conn);
+
+                // Thêm size mặc định cho sản phẩm cá nhân
+                $sql_size = "INSERT INTO outfit_sizes (outfit_id, color_id, size_name, quantity) VALUES (?, ?, 'Mặc định', 1)";
+                $stmt_size = mysqli_prepare($conn, $sql_size);
+                if ($stmt_size) {
+                    mysqli_stmt_bind_param($stmt_size, "ii", $outfit_id, $color_id);
+                    mysqli_stmt_execute($stmt_size);
+                }
+
                 $msg = "Đã thêm món đồ mới vào tủ đồ!";
             }
 
@@ -159,6 +183,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
             $_SESSION['error'] = "Có lỗi xảy ra: " . $e->getMessage();
         }
     }
+}
+
+// 4. Xử lý xóa món đồ cá nhân
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_personal_item'])) {
+    if (!isset($_SESSION['user_id'])) {
+        $_SESSION['error'] = "Bạn cần đăng nhập để thực hiện tính năng này!";
+    } else {
+        $userId = $_SESSION['user_id'];
+        $itemId = (int)$_POST['item_id'];
+
+        mysqli_begin_transaction($conn);
+        try {
+            // Kiểm tra quyền sở hữu
+            $checkSql = "SELECT id FROM outfits WHERE id = ? AND owner_id = ?";
+            $checkStmt = mysqli_prepare($conn, $checkSql);
+            mysqli_stmt_bind_param($checkStmt, "ii", $itemId, $userId);
+            mysqli_stmt_execute($checkStmt);
+            $res = mysqli_stmt_get_result($checkStmt);
+            
+            if (mysqli_num_rows($res) === 0) {
+                throw new Exception("Bạn không có quyền xóa mục này!");
+            }
+
+            // Xóa các bảng liên quan (do có FK)
+            mysqli_query($conn, "DELETE FROM outfit_sizes WHERE outfit_id = $itemId");
+            mysqli_query($conn, "DELETE FROM outfit_colors WHERE outfit_id = $itemId");
+            mysqli_query($conn, "DELETE FROM outfits WHERE id = $itemId");
+
+            mysqli_commit($conn);
+            $_SESSION['success'] = "Đã xóa món đồ khỏi tủ đồ!";
+        } catch (Exception $e) {
+            mysqli_rollback($conn);
+            $_SESSION['error'] = "Lỗi khi xóa: " . $e->getMessage();
+        }
+    }
+    header("Location: wardrobe.php");
+    exit;
 }
 
 // Map loại đồ sang tiếng Việt
@@ -281,18 +342,23 @@ endif; ?>
 else: ?>
                     <?php foreach ($my_items as $item): ?>
                         <div class="col l-2-4 m-4 c-6">
-                            <div class="personal-item-card" onclick='openEditModal(<?php echo json_encode($item); ?>)'>
-                                <div class="personal-item-card__img">
-                                    <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
-                                </div>
-                                <div class="personal-item-card__info">
-                                    <h3 class="personal-item-card__name"><?php echo htmlspecialchars($item['name']); ?></h3>
-                                    <span class="personal-item-card__type"><?php echo $typeMap[$item['type']] ?? 'Khác'; ?></span>
+                            <div class="personal-item-card">
+                                <button class="personal-item-card__btn-delete" title="Xóa món đồ" 
+                                        onclick="event.stopPropagation(); deletePersonalItem(<?php echo $item['id']; ?>)">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                                <div class="personal-item-card__link-box" onclick='openEditModal(<?php echo json_encode($item); ?>)'>
+                                    <div class="personal-item-card__img">
+                                        <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                    </div>
+                                    <div class="personal-item-card__info">
+                                        <h3 class="personal-item-card__name"><?php echo htmlspecialchars($item['name']); ?></h3>
+                                        <span class="personal-item-card__type"><?php echo $typeMap[$item['type']] ?? 'Khác'; ?></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    <?php
-    endforeach; ?>
+                    <?php endforeach; ?>
                 <?php
 endif; ?>
             </div>
@@ -325,22 +391,31 @@ endif; ?>
                             <option value="accessory">Phụ kiện (Accessory)</option>
                         </select>
                     </div>
-
+                    <div class="form-group">
+                        <label>Tên màu sắc</label>
+                        <input type="text" name="color_name" id="color_name" placeholder="VD: Đen, Trắng, Caro...">
+                    </div>
                 </div>
                 <div class="col l-6 m-12 c-12">
                     <div class="form-group">
                         <label>Ảnh sản phẩm (Chụp hoặc tải lên) <span class="required">*</span></label>
-                        <div class="upload-box" id="uploadBox" onclick="document.getElementById('personal-file').click()">
-                            <div class="upload-box__placeholder" id="uploadPlaceholder">
-                                <i class="fa-solid fa-cloud-arrow-up"></i>
-                                <p>Nhấn để chọn ảnh hoặc chụp</p>
+                        <div class="upload-options" id="uploadBox">
+                            <div class="upload-box" onclick="document.getElementById('personal-file-upload').click()">
+                                <i class="fa-solid fa-folder-open"></i>
+                                <p>Chọn từ máy</p>
                             </div>
-                            <div class="upload-box__preview" id="uploadPreview" style="display:none;">
-                                <img src="" alt="Preview" id="uploadPreviewImg">
+                            <div class="upload-box" onclick="document.getElementById('personal-file-camera').click()">
+                                <i class="fa-solid fa-camera"></i>
+                                <p>Chụp ảnh</p>
                             </div>
-                            <p class="upload-box__filename" id="file-name"></p>
-                            <input type="file" id="personal-file" name="image" accept="image/*" capture="environment" hidden required onchange="previewUploadImage(this)">
                         </div>
+                        <div id="uploadPreview" class="upload-preview-container" style="display:none;" onclick="resetUploadPreview()">
+                            <img src="" alt="Preview" id="uploadPreviewImg">
+                            <p class="upload-preview-tip">Nhấn vào ảnh để chọn lại</p>
+                        </div>
+                        <p class="upload-box__filename" id="file-name"></p>
+                        <input type="file" id="personal-file-upload" name="image" accept="image/*" hidden onchange="previewUploadImage(this)">
+                        <input type="file" id="personal-file-camera" name="image_camera" accept="image/*" capture="environment" hidden onchange="previewUploadImage(this)">
                     </div>
                 </div>
             </div>
@@ -425,10 +500,52 @@ endif; ?>
     .personal-item-card__info { padding: 12px; text-align: center; }
     .personal-item-card__name { font-size: 1.4rem; font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .personal-item-card__type { font-size: 1.2rem; color: #86868b; display: block; }
+    .personal-item-card { position: relative; }
+    .personal-item-card__btn-delete { position: absolute; top: 8px; right: 8px; width: 28px; height: 28px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; color: #ff3b30; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10; opacity: 0; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+    .personal-item-card:hover .personal-item-card__btn-delete { opacity: 1; }
+    .personal-item-card__btn-delete:hover { background: #ff3b30; color: #fff; transform: scale(1.1); }
+
+    /* Upload Box Improvements */
+    .upload-options { display: flex; gap: 15px; height: 160px; }
+    .upload-box { flex: 1; border: 2px dashed #ddd; border-radius: 15px; padding: 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #fafafa; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .upload-box:hover { border-color: #007aff; background: #f0f7ff; color: #007aff; }
+    .upload-box i { font-size: 2.8rem; margin-bottom: 10px; color: #007aff; }
+    .upload-box p { font-size: 1.3rem; font-weight: 600; }
+    .upload-preview-container { border: 2px solid #007aff; border-radius: 15px; overflow: hidden; background: #fff; cursor: pointer; text-align: center; padding: 10px; }
+    .upload-preview-container img { max-width: 100%; max-height: 150px; border-radius: 10px; object-fit: contain; }
+    .upload-preview-tip { font-size: 1.1rem; color: #86868b; margin-top: 5px; }
 
     /* Modal Styles */
-    .modal { display: none; position: fixed; z-index: 9999; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-    .modal-content { background: #fff; margin: 5% auto; padding: 30px; border-radius: 24px; width: 700px; max-width: 95%; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: scaleUp 0.3s ease; }
+    .modal { 
+        display: none; 
+        position: fixed; 
+        z-index: 9999; 
+        left: 0; 
+        top: 0; 
+        width: 100%; 
+        height: 100%; 
+        background: rgba(0,0,0,0.5); 
+        backdrop-filter: blur(4px); 
+        overflow-y: auto; 
+        padding: 40px 0;
+    }
+    .modal-content { 
+        background: #fff; 
+        margin: 0 auto; 
+        padding: 30px; 
+        border-radius: 24px; 
+        width: 700px; 
+        max-width: 95%; 
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2); 
+        animation: scaleUp 0.3s ease; 
+        position: relative;
+    }
+
+    /* Custom Scrollbar cho Modal */
+    .modal::-webkit-scrollbar { width: 8px; }
+    .modal::-webkit-scrollbar-track { background: transparent; }
+    .modal::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.3); border-radius: 10px; }
+    .modal::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.5); }
     .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #eee; padding-bottom: 15px; }
     .modal-header h2 { font-size: 2.2rem; font-weight: 700; color: #1d1d1f; }
     .close-modal { font-size: 2.8rem; cursor: pointer; color: #86868b; }
@@ -437,12 +554,6 @@ endif; ?>
     .form-group label { display: block; font-size: 1.4rem; font-weight: 600; margin-bottom: 8px; color: #1d1d1f; }
     .form-group input, .form-group select { width: 100%; padding: 12px 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 1.4rem; outline: none; transition: 0.3s; }
     .form-group input:focus { border-color: #007aff; box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1); }
-    
-    .color-picker-group { display: flex; gap: 8px; align-items: center; }
-    .color-picker-group input[type="text"] { flex: 1; }
-    .color-picker-group input[type="color"] { width: 45px; height: 45px; padding: 2px; border: 1px solid #ddd; border-radius: 10px; cursor: pointer; background: #fff; }
-    .color-picker-group input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
-    .color-picker-group input[type="color"]::-webkit-color-swatch { border: none; border-radius: 8px; }
     
     .upload-box { border: 2px dashed #ddd; border-radius: 15px; padding: 40px 20px; text-align: center; cursor: pointer; transition: 0.3s; background: #fafafa; height: 100%; display: flex; flex-direction: column; justify-content: center; }
     .upload-box:hover { border-color: #007aff; background: #f0f7ff; }
@@ -468,33 +579,27 @@ endif; ?>
 </style>
 
 <script>
-    const colorMap = {
-        'đen': '#000000', 'trắng': '#FFFFFF', 'đỏ': '#FF0000', 'vàng': '#FFFF00',
-        'xanh lá': '#008000', 'xanh dương': '#0000FF', 'xanh lam': '#0000FF',
-        'cam': '#FFA500', 'tím': '#800080', 'hồng': '#FFC0CB', 'xám': '#808080',
-        'nâu': '#3f2929ff', 'kem': '#d8d7c7ff', 'be': '#F5F5DC'
-    };
-
-    function suggestHex(input) {
-        const hexText = document.getElementById('hex_code_text');
-        const hexPicker = document.getElementById('hex_code_picker');
-        const colorName = input.value.toLowerCase().trim();
-        if (colorMap[colorName]) {
-            hexText.value = colorMap[colorName];
-            hexPicker.value = colorMap[colorName];
+    function deletePersonalItem(itemId) {
+        if (confirm('Bạn có chắc chắn muốn xóa món đồ này khỏi tủ đồ cá nhân?')) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = 'wardrobe.php';
+            
+            const inputId = document.createElement('input');
+            inputId.type = 'hidden';
+            inputId.name = 'item_id';
+            inputId.value = itemId;
+            
+            const inputAction = document.createElement('input');
+            inputAction.type = 'hidden';
+            inputAction.name = 'delete_personal_item';
+            inputAction.value = '1';
+            
+            form.appendChild(inputId);
+            form.appendChild(inputAction);
+            document.body.appendChild(form);
+            form.submit();
         }
-    }
-
-    function syncColorPicker(val) {
-        const picker = document.getElementById('hex_code_picker');
-        if (/^#[0-9A-F]{6}$/i.test(val)) {
-            picker.value = val;
-        }
-    }
-
-    function syncColorText(val) {
-        const text = document.getElementById('hex_code_text');
-        text.value = val.toUpperCase();
     }
 
     function switchTab(btn, sectionId) {
@@ -524,6 +629,7 @@ endif; ?>
         
         form.querySelector('[name="name"]').value = item.name;
         form.querySelector('[name="type"]').value = item.type;
+        form.querySelector('[name="color_name"]').value = item.color_name || '';
 
         
         // Populate JSON fields (gender, occasion, style, weather, fit)
@@ -539,15 +645,15 @@ endif; ?>
 
         // Hiển ảnh hiện tại của món đồ làm preview
         if (item.image) {
-            document.getElementById('uploadPlaceholder').style.display = 'none';
-            document.getElementById('uploadPreview').style.display = 'flex';
+            document.getElementById('uploadBox').style.display = 'none';
+            document.getElementById('uploadPreview').style.display = 'block';
             document.getElementById('uploadPreviewImg').src = item.image;
             document.getElementById('file-name').innerText = 'Để trống nếu không muốn đổi ảnh';
         } else {
             resetUploadPreview();
-            document.getElementById('file-name').innerText = 'Để trống nếu không muốn đổi ảnh';
         }
-        form.querySelector('#personal-file').required = false;
+        document.getElementById('personal-file-upload').required = false;
+        document.getElementById('personal-file-camera').required = false;
 
         document.getElementById('addPersonalModal').style.display = 'block';
     }
@@ -558,24 +664,23 @@ endif; ?>
 
     // Reset upload preview về trạng thái ban đầu
     function resetUploadPreview() {
-        document.getElementById('uploadPlaceholder').style.display = '';
+        document.getElementById('uploadBox').style.display = 'flex';
         document.getElementById('uploadPreview').style.display = 'none';
         document.getElementById('uploadPreviewImg').src = '';
         document.getElementById('file-name').innerText = '';
+        document.getElementById('personal-file-upload').value = '';
+        document.getElementById('personal-file-camera').value = '';
     }
 
     // Xem trước ảnh khi chọn file
     function previewUploadImage(input) {
-        if (!input.files || !input.files[0]) {
-            resetUploadPreview();
-            return;
-        }
+        if (!input.files || !input.files[0]) return;
 
         const file = input.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
-            document.getElementById('uploadPlaceholder').style.display = 'none';
-            document.getElementById('uploadPreview').style.display = 'flex';
+            document.getElementById('uploadBox').style.display = 'none';
+            document.getElementById('uploadPreview').style.display = 'block';
             document.getElementById('uploadPreviewImg').src = e.target.result;
             document.getElementById('file-name').innerText = file.name;
         };

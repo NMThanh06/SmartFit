@@ -428,6 +428,7 @@ include $base_dir . 'includes/header.php';
         text-transform: uppercase;
         letter-spacing: 1px;
         margin-bottom: 15px;
+        line-height: 1.2;
     }
 
     .add-product__subtitle {
@@ -479,6 +480,7 @@ include $base_dir . 'includes/header.php';
         display: flex;
         align-items: center;
         gap: 12px;
+        line-height: 1.2;
     }
 
     .add-product__section-title i {
