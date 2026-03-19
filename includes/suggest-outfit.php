@@ -71,7 +71,7 @@ try {
                 while ($pRow = mysqli_fetch_assoc($resPersonal)) {
                     // Chuyển đổi sang cùng format với outfits.json
                     $personalItem = [
-                        'id' => 'personal_' . $pRow['id'],
+                        'id' => $pRow['id'],
                         'type' => $pRow['type'] ?? 'top',
                         'name' => $pRow['name'] ?? 'Đồ cá nhân',
                         'gender' => json_decode($pRow['gender'] ?? '[]', true) ?: [],
@@ -112,7 +112,8 @@ try {
             $itemName = $item['name'] ?? '??';
             $sellerNote = !empty($item['seller_note']) ? $item['seller_note'] : 'Không có';
             $itemAge = !empty($item['age']) ? $item['age'] : 'All';
-            $wardrobeBrief .= "- ID: {$itemId} | Loại: {$itemType} | Tên: {$itemName} | Age: {$itemAge} | Seller note: {$sellerNote}\n";
+            $isPersonal = !empty($item['seller_note']) && strpos($item['seller_note'], 'closet') !== false || $item['price'] == 0;
+            $wardrobeBrief .= "- ID: {$itemId} | Loại: {$itemType} | Tên: {$itemName} | Age: {$itemAge} | Note: {$sellerNote}" . ($isPersonal ? " (Đồ của khách)" : "") . "\n";
         }
     }
 
