@@ -1,9 +1,70 @@
 {
     "items": [
         {
+            "id": "26",
+            "type": "top",
+            "name": "Áo thun họa tiết",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/outfits/1773908500_user_19_closet.jpg",
+            "price": 0,
+            "sizes": {
+                "Mặc định": 1
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
+            "id": "24",
+            "type": "top",
+            "name": "Áo polo hoa cúc",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "basic"
+            ],
+            "color": "Xanh dương đậm",
+            "fit": [
+                "regular"
+            ],
+            "weather": [
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/outfits/1773908025_user_3_closet.webp",
+            "price": 0,
+            "sizes": {
+                "Mặc định": 1
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "21",
             "type": "top",
-            "name": "Áo Thun Teelab Basketball Jersey Số 23 ",
+            "name": "Áo Thun Basketball Jersey Số 23 ",
             "gender": [
                 "male",
                 "female"
@@ -23,11 +84,11 @@
                 "hot",
                 "mild"
             ],
-            "image": "/SmartFit/assets/img/1773903740_outfit_21_color_1.webp",
+            "image": "/SmartFit/assets/img/1773910907_outfit_21_color_1.webp",
             "price": 250000,
             "sizes": {
                 "L": 42,
-                "M": 76,
+                "M": 72,
                 "S": 55
             },
             "age": "25",

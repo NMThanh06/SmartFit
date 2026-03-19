@@ -88,6 +88,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_path)) {
                         $image_path = "/SmartFit/assets/img/" . $new_filename;
                     }
+                } elseif (isset($colorData['old_image']) && !empty($colorData['old_image'])) {
+                    // Nếu không upload ảnh mới, giữ lại ảnh cũ từ form
+                    $image_path = mysqli_real_escape_string($conn, $colorData['old_image']);
                 }
 
                 $sql_color = "INSERT INTO outfit_colors (outfit_id, color_name, image) 
@@ -849,7 +852,52 @@ include $base_dir . 'includes/header.php';
         gap: 2px;
     }
 
+    /* Styles cho phần xem trước ảnh mới */
+    .variant-image-preview {
+        /* Bỏ margin-top để không bị lệch trong flex container */
+        width: 100px !important;
+        height: 100px !important;
+        min-height: 100px !important;
+        border: 2px dashed #ccc !important;
+        border-radius: 8px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        background: #f9f9f9;
+        position: relative;
+    }
 
+    .variant-image-preview span {
+        font-size: 1.1rem;
+        color: #999;
+        text-align: center;
+        padding: 5px;
+    }
+
+    .variant-image-preview img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* Đảm bảo thấy trọn vẹn ảnh */
+        display: block;
+        background: #fff;
+    }
+
+    /* Layout ngang cho phần chọn ảnh */
+    .variant-image-flex {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 25px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        min-height: 180px; /* Tăng thêm độ cao để ảnh 100px nằm giữa thoải mái */
+    }
+
+    .variant-image-input-wrapper {
+        flex: 1;
+    }
     .variant-sizes-list {
         display: flex;
         flex-wrap: wrap;
@@ -922,7 +970,17 @@ include $base_dir . 'includes/header.php';
             <div class="col l-8 m-12 c-12">
                 <div class="config-form__group">
                     <label class="add-product__label">Ảnh minh họa màu</label>
-                    <input type="file" name="color_images_${colorCount}" class="config-form__input--text" accept="image/*" required>
+                    <div class="variant-image-flex">
+                        <div class="variant-image-preview" id="previewContainer_${colorCount}">
+                            <img src="" id="img_preview_${colorCount}" style="display: none;">
+                            <span id="span_preview_${colorCount}">Chưa có ảnh</span>
+                        </div>
+                        <div class="variant-image-input-wrapper">
+                            <input type="file" name="color_images_${colorCount}" class="config-form__input--text" accept="image/*" onchange="previewVariantImage(this, ${colorCount})" required>
+                            <input type="hidden" name="colors[${colorCount}][old_image]" id="old_image_${colorCount}">
+                            <p style="font-size: 1.1rem; color: #86868b; margin-top: 5px;">Chọn ảnh rõ nét cho màu này</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1037,6 +1095,29 @@ include $base_dir . 'includes/header.php';
         });
     }
 
+    // Hàm xem trước ảnh khi chọn file
+    function previewVariantImage(input, cIdx) {
+        console.log("previewVariantImage called for idx:", cIdx);
+        const previewImg = document.getElementById(`img_preview_${cIdx}`);
+        const previewSpan = document.getElementById(`span_preview_${cIdx}`);
+        
+        if (!previewImg) {
+            console.error("Not found previewImg for idx:", cIdx);
+            return;
+        }
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                console.log("File loaded, setting src...");
+                previewImg.src = e.target.result;
+                previewImg.style.display = 'block';
+                if (previewSpan) previewSpan.style.display = 'none';
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     // --- QUẢN LÝ SỬA / XÓA ---
     async function deleteProduct(id) {
         if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này? Thao tác này sẽ xóa toàn bộ biến thể và ảnh liên quan.')) return;
@@ -1119,10 +1200,20 @@ include $base_dir . 'includes/header.php';
                     const block = document.getElementById(`colorBlock_${currentCIdx}`);
 
                     block.querySelector(`[name="colors[${currentCIdx}][name]"]`).value = c.color_name;
-
                     
-                    // Hiển thị ảnh cũ (optional - maybe just placeholder for now since file input can't be set)
-                    // We'll skip file input value because it's not possible, but we can show preview label nearby if needed.
+                    // Gán ảnh cũ và hiển thị preview
+                    const oldImgInput = document.getElementById(`old_image_${currentCIdx}`);
+                    const previewImg = document.getElementById(`img_preview_${currentCIdx}`);
+                    const previewSpan = document.getElementById(`span_preview_${currentCIdx}`);
+                    
+                    if (c.image) {
+                        oldImgInput.value = c.image;
+                        previewImg.src = c.image;
+                        previewImg.style.display = 'block';
+                        if (previewSpan) previewSpan.style.display = 'none';
+                        // Khi sửa, không bắt buộc chọn ảnh mới nếu đã có ảnh cũ
+                        block.querySelector(`input[type="file"]`).required = false;
+                    }
 
                     // Render sizes
                     const sContainer = document.getElementById(`sizeContainer_${currentCIdx}`);
@@ -1152,6 +1243,11 @@ include $base_dir . 'includes/header.php';
 
         const idInput = document.getElementById('editProductId');
         if (idInput) idInput.remove();
+
+        // Đặt lại thuộc tính required cho các input file khi quay về chế độ thêm mới
+        document.querySelectorAll('input[type="file"][name^="color_images_"]').forEach(input => {
+            input.required = true;
+        });
 
         const container = document.getElementById('variantContainer');
         container.innerHTML = '';
