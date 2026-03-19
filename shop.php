@@ -179,6 +179,125 @@ include 'includes/header.php';
                 font-weight: 600;
                 background: #fff;
             }
+
+            /* CSS mới cho nút màu sắc hiển thị ảnh */
+            .config-color-btn {
+                width: 45px !important;
+                height: 45px !important;
+                border-radius: 8px !important;
+                border: 2px solid transparent !important;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                background-size: cover !important;
+                background-position: center !important;
+                position: relative;
+                display: inline-block;
+                margin-right: 8px;
+                margin-bottom: 8px;
+            }
+            .config-color-btn:hover {
+                transform: scale(1.05);
+                border-color: #ddd !important;
+            }
+            .config-color-btn.active {
+                border: 2px solid #ee4d2d !important;
+            }
+            .config-color-btn.active::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                width: 0;
+                height: 0;
+                border-style: solid;
+                border-width: 0 0 12px 12px;
+                border-color: transparent transparent #ee4d2d transparent;
+            }
+            .config-color-btn.active::before {
+                content: '✓';
+                position: absolute;
+                bottom: -2px;
+                right: 0;
+                color: white;
+                font-size: 8px;
+                z-index: 10;
+            }
+
+            .config-color-btn.out-of-stock {
+                opacity: 0.4;
+                cursor: not-allowed;
+            }
+            .config-color-btn.out-of-stock::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 0;
+                width: 100%;
+                height: 1px;
+                background: #ff3b30;
+                transform: rotate(45deg);
+            }
+
+            /* Style cho nút kích cỡ */
+            .config-size-btn {
+                min-width: 60px;
+                height: 45px;
+                border: 1px solid #ddd;
+                background-color: #fff;
+                color: #333;
+                font-size: 1.5rem;
+                font-weight: 600;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-right: 8px;
+                margin-bottom: 8px;
+            }
+
+            .config-size-btn:hover {
+                border-color: #333;
+            }
+
+            .config-size-btn.active {
+                border-color: #ee4d2d !important;
+                background-color: #fff9f8 !important;
+                color: #ee4d2d !important;
+            }
+
+            .config-size-btn.out-of-stock {
+                opacity: 0.4;
+                cursor: not-allowed;
+                text-decoration: line-through;
+            }
+
+            /* Style cho nút Xác nhận thêm vào giỏ trong popup */
+            .config-modal__btn-confirm {
+                width: 100%;
+                padding: 16px;
+                background: #1d1d1f;
+                color: #fff;
+                border: none;
+                border-radius: 12px;
+                font-size: 1.6rem;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 10px;
+                margin-top: 20px;
+            }
+
+            .config-modal__btn-confirm:hover {
+                background: #000;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            }
+
+            .config-modal__btn-confirm:active {
+                transform: translateY(0);
+            }
         </style>
 
     <!-- Backend cho trang cửa hàng -->
@@ -340,7 +459,14 @@ include 'includes/header.php';
                 item.colors.forEach((c, index) => {
                     const btn = document.createElement('span');
                     btn.className = 'config-color-btn';
-                    btn.style.background = c.hex_code;
+                    
+                    // Ưu tiên hiển thị ảnh nếu có, nếu không thì dùng mã màu
+                    if (c.image) {
+                        btn.style.background = `url('${c.image}')`;
+                    } else {
+                        btn.style.background = c.hex_code;
+                    }
+                    
                     btn.title = c.color_name;
                     
                     // Kiểm tra tồn kho tổng của màu này
