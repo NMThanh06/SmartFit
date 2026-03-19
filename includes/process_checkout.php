@@ -139,33 +139,17 @@ try {
     switch ($payment_method) {
         case 'cod':
             // ==========================================
-            // ĐOẠN CODE GỬI WEBHOOK SANG n8n (DEBUG MODE)
+            // GỬI WEBHOOK SANG n8n (Dùng Helper)
             // ==========================================
-
-            // 1. Gom dữ liệu để gửi
-            $data_to_n8n = [
-                'order_id' => $orderId,
-                'fullname' => $fullname,
-                'email' => $email,
-                'total_amount' => $totalAmount,
+            require_once __DIR__ . '/n8n_helper.php';
+            sendDataToN8n('/webhook/order-email', [
+                'order_id'       => $orderId,
+                'fullname'       => $fullname,
+                'email'          => $email,
+                'total_amount'   => $totalAmount,
                 'payment_method' => 'cod',
-                'address' => $address
-            ];
-
-            // 2. Setup cURL
-            $webhook_url = 'http://127.0.0.1:5678/webhook/order-email';
-            $ch = curl_init($webhook_url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data_to_n8n));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, [
-                'Content-Type: application/json'
+                'address'        => $address
             ]);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Timeout ngắn (3s) để tránh treo trang
-
-            // 3. Thực hiện gửi (Bỏ qua lỗi nếu dịch vụ n8n không chạy)
-            @curl_exec($ch);
-            curl_close($ch);
             // ==========================================
 
             echo json_encode([

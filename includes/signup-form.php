@@ -68,20 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mysqli_stmt_execute($insert)) {
         // Gửi webhook đến n8n để gửi email chào mừng
-        $webhookUrl = 'http://host.docker.internal:5678/webhook/welcome-email';
-        $webhookData = json_encode([
+        require_once __DIR__ . '/n8n_helper.php';
+        sendDataToN8n('/webhook/welcome-email', [
             'name'  => $name,
             'email' => $email
         ]);
-
-        $ch = curl_init($webhookUrl);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $webhookData);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 2); // Timeout 2 giây để không bị treo
-        @curl_exec($ch);
-        curl_close($ch);
 
         sendResponse(true, 'Đăng ký thành công! Vui lòng đăng nhập.');
     } else {
