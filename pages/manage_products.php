@@ -7,6 +7,8 @@ require_once $base_dir . 'includes/functions.php';
 // --- PHẦN XỬ LÝ PHP (BACKEND) ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
 
+    // Kích hoạt báo lỗi SQL nghiêm ngặt
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     // Bắt đầu Transaction
     mysqli_begin_transaction($conn);
 
@@ -63,8 +65,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             mysqli_query($conn, "DELETE FROM outfit_colors WHERE outfit_id = $outfit_id");
         } else {
             // TRƯỜNG HỢP: THÊM MỚI (INSERT) - Mặc định là sản phẩm của Shop (is_commercial = 1)
-            $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial, owner_id) 
-                           VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1, $current_user_id)";
+            $sql_outfit = "INSERT INTO outfits (name, price, type, gender, occasion, style, weather, fit, age, seller_note, description, created_at, is_commercial, owner_id, image) 
+                           VALUES ('$name', $price, '$type', '$gender', '$occasion', '$style', '$weather', '$fit', '$age', '$seller_note', '$description', NOW(), 1, $current_user_id, '')";
             if (!mysqli_query($conn, $sql_outfit))
                 throw new Exception("Lỗi chèn bảng outfits: " . mysqli_error($conn));
             $outfit_id = mysqli_insert_id($conn);
@@ -74,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         if (isset($_POST['colors']) && is_array($_POST['colors'])) {
             foreach ($_POST['colors'] as $cIdx => $colorData) {
                 $color_name = mysqli_real_escape_string($conn, $colorData['name']);
-                $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
+                $image_path = 'assets/img/default-placeholder.jpg';
 
                 // Nếu là Update và không upload ảnh mới, cần giữ ảnh cũ (trong logic đơn giản này ta coi như phải upload hoặc dùng placeholder)
                 // Tuy nhiên form hiện tại không gửi link ảnh cũ. Để cải thiện, tôi sẽ cho dùng placeholder nếu không có ảnh mới.
@@ -86,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     $upload_path = $base_dir . "assets/img/" . $new_filename;
 
                     if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_path)) {
-                        $image_path = "/SmartFit/assets/img/" . $new_filename;
+                        $image_path = "assets/img/" . $new_filename;
                     }
                 } elseif (isset($colorData['old_image']) && !empty($colorData['old_image'])) {
                     // Nếu không upload ảnh mới, giữ lại ảnh cũ từ form
@@ -97,6 +99,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                                VALUES ($outfit_id, '$color_name', '$image_path')";
                 mysqli_query($conn, $sql_color);
                 $color_id = mysqli_insert_id($conn);
+
+                // Cập nhật ảnh chính cho bảng outfits (Lấy ảnh đầu tiên trong danh sách gửi lên)
+                if ($cIdx == 0 || $cIdx == '0') {
+                    $sql_main_img = "UPDATE outfits SET image = '$image_path' WHERE id = $outfit_id";
+                    mysqli_query($conn, $sql_main_img);
+                }
 
                 if (isset($colorData['sizes']) && is_array($colorData['sizes'])) {
                     foreach ($colorData['sizes'] as $sizeData) {
@@ -111,9 +119,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         }
 
         mysqli_commit($conn);
-
-        // ĐỒNG BỘ JSON SAU KHI THÀNH CÔNG
-        syncOutfitsToJson($conn);
 
         $success_msg = ($edit_id > 0) ? "Đã cập nhật/nhập thêm hàng thành công sản phẩm: $name!" : "Sản phẩm đã được thêm thành công!";
 

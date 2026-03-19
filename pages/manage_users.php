@@ -156,7 +156,7 @@ include $base_dir . 'includes/header.php';
                                     <strong>#<?= $user['id'] ?></strong>
                                 </td>
                                 <td><?= htmlspecialchars($user['name']) ?></td>
-                                <td><?= htmlspecialchars($user['fullname']) ?></td>
+                                <td><?= htmlspecialchars($user['fullname'] ?? '') ?></td>
                                 <td><?= htmlspecialchars($user['email']) ?></td>
                                 <td>
                                     <?php

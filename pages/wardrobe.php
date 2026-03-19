@@ -61,6 +61,8 @@ if (isset($_SESSION['user_id'])) {
 
 // 3. Xử lý Form thêm/sửa đồ cá nhân (Submit POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])) {
+    // Kích hoạt báo lỗi SQL nghiêm ngặt
+    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
     if (!isset($_SESSION['user_id'])) {
         $_SESSION['error'] = "Bạn cần đăng nhập để thực hiện tính năng này!";
     }
@@ -119,7 +121,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                         mkdir($upload_dir, 0777, true);
 
                     if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_dir . $new_filename)) {
-                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $image_path = "assets/img/outfits/" . $new_filename;
+                        
+                        // Cập nhật cả bảng outfits (ảnh chính) và outfit_colors (ảnh biến thể)
+                        mysqli_query($conn, "UPDATE outfits SET image = '$image_path' WHERE id = $itemId");
+                        
                         $sql_img = "UPDATE outfit_colors SET image = ? WHERE outfit_id = ?";
                         $stmt_img = mysqli_prepare($conn, $sql_img);
                         mysqli_stmt_bind_param($stmt_img, "si", $image_path, $itemId);
@@ -130,15 +136,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
             }
             else {
                 // INSERT mới
-                $sql_ins = "INSERT INTO outfits (name, type, gender, occasion, style, weather, fit, price, is_commercial, owner_id, created_at) 
-                            VALUES (?, ?, ?, ?, ?, ?, ?, 0, 0, ?, NOW())";
+                $sql_ins = "INSERT INTO outfits (name, type, gender, occasion, style, weather, fit, price, image, is_commercial, owner_id, created_at) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, 0, '', 0, ?, NOW())";
                 $stmt_ins = mysqli_prepare($conn, $sql_ins);
                 mysqli_stmt_bind_param($stmt_ins, "sssssssi", $name, $type, $gender, $occasion, $style, $weather, $fit, $userId);
                 if (!mysqli_stmt_execute($stmt_ins))
                     throw new Exception("Lỗi lưu thông tin: " . mysqli_error($conn));
                 $outfit_id = mysqli_insert_id($conn);
 
-                $image_path = '/SmartFit/assets/img/default-placeholder.jpg';
+                $image_path = 'assets/img/default-placeholder.jpg';
                 $file_key = '';
                 if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) $file_key = 'image';
                 elseif (isset($_FILES['image_camera']) && $_FILES['image_camera']['error'] === UPLOAD_ERR_OK) $file_key = 'image_camera';
@@ -150,7 +156,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
                     if (!is_dir($upload_dir))
                         mkdir($upload_dir, 0777, true);
                     if (move_uploaded_file($_FILES[$file_key]['tmp_name'], $upload_dir . $new_filename)) {
-                        $image_path = "/SmartFit/assets/img/outfits/" . $new_filename;
+                        $image_path = "assets/img/outfits/" . $new_filename;
+                        // Cập nhật ảnh chính cho bảng outfits ngay khi có ảnh
+                        mysqli_query($conn, "UPDATE outfits SET image = '$image_path' WHERE id = $outfit_id");
                     }
                 }
 
@@ -175,6 +183,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_personal_item'])
             }
 
             mysqli_commit($conn);
+            
             $_SESSION['success'] = $msg;
             header("Location: wardrobe.php");
             exit;

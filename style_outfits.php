@@ -201,15 +201,15 @@ if (isset($_SESSION['smartfit_just_logged_in'])) {
 
                 <div class="result__visual">
                     <div class="visual-item" id="boxTop">
-                        <img src="./assets/img/default-top.jpg" alt="Áo" id="imgTop">
+                        <img src="<?php echo getImageUrl('assets/img/default-top.jpg'); ?>" alt="Áo" id="imgTop">
                     </div>
 
                     <div class="visual-item" id="boxBottom">
-                        <img src="./assets/img/default-bottom.jpg" alt="Quần" id="imgBottom">
+                        <img src="<?php echo getImageUrl('assets/img/default-bottom.jpg'); ?>" alt="Quần" id="imgBottom">
                     </div>
 
                     <div class="visual-item" id="boxOnePiece" style="display: none; flex: 1;">
-                        <img src="/SmartFit/assets/img/default-placeholder.jpg" alt="Đồ bộ" id="imgOnePiece">
+                        <img src="<?php echo getImageUrl('assets/img/default-placeholder.jpg'); ?>" alt="Đồ bộ" id="imgOnePiece">
                     </div>
                 </div>
 

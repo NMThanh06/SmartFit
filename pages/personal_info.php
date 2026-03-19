@@ -16,27 +16,28 @@ $message_type = "";
 // 2. Xử lý cập nhật thông tin khi có request POST
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_info'])) {
     $fullname = mysqli_real_escape_string($conn, $_POST['fullname']);
-    $phone    = mysqli_real_escape_string($conn, $_POST['phone']);
-    $address  = mysqli_real_escape_string($conn, $_POST['address']);
-    $age      = (int)$_POST['age'];
-    if ($age < 6) $age = 6; // Đảm bảo tuổi ít nhất là 6
-    $gender   = mysqli_real_escape_string($conn, $_POST['gender']);
-    
+    $phone = mysqli_real_escape_string($conn, $_POST['phone']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $age = (int)$_POST['age'];
+    if ($age < 6)
+        $age = 6; // Đảm bảo tuổi ít nhất là 6
+    $gender = mysqli_real_escape_string($conn, $_POST['gender']);
+
     // Xử lý Upload Avatar
     $avatar_path = null;
     if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] == 0) {
         $allowed = ['jpg', 'jpeg', 'png', 'webp'];
         $filename = $_FILES['avatar']['name'];
         $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-        
+
         if (in_array($ext, $allowed)) {
             $new_filename = time() . '_' . rand(1000, 9999) . '.' . $ext;
             $upload_dir = '../assets/img/avatars/';
-            
+
             if (!is_dir($upload_dir)) {
                 mkdir($upload_dir, 0777, true);
             }
-            
+
             $destination = $upload_dir . $new_filename;
             if (move_uploaded_file($_FILES['avatar']['tmp_name'], $destination)) {
                 $avatar_path = 'assets/img/avatars/' . $new_filename;
@@ -56,7 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_info'])) {
             }
             mysqli_stmt_close($stmt);
         }
-    } else {
+    }
+    else {
         // Không có ảnh mới hoặc lỗi upload
         $sql_update = "UPDATE users SET fullname = ?, phone = ?, address = ?, age = ?, gender = ? WHERE id = ?";
         if ($stmt = mysqli_prepare($conn, $sql_update)) {
@@ -77,10 +79,10 @@ $user_data = mysqli_fetch_assoc($result_user);
 
 // Gán giá trị mặc định cho các trường chưa cập nhật để hiển thị
 $display_fullname = $user_data['fullname'] ? $user_data['fullname'] : "Chưa cập nhật";
-$display_phone    = $user_data['phone']    ? $user_data['phone']    : "Chưa cập nhật";
-$display_address  = $user_data['address']  ? $user_data['address']  : "Chưa cập nhật";
-$display_age      = $user_data['age']      ? $user_data['age']      : "Chưa cập nhật";
-$display_gender   = ($user_data['gender'] == 'male') ? "Nam" : (($user_data['gender'] == 'female') ? "Nữ" : "Chưa cập nhật");
+$display_phone = $user_data['phone'] ? $user_data['phone'] : "Chưa cập nhật";
+$display_address = $user_data['address'] ? $user_data['address'] : "Chưa cập nhật";
+$display_age = $user_data['age'] ? $user_data['age'] : "Chưa cập nhật";
+$display_gender = ($user_data['gender'] == 'male') ? "Nam" : (($user_data['gender'] == 'female') ? "Nữ" : "Chưa cập nhật");
 
 // Xử lý đường dẫn Avatar
 $user_avatar = !empty($user_data['avatar']) ? '../' . $user_data['avatar'] : '../assets/img/default_avatar.jpg';
@@ -109,7 +111,8 @@ require_once '../includes/header.php';
                 <div class="alert alert--<?php echo $message_type; ?>">
                     <?php echo $message; ?>
                 </div>
-            <?php endif; ?>
+            <?php
+endif; ?>
 
             <!-- Form thông tin -->
             <form id="infoForm" method="POST" action="" enctype="multipart/form-data">
@@ -145,7 +148,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Họ và tên</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_fullname; ?></span>
-                            <input type="text" name="fullname" class="edit-mode info-input" value="<?php echo htmlspecialchars($user_data['fullname']); ?>" placeholder="Nhập họ tên đầy đủ">
+                            <input type="text" name="fullname" class="edit-mode info-input" value="<?php echo htmlspecialchars($user_data['fullname'] ?? ''); ?>" placeholder="Nhập họ tên đầy đủ">
                         </div>
                     </div>
 
@@ -154,7 +157,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Số điện thoại</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_phone; ?></span>
-                            <input type="text" name="phone" class="edit-mode info-input" value="<?php echo htmlspecialchars($user_data['phone']); ?>" placeholder="Nhập số điện thoại">
+                            <input type="text" name="phone" class="edit-mode info-input" value="<?php echo htmlspecialchars($user_data['phone'] ?? ''); ?>" placeholder="Nhập số điện thoại">
                         </div>
                     </div>
 
@@ -174,8 +177,8 @@ require_once '../includes/header.php';
                             <span class="view-mode"><?php echo $display_gender; ?></span>
                             <select name="gender" class="edit-mode info-select">
                                 <option value="" <?php echo is_null($user_data['gender']) ? 'selected' : ''; ?>>Chọn giới tính</option>
-                                <option value="male" <?php echo ($user_data['gender'] == 'male') ? 'selected' : ''; ?>>Nam</option>
-                                <option value="female" <?php echo ($user_data['gender'] == 'female') ? 'selected' : ''; ?>>Nữ</option>
+                                <option value="male" <?php echo($user_data['gender'] == 'male') ? 'selected' : ''; ?>>Nam</option>
+                                <option value="female" <?php echo($user_data['gender'] == 'female') ? 'selected' : ''; ?>>Nữ</option>
                             </select>
                         </div>
                     </div>
@@ -185,7 +188,7 @@ require_once '../includes/header.php';
                         <label class="info-label">Địa chỉ giao hàng</label>
                         <div class="info-content">
                             <span class="view-mode"><?php echo $display_address; ?></span>
-                            <textarea name="address" class="edit-mode info-textarea" placeholder="Nhập địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện...)"><?php echo htmlspecialchars($user_data['address']); ?></textarea>
+                            <textarea name="address" class="edit-mode info-textarea" placeholder="Nhập địa chỉ chi tiết (Số nhà, đường, phường/xã, quận/huyện...)"><?php echo htmlspecialchars($user_data['address'] ?? ''); ?></textarea>
                         </div>
                     </div>
                 </div>

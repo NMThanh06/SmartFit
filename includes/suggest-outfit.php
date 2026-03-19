@@ -43,57 +43,45 @@ try {
     // 2. ĐỊNH NGHĨA MODEL VÀ URL (gemini-flash-latest đã chạy thành công)
     $apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" . $cleanApiKey;
 
-    // 3. ĐỌC WARDROBE TỪ outfits.json
-    $rawJson = file_get_contents(__DIR__ . '/outfits.json');
-    $decodedJson = json_decode($rawJson, true);
+    // 3. ĐỌC WARDROBE TRỰC TIẾP TỪ DATABASE (Mệnh lệnh: Không dùng file JSON)
+    $wardrobeData = [];
+    $currentUserId = $_SESSION['user_id'] ?? null;
+    
+    // Lấy đồ Shop (commercial) + Đồ cá nhân của user hiện tại
+    $sqlData = "SELECT * FROM outfits WHERE is_commercial = 1";
+    if ($currentUserId) {
+        $sqlData .= " OR owner_id = " . intval($currentUserId);
+    }
+    $sqlData .= " ORDER BY id DESC";
 
-    if (!is_array($decodedJson) || !isset($decodedJson['items'])) {
-        throw new Exception("Không đọc được file outfits.json hoặc thiếu key 'items'.");
+    $resData = mysqli_query($conn, $sqlData);
+    if (!$resData) {
+        throw new Exception("Lỗi truy vấn Database: " . mysqli_error($conn));
     }
 
-    $wardrobeData = $decodedJson['items'];
+    while ($row = mysqli_fetch_assoc($resData)) {
+        // Lấy tên màu chính từ bảng outfit_colors (để AI biết màu sắc)
+        $oid = $row['id'];
+        $colorRes = mysqli_query($conn, "SELECT color_name FROM outfit_colors WHERE outfit_id = $oid LIMIT 1");
+        $colorRow = mysqli_fetch_assoc($colorRes);
+        $mainColor = $colorRow['color_name'] ?? 'Mặc định';
 
-    // === TRỘN ĐỒ CÁ NHÂN TỪ DATABASE VÀO POOL ===
-    $currentUserId = $_SESSION['user_id'] ?? null;
-    if ($currentUserId) {
-        try {
-            $sqlPersonal = "SELECT o.id, o.name, o.type, o.gender, o.occasion, o.style, o.fit, o.weather, o.price,
-                                   oc.color_name, oc.image
-                            FROM outfits o
-                            LEFT JOIN outfit_colors oc ON o.id = oc.outfit_id
-                            WHERE o.is_commercial = 0 AND o.owner_id = ?";
-            $stmtPersonal = mysqli_prepare($conn, $sqlPersonal);
-            if ($stmtPersonal) {
-                mysqli_stmt_bind_param($stmtPersonal, "i", $currentUserId);
-                mysqli_stmt_execute($stmtPersonal);
-                $resPersonal = mysqli_stmt_get_result($stmtPersonal);
-
-                while ($pRow = mysqli_fetch_assoc($resPersonal)) {
-                    // Chuyển đổi sang cùng format với outfits.json
-                    $personalItem = [
-                        'id' => $pRow['id'],
-                        'type' => $pRow['type'] ?? 'top',
-                        'name' => $pRow['name'] ?? 'Đồ cá nhân',
-                        'gender' => json_decode($pRow['gender'] ?? '[]', true) ?: [],
-                        'occasion' => json_decode($pRow['occasion'] ?? '[]', true) ?: [],
-                        'style' => json_decode($pRow['style'] ?? '[]', true) ?: [],
-                        'color' => $pRow['color_name'] ?? '',
-                        'fit' => json_decode($pRow['fit'] ?? '[]', true) ?: [],
-                        'weather' => json_decode($pRow['weather'] ?? '[]', true) ?: [],
-                        'image' => $pRow['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg',
-                        'price' => (int)($pRow['price'] ?? 0),
-                        'sizes' => [],
-                        'age' => 'All',
-                        'seller_note' => '(Đồ cá nhân của khách)'
-                    ];
-                    $wardrobeData[] = $personalItem;
-                }
-                mysqli_stmt_close($stmtPersonal);
-            }
-        }
-        catch (Exception $e) {
-        // Bảng chưa có cột is_commercial/owner_id → bỏ qua, chỉ dùng đồ shop
-        }
+        $wardrobeData[] = [
+            'id' => (string)$row['id'],
+            'type' => $row['type'],
+            'name' => $row['name'],
+            'gender' => json_decode($row['gender'], true) ?: [],
+            'occasion' => json_decode($row['occasion'], true) ?: [],
+            'style' => json_decode($row['style'], true) ?: [],
+            'color' => $mainColor,
+            'fit' => json_decode($row['fit'], true) ?: [],
+            'weather' => json_decode($row['weather'], true) ?: [],
+            'image' => $row['image'] ?: 'assets/img/default-placeholder.jpg',
+            'price' => (int)$row['price'],
+            'sizes' => [],
+            'age' => $row['age'] ?? 'All',
+            'seller_note' => $row['seller_note'] ?? ($row['is_commercial'] ? '' : '(Đồ cá nhân của khách)')
+        ];
     }
 
     $wardrobeBrief = "";
