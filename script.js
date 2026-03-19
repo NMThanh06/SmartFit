@@ -32,6 +32,7 @@ window.app = {
         this.initForecastDropdown();
         this.initScrollBtn();
         this.initMobileMenu();
+        this.initAuthFormSubmit();
 
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
@@ -273,6 +274,9 @@ window.app = {
             const formData = new FormData(form);
             const action = form.getAttribute('action');
 
+            const btn = form.querySelector('.auth-card__button');
+            if (btn) btn.classList.add('btn-loading');
+
             try {
                 const response = await fetch(action, {
                     method: 'POST',
@@ -293,6 +297,14 @@ window.app = {
                     if (formType === 'login') {
                         // Cập nhật Navbar sau khi đăng nhập thành công
                         self.updateNavbarAfterLogin(data.user_name);
+                        // Reload trang sau 1.5s để cập nhật trạng thái các trang quan trọng
+                        setTimeout(() => window.location.reload(), 1500);
+                    } else {
+                        // Đăng ký xong thì chuyển sang form đăng nhập
+                        setTimeout(() => {
+                            document.getElementById('registerForm').style.display = 'none';
+                            document.getElementById('loginForm').style.display = 'block';
+                        }, 1500);
                     }
                 } else {
                     self.showNotification(data.message, 'error');
@@ -300,6 +312,8 @@ window.app = {
             } catch (error) {
                 console.error('Auth Error:', error);
                 self.showNotification('Có lỗi xảy ra, vui lòng thử lại!', 'error');
+            } finally {
+                if (btn) btn.classList.remove('btn-loading');
             }
         };
 

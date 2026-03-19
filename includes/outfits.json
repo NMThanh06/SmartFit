@@ -1,6 +1,70 @@
 {
     "items": [
         {
+            "id": "21",
+            "type": "top",
+            "name": "Áo Thun Teelab Basketball Jersey Số 23 ",
+            "gender": [
+                "male",
+                "female"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild"
+            ],
+            "image": "/SmartFit/assets/img/1773903740_outfit_21_color_1.webp",
+            "price": 250000,
+            "sizes": {
+                "L": 42,
+                "M": 76,
+                "S": 55
+            },
+            "age": "25",
+            "seller_note": ""
+        },
+        {
+            "id": "20",
+            "type": "top",
+            "name": "Áo thun Sơn Đòong",
+            "gender": [
+                "male"
+            ],
+            "occasion": [
+                "study",
+                "goout"
+            ],
+            "style": [
+                "street"
+            ],
+            "color": "Đen",
+            "fit": [
+                "oversized"
+            ],
+            "weather": [
+                "hot",
+                "mild",
+                "cold"
+            ],
+            "image": "/SmartFit/assets/img/outfits/1773901983_user_2_closet.jpg",
+            "price": 0,
+            "sizes": {
+                "Mặc định": 1
+            },
+            "age": "All",
+            "seller_note": ""
+        },
+        {
             "id": "16",
             "type": "bottom",
             "name": "Chân váy ngắn xếp ly nữ",
@@ -29,8 +93,8 @@
             "image": "/SmartFit/assets/img/1773839247_outfit_16_color_1.png",
             "price": 99000,
             "sizes": {
-                "L": 577,
-                "M": 743,
+                "L": 574,
+                "M": 737,
                 "S": 1907
             },
             "age": "15-25",
@@ -98,8 +162,8 @@
             "price": 299000,
             "sizes": {
                 "38": 283,
-                "39": 1644,
-                "40": 126,
+                "39": 1642,
+                "40": 125,
                 "41": 223
             },
             "age": "All",
@@ -235,7 +299,7 @@
             "price": 350000,
             "sizes": {
                 "L": 54,
-                "M": 33,
+                "M": 31,
                 "S": 28
             },
             "age": "30",
@@ -340,33 +404,6 @@
             "seller_note": ""
         },
         {
-            "id": "5",
-            "type": "bottom",
-            "name": "Quần short ",
-            "gender": [
-                "male"
-            ],
-            "occasion": [
-                "goout"
-            ],
-            "style": [
-                "street"
-            ],
-            "color": "Đen",
-            "fit": [
-                "oversized"
-            ],
-            "weather": [
-                "hot",
-                "mild"
-            ],
-            "image": "/SmartFit/assets/img/outfits/1773752263_user_2_closet.webp",
-            "price": 0,
-            "sizes": [],
-            "age": "All",
-            "seller_note": ""
-        },
-        {
             "id": "4",
             "type": "top",
             "name": "Áo Hoodie",
@@ -392,7 +429,7 @@
             "image": "/SmartFit/assets/img/1773688867_outfit_4_color_1.webp",
             "price": 370000,
             "sizes": {
-                "L": 7,
+                "L": 5,
                 "M": 2,
                 "S": 5,
                 "XL": 10
