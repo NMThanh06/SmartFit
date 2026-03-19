@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     $action = $data['action'] ?? '';
     $id = intval($data['id'] ?? 0);
-} else {
+}
+else {
     $id = intval($_GET['id'] ?? 0);
 }
 
@@ -53,14 +54,14 @@ if ($action === 'get_details') {
     $c_res = mysqli_query($conn, "SELECT * FROM outfit_colors WHERE outfit_id = $id");
     while ($color = mysqli_fetch_assoc($c_res)) {
         $color_id = $color['id'];
-        
+
         // Lấy danh sách size cho màu này
         $sizes = [];
         $s_res = mysqli_query($conn, "SELECT * FROM outfit_sizes WHERE color_id = $color_id");
         while ($size = mysqli_fetch_assoc($s_res)) {
             $sizes[] = $size;
         }
-        
+
         $color['sizes'] = $sizes;
         $colors[] = $color;
     }
@@ -94,9 +95,10 @@ if ($action === 'delete') {
         mysqli_query($conn, "DELETE FROM outfits WHERE id = $id");
 
         mysqli_commit($conn);
-        syncOutfitsToJson($conn); // Đồng bộ lại file JSON
+        // syncOutfitsToJson($conn); // Đồng bộ lại file JSON
         echo json_encode(['success' => true]);
-    } catch (Exception $e) {
+    }
+    catch (Exception $e) {
         mysqli_rollback($conn);
         echo json_encode(['success' => false, 'message' => $e->getMessage()]);
     }
