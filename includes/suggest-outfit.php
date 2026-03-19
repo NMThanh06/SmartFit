@@ -147,22 +147,48 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
 
     $data = ["contents" => [["parts" => [["text" => $prompt]]]]];
 
-    // 5. CẤU HÌNH cURL GỌI GEMINI API
-    $ch = curl_init($apiUrl);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_POST, true);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    // 5. CẤU HÌNH cURL GỌI GEMINI API (Có auto-retry khi bị Rate Limit 429)
+    $maxRetries = 2;
+    $response = null;
+    $httpCode = 0;
 
-    $response = curl_exec($ch);
-    $curlError = curl_error($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    curl_close($ch);
+    for ($attempt = 0; $attempt <= $maxRetries; $attempt++) {
+        $ch = curl_init($apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 90);
 
-    if ($curlError) {
-        throw new Exception("Lỗi kết nối tới AI: " . $curlError);
+        $response = curl_exec($ch);
+        $curlError = curl_error($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($curlError) {
+            throw new Exception("Lỗi kết nối tới AI: " . $curlError);
+        }
+
+        // Nếu bị 429 (Rate Limit) và còn lượt retry → chờ rồi thử lại
+        if ($httpCode === 429 && $attempt < $maxRetries) {
+            // Lấy retryDelay từ response của Google (mặc định 40s)
+            $waitSeconds = 40;
+            $errObj = json_decode($response, true);
+            if (is_array($errObj) && isset($errObj['error']['details'])) {
+                foreach ($errObj['error']['details'] as $detail) {
+                    if (isset($detail['retryDelay'])) {
+                        $waitSeconds = intval($detail['retryDelay']) + 5; // Thêm 5s buffer
+                        break;
+                    }
+                }
+            }
+            sleep($waitSeconds);
+            continue;
+        }
+
+        // Nếu thành công hoặc lỗi khác → thoát vòng lặp
+        break;
     }
 
     if ($httpCode !== 200) {
@@ -170,6 +196,10 @@ TRẢ VỀ JSON TUYỆT ĐỐI THEO ĐỊNH DẠNG SAU, KHÔNG KÈM TEXT GIẢI 
         $errMsg = 'Unknown error';
         if (is_array($errObj) && isset($errObj['error']['message'])) {
             $errMsg = $errObj['error']['message'];
+        }
+        // Thông báo thân thiện cho lỗi 429
+        if ($httpCode === 429) {
+            throw new Exception("Vui lòng đợi 1-2 phút rồi thử lại nhé!");
         }
         throw new Exception("Google API Lỗi ($httpCode): $errMsg. Raw: $response");
     }
