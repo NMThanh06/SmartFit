@@ -292,14 +292,14 @@ else: ?>
                                 <div class="wardrobe-card__gallery">
                                     <?php if (!empty($outfit['onepiece_name'])): ?>
                                         <div class="wardrobe-card__img" style="flex: 1;">
-                                            <img src="<?php echo htmlspecialchars($outfit['onepiece_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="One-piece" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo getImageUrl($outfit['onepiece_img'] ?? ''); ?>" alt="One-piece" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                                         </div>
                                     <?php else: ?>
                                         <div class="wardrobe-card__img">
-                                            <img src="<?php echo htmlspecialchars($outfit['top_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Áo" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo getImageUrl($outfit['top_img'] ?? ''); ?>" alt="Áo" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                                         </div>
                                         <div class="wardrobe-card__img">
-                                            <img src="<?php echo htmlspecialchars($outfit['bottom_img'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" alt="Quần" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo getImageUrl($outfit['bottom_img'] ?? ''); ?>" alt="Quần" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                                         </div>
                                     <?php endif; ?>
                                 </div>
@@ -359,7 +359,7 @@ else: ?>
                                 </button>
                                 <div class="personal-item-card__link-box" onclick='openEditModal(<?php echo json_encode($item); ?>)'>
                                     <div class="personal-item-card__img">
-                                        <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                        <img src="<?php echo getImageUrl($item['image']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                                     </div>
                                     <div class="personal-item-card__info">
                                         <h3 class="personal-item-card__name"><?php echo htmlspecialchars($item['name']); ?></h3>

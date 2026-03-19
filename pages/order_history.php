@@ -119,7 +119,7 @@ include '../includes/header.php';
                                 ?>
                                     <div class="order-item">
                                         <div class="order-item__img-wrapper">
-                                            <img src="<?php echo htmlspecialchars($item['image'] ?? '/SmartFit/assets/img/default-placeholder.jpg'); ?>" class="order-item__img" onerror="this.src='/SmartFit/assets/img/default-placeholder.jpg'">
+                                            <img src="<?php echo getImageUrl($item['image'] ?? ''); ?>" class="order-item__img" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                                         </div>
                                         <div class="order-item__info">
                                             <h4 class="order-item__name"><?php echo htmlspecialchars($item['name']); ?></h4>

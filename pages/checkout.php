@@ -108,7 +108,7 @@ if ($is_logged_in) {
                         <?php
 $subtotal = 0;
 $sqlCart = "SELECT c.*, o.name, o.price, 
-                                           COALESCE(col.image, (SELECT image FROM outfit_colors WHERE outfit_id = o.id LIMIT 1), '../assets/img/default-placeholder.jpg') as image
+                                           COALESCE(col.image, (SELECT image FROM outfit_colors WHERE outfit_id = o.id LIMIT 1), 'assets/img/default-placeholder.jpg') as image
                                     FROM shopping_cart c 
                                     JOIN outfits o ON c.outfit_id = o.id 
                                     LEFT JOIN outfit_colors col ON (c.outfit_id = col.outfit_id AND c.color_name COLLATE utf8mb4_unicode_ci = col.color_name COLLATE utf8mb4_unicode_ci)
@@ -123,7 +123,7 @@ while ($item = mysqli_fetch_assoc($resCart)):
     $subtotal += $lineTotal;
 ?>
                         <div class="checkout-item">
-                            <img src="<?php echo htmlspecialchars($item['image']); ?>" alt="" class="checkout-item__img" onerror="this.src='../assets/img/default-placeholder.jpg'">
+                            <img src="<?php echo getImageUrl($item['image']); ?>" alt="" class="checkout-item__img" onerror="this.src='<?php echo $root; ?>assets/img/default-placeholder.jpg'">
                             <div class="checkout-item__info">
                                 <h4 class="checkout-item__name"><?php echo htmlspecialchars($item['name']); ?></h4>
                                 <p class="checkout-item__meta">Size: <?php echo $item['size_name']; ?> | SL: <?php echo $item['quantity']; ?></p>
